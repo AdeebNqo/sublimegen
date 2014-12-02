@@ -23,17 +23,16 @@ var scope = flag.String("scope", "source.default", "This is the scope of the syn
 var fileTypes = flag.String("fileTypes", "default", "Comma seperated list of file types.")
 
 func main() {
-	flag.Parse() //parsing commandline arguments. One
-				// should
+	flag.Parse()
 
 	jsonhighlight := `
 
 		{ "name": "%v",
 		  "scopeName": "%v",
 		  "fileTypes": [%v],
-		  "patterns": [
+		  "repository": {
 		  	%v
-		  ],
+		  },
 		  "uuid": "%v"
 		}
 	`
@@ -42,7 +41,16 @@ func main() {
 		fmt.Println("Could not generate uuid.")
 		os.Exit(1)
 	}else{
-		result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, "hello World", u)
+
+		repositoryfield := "COMING..."
+		//0. Generate repository field from bnf file
+
+		result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, repositoryfield, u)
+
+		//1. save result in a JSON file.
+
+		//2. convert result to a plist file and save it.
+
 		fmt.Println(result)
 	}
 }
