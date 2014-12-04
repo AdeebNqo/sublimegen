@@ -12,14 +12,17 @@ file.
 package main
 
 import (
-	"flag"
-	"fmt"
-	"github.com/nu7hatch/gouuid"
 	"code.google.com/p/gocc/frontend/scanner"
 	"code.google.com/p/gocc/frontend/token"
 	"code.google.com/p/gocc/frontend/parser"
-	"os"
+    "code.google.com/p/gocc/ast"
 	"io/ioutil"
+
+	"os"
+	"flag"
+	"fmt"
+	"github.com/nu7hatch/gouuid"
+	//"reflect"
 )
 
 var name = flag.String("name", "default", "This is the name of the syntax.")
@@ -28,9 +31,9 @@ var fileTypes = flag.String("fileTypes", "default", "Comma seperated list of fil
 var source = flag.String("source","defaultinput", "the bnf file for the language you want to highlight.")
 
 func main() {
-	//zola
-	flag.Parse()
+	flag.Parse() //parsing commandline flags
 
+    //walter
 	scanner := &scanner.Scanner{}
 	srcBuffer, err := ioutil.ReadFile(*source)
 	if err != nil {
@@ -44,9 +47,20 @@ func main() {
 		fmt.Printf("Parse error: %s\n", err)
 		os.Exit(1)
 	}
-	fmt.Println(grammar)
-
-	//zola
+    
+    //
+    grammarX := grammar.(*ast.Grammar)
+    tokendefs := grammarX.LexPart.TokDefs
+    for key,value := range tokendefs{
+        fmt.Println(key)
+        fmt.Println(value)
+    }
+    
+    productions := grammarX.LexPart.ProdList.Productions
+    for _,prod  := range productions {
+        fmt.Println(prod)
+    }
+    
 	jsonhighlight := `
 
 		{ "name": "%v",
