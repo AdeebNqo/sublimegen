@@ -48,7 +48,8 @@ func main() {
 		os.Exit(1)
 	}
     
-    //
+    //retrieving the toekens and productions from the
+    //the grammar
     grammarX := grammar.(*ast.Grammar)
     tokendefs := grammarX.LexPart.TokDefs
     for key,value := range tokendefs{
@@ -61,6 +62,7 @@ func main() {
         fmt.Println(prod)
     }
     
+    //constructing the syntax highlighting file for sublime text
 	jsonhighlight := `
 
 		{ "name": "%v",
@@ -72,6 +74,7 @@ func main() {
 		  "uuid": "%v"
 		}
 	`
+    //generating uuid for syntax highlighting file
 	u, err := uuid.NewV4()
 	if (err!=nil){
 		fmt.Println("Could not generate uuid.")
