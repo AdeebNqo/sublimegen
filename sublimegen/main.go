@@ -24,7 +24,7 @@ import (
 	"github.com/nu7hatch/gouuid"
     "strings"
 	"reflect"
-    "repository"
+    "github.com/AdeebNqo/sublimegen/repository"
 )
 
 var name = flag.String("name", "default", "This is the name of the syntax.")
