@@ -7,7 +7,7 @@ type repoitem struct{
 
 //constructor -- sorta
 func NewRepoItem (nameX string, jsonX string) (*repoitem, error){
-    ritrem := &repoitem{name:nameX, jsonL:jsonX}
+    ritem := &repoitem{name:nameX, json:jsonX}
     return ritem,nil
 }
 func Getjson (ritem *repoitem) string{
