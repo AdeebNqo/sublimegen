@@ -1,4 +1,4 @@
-sublimegen/src/training/AAAPackageDev
-sublimegen/src/training/gocc
-sublimegen/src/training/gographviz
+sublimegen/src/training/AAAPackageDev/
+sublimegen/src/training/gocc/
+sublimegen/src/training/gographviz/
 *.pyc
