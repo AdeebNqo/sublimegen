@@ -22,8 +22,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/nu7hatch/gouuid"
-    "strings"
-	"reflect"
+    //"strings"
+	//"reflect"
     "github.com/AdeebNqo/sublimegen/repository"
 )
 
@@ -63,40 +63,28 @@ func main() {
 		os.Exit(1)
 	}
     
-    //retrieving the toekens and productions from the
+    //retrieving the tokens and productions from the
     //the grammar
     grammarX := grammar.(*ast.Grammar)
     
-    tokendefs := grammarX.LexPart.TokDefs
     
-    fmt.Println(reflect.TypeOf(tokendefs))
+    /*
+
+    Processing token definitions
+
+    */
+    tokendefs := grammarX.LexPart.TokDefs //list of token definitions
     for key,value := range tokendefs{ //the key is the name that appears on the left hand side, value is the right hand side
         
-        //extracting the name of the of the type from the key, remove the "lit"/"var" section
-        startpos := 0
-        if strings.HasPrefix(key,"_") {
-            startpos = 1
-        }
-        endpos := strings.LastIndex(key, "_")
-        if endpos==-1{
-            endpos = len(key)-1
-        }
+        //creating an object that will convert the token to the appropriate item for the json patterns field
+        patternobj,err := repository.NewRepoItem(key)
         
-        //
-
-        name := key[startpos:endpos]
-        
-        fmt.Println(name)
-        
-        termalternatives := value.LexPattern().Alternatives
-        for _,val := range termalternatives{
-            for _, term:= range val.Terms{
-                fmt.Println(term)
-                fmt.Println(reflect.TypeOf(term))
-            }
-            fmt.Println()
-            fmt.Println()
+        if err != nil{
+            //ignoring token
+            fmt.Println(fmt.Sprintf("could not process %v. reason: %v",key, err))
+            break
         }
+        repository.SetRighthandside(patternobj,value.LexPattern())
     }
     
     /*
@@ -108,87 +96,16 @@ func main() {
     for _,prod  := range productions {
         prodid := prod.Id()
         
-        if strings.HasPrefix(prodid,"_"){
-        /*
         
-        This if statement will only capture the what the gocc user guide defines as "regular definitions" (see pg 24)
-        -Processing regular definitions-
-    
-        */
-            /*prodregex := prod.LexPattern()
-            fmt.Println("id and regex:")
-            fmt.Println(prodid)
-            
-            alternatives := prodregex.Alternatives
-            numalternatives := cap(alternatives)
-            fmt.Println(fmt.Sprintf("there are/is %v alternative(s).", numalternatives))
-            
-            if (numalternatives == 1){
-                val := alternatives[0]
-                fmt.Println(val)
-                fmt.Println(reflect.TypeOf(val))
-                fmt.Println()
-                fmt.Println()
-            }else{
-                
-                ValueLoop:
-                    for _,val := range alternatives{
-
-                        //for each alternative, we need to look at the terms
-                        altterms := val.Terms
-                        fmt.Println(fmt.Sprintf("val: %v",val))
-                        for _,term := range altterms{
-                            fmt.Println(fmt.Sprintf("term: %v",term))
-                            switch term.(type){
-                                case *ast.LexRegDefId:{
-                                    fmt.Println("*ast.LexRegDefId") //include - means this is somthing like "int_var" 
-                                    break
-                                }
-                                case *ast.LexGroupPattern:{
-                                    fmt.Println("*ast.LexGroupPattern")//compund regex with round braces
-                                    break
-                                }
-                                case *ast.LexCharLit:{
-                                    fmt.Println("*ast.LexCharLit")//literal char
-                                    break
-                                }
-                                case *ast.LexRepPattern:{
-                                    fmt.Println("*ast.LexRepPattern")//compound regex, surrounded by curly braces
-                                    break   
-                                }
-                                case *ast.LexOptPattern:{
-                                    fmt.Println("*ast.LexOptPattern")// surrounded by square braces
-                                    break   
-                                }
-                                case *ast.LexCharRange:{
-                                    fmt.Println("*ast.LexCharRange")// range of characters
-                                    break   
-                                }
-                                default:{
-                                    fmt.Println(fmt.Sprintf("type %v is unrecognized, ignoring %v",reflect.TypeOf(term), val))
-                                    break ValueLoop
-                                }
-                            }
-                        }
-                    }
-                fmt.Println()
-                fmt.Println()
-            }*/
-        }else if strings.HasPrefix(prodid,"!"){
-        /*
+        //creating an object that will convert the production/token to the appropriate item for the json patterns field
+        patternobj,err := repository.NewRepoItem(prodid)
         
-        This if statement will only capture the what the gocc user guide defines as "ignored token identifiers" (see pg 24)
-        -Processing ignored token identifiers-
-    
-        */
-            
-        }else{
-            //fmt.Println("Else")
-            //fmt.Println(prod)
-            //fmt.Println()
-            //fmt.Println()
+        if err != nil{
+            //ignoring token
+            fmt.Println(fmt.Sprintf("could not process %v. reason: %v",prodid, err))
+            break
         }
-        
+        repository.SetRighthandside(patternobj,prod.LexPattern())
     }
     
     //constructing the syntax highlighting file for sublime text
