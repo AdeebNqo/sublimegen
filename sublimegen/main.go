@@ -25,6 +25,7 @@ import (
     //"strings"
 	//"reflect"
     "github.com/AdeebNqo/sublimegen/repository"
+    "container/list"
 )
 
 var name = flag.String("name", "default", "This is the name of the syntax.")
@@ -67,6 +68,10 @@ func main() {
     //the grammar
     grammarX := grammar.(*ast.Grammar)
     
+    var repoitems *list.List
+    repoitems = list.New()
+    repoitems.Init()
+    
     
     /*
 
@@ -85,6 +90,7 @@ func main() {
             break
         }
         repository.SetRighthandside(patternobj,value.LexPattern())
+        repoitems.PushBack(patternobj)
     }
     
     /*
@@ -106,11 +112,11 @@ func main() {
             break
         }
         repository.SetRighthandside(patternobj,prod.LexPattern())
+        repoitems.PushBack(patternobj)
     }
     
     //constructing the syntax highlighting file for sublime text
 	jsonhighlight := `
-
 		{ "name": "%v",
 		  "scopeName": "%v",
 		  "fileTypes": [%v],
