@@ -35,6 +35,7 @@ var source = flag.String("source","defaultinput", "the bnf file for the language
 
 /*
 
+Method for strip the start and end (') characters from a token
 
 */
 
@@ -44,6 +45,13 @@ func stripliteral(somelit string) (retval string){
     }
     retval = somelit
     return
+}
+
+/*
+
+*/
+func getItem() {
+
 }
 
 func main() {
@@ -134,7 +142,14 @@ func main() {
 	}else{
 
 		repositoryfield := "COMING..."
+        
+        tmpscope := fmt.Sprintf("variable.language.%v",fileTypes) //default scope that will be used in the meantime
+        
 		//0. Generate repository field from bnf file
+        for listitem := repoitems.Front(); listitem != nil; listitem = listitem.Next() {
+            listitemwithtype := listitem.Value.(*repository.Repoitem)
+            repository.SetScope(listitemwithtype, tmpscope)
+        }
 
 		result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, repositoryfield, u)
 
