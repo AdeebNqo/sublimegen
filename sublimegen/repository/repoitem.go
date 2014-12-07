@@ -4,16 +4,17 @@ import (
     "strings"
     "code.google.com/p/gocc/ast"
 )
-type repoitem struct{
+type Repoitem struct{
     cleanname string
     realname string
     json string
+    scope string
     
     regexorprod *ast.LexPattern
 }
 
 //constructor -- sorta
-func NewRepoItem (nameX string) (*repoitem, error){
+func NewRepoItem (nameX string) (*Repoitem, error){
     
     //extracting the name of the of the type from the key, remove the "lit"/"var" section
     startpos := 0
@@ -25,24 +26,31 @@ func NewRepoItem (nameX string) (*repoitem, error){
         endpos = len(nameX)
     }
     //creating repository item
-    ritem := &repoitem{}
+    ritem := &Repoitem{}
     ritem.cleanname = nameX[startpos:endpos]
     ritem.realname = nameX
     
     return ritem,nil
 }
-func Getjson (ritem *repoitem) string{
+func Getjson (ritem *Repoitem) string{
     return ritem.json
 }
 
-func Getname (ritem *repoitem) string{
+func Getname (ritem *Repoitem) string{
     return ritem.cleanname
 }
 
-func GetRealname(ritem *repoitem) string{
+func GetRealname(ritem *Repoitem) string{
     return ritem.realname
 }
 
-func SetRighthandside(ritem *repoitem, regexorprodX *ast.LexPattern){
+func SetRighthandside(ritem *Repoitem, regexorprodX *ast.LexPattern){
     ritem.regexorprod = regexorprodX
+}
+
+func SetScope(ritem * Repoitem, scope string){
+    ritem.scope = scope
+}
+func GetDirtyRep(ritem *Repoitem) string{
+    return ritem.regexorprod.String()
 }
