@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"github.com/nu7hatch/gouuid"
     //"strings"
-	//"reflect"
+    "reflect"
     "github.com/AdeebNqo/sublimegen/repository"
     "container/list"
 )
@@ -49,9 +49,17 @@ func stripliteral(somelit string) (retval string){
 
 /*
 
-*/
-func getItem() {
+Method for retrieving lex pattern
 
+*/
+func getItem(container *list.List, id string) (*repository.Repoitem){
+    for val := container.Front(); val != nil; val = val.Next(){
+        rval := val.Value.(*repository.Repoitem)
+        if repository.GetRealname(rval) ==id{
+            return rval
+        }
+    }
+    return nil
 }
 
 func main() {
@@ -71,7 +79,7 @@ func main() {
 		fmt.Printf("Parse error: %s\n", err)
 		os.Exit(1)
 	}
-    
+
     //retrieving the tokens and productions from the
     //the grammar
     grammarX := grammar.(*ast.Grammar)
@@ -79,8 +87,7 @@ func main() {
     var repoitems *list.List
     repoitems = list.New()
     repoitems.Init()
-    
-    
+
     /*
 
     Processing token definitions
@@ -88,10 +95,10 @@ func main() {
     */
     tokendefs := grammarX.LexPart.TokDefs //list of token definitions
     for key,value := range tokendefs{ //the key is the name that appears on the left hand side, value is the right hand side
-        
+
         //creating an object that will convert the token to the appropriate item for the json patterns field
         patternobj,err := repository.NewRepoItem(key)
-        
+
         if err != nil{
             //ignoring token
             fmt.Println(fmt.Sprintf("could not process %v. reason: %v",key, err))
@@ -100,7 +107,7 @@ func main() {
         repository.SetRighthandside(patternobj,value.LexPattern())
         repoitems.PushBack(patternobj)
     }
-    
+
     /*
 
     Processing productions
@@ -109,11 +116,11 @@ func main() {
     productions := grammarX.LexPart.ProdList.Productions
     for _,prod  := range productions {
         prodid := prod.Id()
-        
-        
+
+
         //creating an object that will convert the production/token to the appropriate item for the json patterns field
         patternobj,err := repository.NewRepoItem(prodid)
-        
+
         if err != nil{
             //ignoring token
             fmt.Println(fmt.Sprintf("could not process %v. reason: %v",prodid, err))
@@ -122,15 +129,15 @@ func main() {
         repository.SetRighthandside(patternobj,prod.LexPattern())
         repoitems.PushBack(patternobj)
     }
-    
+
     //constructing the syntax highlighting file for sublime text
 	jsonhighlight := `
 		{ "name": "%v",
 		  "scopeName": "%v",
 		  "fileTypes": [%v],
-		  "repository": {
+		  "patterns": [
 		  	%v
-		  },
+                    ],
 		  "uuid": "%v"
 		}
 	`
@@ -142,14 +149,51 @@ func main() {
 	}else{
 
 		repositoryfield := "COMING..."
-        
-        tmpscope := fmt.Sprintf("variable.language.%v",fileTypes) //default scope that will be used in the meantime
-        
+
+		tmpscope := fmt.Sprintf("variable.language.%v",fileTypes) //default scope that will be used in the meantime
+
 		//0. Generate repository field from bnf file
-        for listitem := repoitems.Front(); listitem != nil; listitem = listitem.Next() {
-            listitemwithtype := listitem.Value.(*repository.Repoitem)
-            repository.SetScope(listitemwithtype, tmpscope)
-        }
+		for listitem := repoitems.Front(); listitem != nil; listitem = listitem.Next() {
+			listitemwithtype := listitem.Value.(*repository.Repoitem)
+			repository.SetScope(listitemwithtype, tmpscope)
+
+			fmt.Println(repository.GetRealname(listitemwithtype))
+			alternatives := repository.GetLexpattern(listitemwithtype).Alternatives
+        
+            //entry := "{"
+            regex := ""
+            //group := 0
+            for index,val := range alternatives{
+                //adding or in regex if there are alternatives
+                if index>0{
+                    regex += "|"
+                }
+                //processing elements
+                for _, term:= range val.Terms{
+                    switch term.(type){
+                        case *ast.LexCharLit:{
+                            regex += stripliteral(term.String())
+                        }
+                        case *ast.LexRegDefId:{
+                            if repository.Isregexempty(term){
+                                expanddef(repoitems, term)
+                            }
+                            //get regex, assign group if we are not working with comment.
+                        }
+                        default:{
+                            fmt.Println(term, reflect.TypeOf(term))
+                        }
+                    }
+                }
+            }
+            
+            //setting regex
+            if repository.Isregexempty(listitemwithtype){
+                repository.Setregex(listitemwithtype, regex)
+            }
+            
+            //fmt.Println(fmt.Sprintf("%v, %v", entry, regex))
+		}
 
 		result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, repositoryfield, u)
 
