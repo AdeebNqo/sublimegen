@@ -47,24 +47,39 @@ func GetRealname(ritem *Repoitem) string{
     return ritem.realname
 }
 
+//-----------------------------------------------
+
 func SetRighthandside(ritem *Repoitem, regexorprodX *ast.LexPattern){
     ritem.regexorprod = regexorprodX
 }
+func GetRighthandside(ritem *Repoitem) *ast.LexPattern{
+        return ritem.regexorprod
+}
+
+//----------------------------------------------
 
 func SetScope(ritem *Repoitem, scope string){
     ritem.scope = scope
 }
 
+func GetScope(ritem *Repoitem) string{
+    return ritem.scope
+}
+
+//-----------------------------------------------
 func Setregex(ritem *Repoitem, regex string){
     ritem.regex = regex
 }
+func Getregex(ritem *Repoitem) string{
+    return ritem.regex
+}
+func Appendregex(ritem *Repoitem, someregex string){
+    ritem.regex += someregex
+}
+//-----------------------------------------------
 
 func GetDirtyRep(ritem *Repoitem) string{
     return ritem.regexorprod.String()
-}
-
-func GetLexpattern(ritem *Repoitem) *ast.LexPattern{
-        return ritem.regexorprod
 }
 
 func Isregexempty(ritem *Repoitem) (bool){
