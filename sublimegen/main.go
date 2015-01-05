@@ -27,7 +27,7 @@ import (
     "github.com/AdeebNqo/sublimegen/repository"
     "container/list"
     "encoding/json"
-    "os/exec"
+    //"os/exec"
 )
 
 var name = flag.String("name", "default", "This is the name of the syntax.")
@@ -61,6 +61,63 @@ func escape(somechar string) string{
         }
         case "\"":{
             return "\\\""
+        }
+        case ".":{
+            return "\\\\."
+        }
+        case "*":{
+            return "\\\\*"
+        }
+        case "-":{
+            return "\\\\-"
+        }
+        case ":":{
+            return "\\\\:"
+        }
+        case "|":{
+            return "\\\\|"
+        }
+        case ">":{
+            return "\\\\>"
+        }
+        case "<":{
+            return "\\\\<"
+        }
+        case "!":{
+            return "\\\\!"
+        }
+        case "=":{
+            return "\\\\="
+        }
+        case "}":{
+            return "\\\\}"
+        }
+        case "{":{
+            return "\\\\{"
+        }
+        case "+":{
+            return "\\\\+"
+        }
+        case "?":{
+            return "\\\\?"
+        }
+        case "^":{
+            return "\\\\^"
+        }
+        case "$":{
+            return "\\\\$"
+        }
+        case "(":{
+            return "\\\\("
+        }
+        case ")":{
+            return "\\\\)"
+        }
+        case "[":{
+            return "\\\\["
+        }
+        case "]":{
+            return "\\\\]"
         }
         default:{
             return somechar
@@ -232,11 +289,12 @@ func createpattern(group int, regex string, groups *list.List, repoitems *list.L
                 //processing elements
                 for _, term2:= range val.Terms{
                     group, regex, groups = createpattern(group, regex, groups, repoitems, term2)
+                    return group, regex, groups
                 }
             }
         }
         case *ast.LexDot:{
-            regex += "\\."
+            regex += "\\\\."
             return group, regex, groups   
         }
         case *ast.LexRepPattern:{
@@ -249,11 +307,14 @@ func createpattern(group int, regex string, groups *list.List, repoitems *list.L
                 //processing elements
                 for _, term2:= range val.Terms{
                     group, regex, groups = createpattern(group, regex, groups, repoitems, term2)
+                    return group, regex, groups
                 }  
             }
         }
         default:{
+            fmt.Println("--------------xx-------------")
             fmt.Println(reflect.TypeOf(term))
+            fmt.Println("--------------xx-------------")
         }
     }
     return 0,"",nil
@@ -375,7 +436,7 @@ func main() {
             //repository.SetScope(listitemwithtype, tmpscope)
 
             alternatives := repository.GetRighthandside(listitemwithtype).Alternatives
-
+            
             regex := ""
             group := 0
             groups := list.New()
@@ -395,45 +456,6 @@ func main() {
                     if listX!=nil{
                         groups.PushBackList(listX)
                     }
-                    /*switch term.(type){
-                        case *ast.LexCharLit:{
-                            regex += stripliteral(term.String())
-                        }
-                        case *ast.LexRegDefId:{
-                            castedterm := term.(*ast.LexRegDefId)
-                            token := getItem(repoitems ,castedterm.Id)
-
-                            if repository.Isregexempty(token){
-                                retrieveregex(repoitems, token) //expand regex
-                            }
-                            //get regex, assign group if we are not working with comment.
-                            group += 1
-                            regex += "("+repository.Getregex(token)+")"
-                            groups.PushBack(repository.GetScope(token))
-                        }
-                        case *ast.LexOptPattern:{
-                            pattern2 := alternative.(*ast.LexOptPattern).LexPattern
-                            tmpregex := "("
-                            for index,val := range pattern2.Alternatives{
-                                if index > 0{
-                                    tmpregex += "|"
-                                }
-                                for _,alternative := range val.Terms{
-                                    tmpregex += switchpattern(tokenlist,alternative)
-                                }
-                            }
-                            tmpregex += ")?"
-                            group += 1
-                            regex += tmpregex
-                        }
-                        case *ast.LexCharRange:{
-                            pattern2 := alternative.(*ast.LexCharRange).LexPattern
-                            
-                        }
-                        default:{
-                            fmt.Println(fmt.Sprintf("ignored: <%v, %v>",term, reflect.TypeOf(term)))
-                        }
-                    }*/
                 }
             }
 
@@ -450,34 +472,45 @@ func main() {
                     %v
                     }
                     `
+            
+            //In the following lines, I am creating the "patterns" field for the json string declared above.
+            //the final string will create the json file which will further be converted to plist. In particular,
+            // I am creating the items (match and name, alongside the neccessary groups) which will be contained in "patterns" array.
             capturespart := `
                                 ,"captures":{
 
                             `
             captureindex := 1
-            for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
-                val := listitemX.Value.(string)
-                lastindex := strings.LastIndex(val, "|")
-                if lastindex > -1 {
-                    captureregex := val[0:lastindex]
-                    capturename := val[lastindex+1:len(val)]
-                    capturespart+= fmt.Sprintf("\"%v\":{ \"match\":\"%v\", \"name\":\"%v\"}", captureindex, captureregex, capturename)
-                    
-                    if listitemX.Next()!=nil{
-                        capturespart+= ","
+            numberofgroups := groups.Len()
+            if numberofgroups != 0{
+                for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
+                    val := listitemX.Value.(string)
+                    lastindex := strings.LastIndex(val, "|")
+                    if lastindex > -1 {
+                        //captureregex := val[0:lastindex]
+                        capturename := val[lastindex+1:len(val)]
+                        //capturespart+= fmt.Sprintf("\"%v\":{ \"match\":\"%v\", \"name\":\"%v\"}", captureindex, captureregex, capturename)
+                        // the above line is commented because it complains when it is included due to the regex being stated again from within the capture
+                        
+                        capturespart+= fmt.Sprintf("\"%v\":{ \"name\":\"%v\"}", captureindex, capturename)
+
+                        if listitemX.Next()!=nil{
+                            capturespart+= ","
+                        }
                     }
+                    captureindex += 1
                 }
-                captureindex += 1
-            }
-            capturespart += "}"
-            
-            repositoryfield+= fmt.Sprintf(item, regex, repository.GetScope(listitemwithtype), capturespart)
-            if listitem.Next()!=nil{
-                    repositoryfield+= ","
+                capturespart += "}"
+                
+                repositoryfield+= fmt.Sprintf(item, regex, repository.GetScope(listitemwithtype), capturespart)
+                if listitem.Next()!=nil{
+                        repositoryfield+= ","
+                }
             }
         }
         
 		result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, repositoryfield, u)
+        //fmt.Println(fmt.Sprintf("result is %v", result))
         
 		//1. save result in a JSON file.
         d1 := []byte(result)
@@ -487,10 +520,10 @@ func main() {
             os.Exit(1)
         }
 		//2. convert result to a plist file and save it.
-        err = exec.Command("python convertor.py "+fmt.Sprintf("%v.tmLanguage.json", *name)+" "+fmt.Sprintf("%v.tmLanguage", *name)).Run() 
-		if err!=nil{
-            fmt.Println(fmt.Sprintf("Err: could not convert json to plist. %v",err))
-        }
+        //err = exec.Command("python convertor.py "+fmt.Sprintf("%v.tmLanguage.json", *name)+" "+fmt.Sprintf("%v.tmLanguage", *name)).Run() 
+		//if err!=nil{
+        //    fmt.Println(fmt.Sprintf("Err: could not convert json to plist. %v",err))
+        //}
         //fmt.Println(result)
 	}
 }

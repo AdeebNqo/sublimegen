@@ -5,120 +5,12 @@
 		  "patterns": [
 		  	
                     {
-                    "match":"([]byte){([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]' |\t|\n|\r, |\t|\n|\r[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]')?}",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"[]byte", "name":"variable.language.bnf"},"2":{ "match":"([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]' |\t|\n|\r, |\t|\n|\r[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]')?", "name":"keyword.control.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"(int64)(((-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]))",
+                    "match":"(double)\\((\\-)?([0-9][0-9]\\.[0-9][0-9]e|E(\\+|\\-)?[0-9][0-9]|[0-9][0-9]\\.[0-9][0-9]|e|E(\\+|\\-)?[0-9][0-9]|[0-9][0-9]e|E(\\+|\\-)?[0-9][0-9]|\\.[0-9][0-9](e|E(\\+|\\-)?[0-9][0-9])?)\\)",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"int64", "name":"variable.language.bnf"},"2":{ "match":"(-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"(float)((-)?)",
-                    "name":"constant.numeric.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"float", "name":"variable.language.bnf"},"2":{ "match":"(-)?", "name":"keyword.control.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"$(int64)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"int64", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"$([]byte)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"[]byte", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"$(string)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"string", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"(`.`)|(\".|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]\")",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"`.`", "name":"keyword.control.bnf"},"2":{ "match":"\".|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]\"", "name":"keyword.control.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"(int32)(((-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]))",
-                    "name":"constant.numeric.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"int32", "name":"variable.language.bnf"},"2":{ "match":"(-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"(double)((-)?)",
-                    "name":"constant.numeric.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"double", "name":"variable.language.bnf"},"2":{ "match":"(-)?", "name":"keyword.control.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"$(double)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"double", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"$(int32)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"int32", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"(//.\n|/*.|**/)|( |\t|\n|\r)",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"//.\n|/*.|**/", "name":"comment.block.bnf"},"2":{ "match":" |\t|\n|\r", "name":"keyword.control.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"(uint64)(([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]))",
-                    "name":"constant.numeric.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"uint64", "name":"variable.language.bnf"},"2":{ "match":"[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"keyword.control.bnf"},"3":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
@@ -127,124 +19,178 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(uint64)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(float)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"uint64", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(uint32)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(string)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"uint32", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(bool)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"(//.\n|/\\*.|\\*\\*/)|( |\t|\n|\r)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"bool", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"comment.block.bnf"},"2":{ "name":"keyword.control.bnf"}}
                     }
                     ,
                     {
-                    "match":"(uint32)(([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]))",
+                    "match":"(uint32)\\(([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])\\)",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"uint32", "name":"variable.language.bnf"},"2":{ "match":"[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(float)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(uint64)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"float", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"//\n",
-                    "name":"comment.line.bnf"
+                    "match":"(\\[\\]byte)\\{( |\t|\n|\r)([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]' |\t|\n|\r, |\t|\n|\r[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]')?( |\t|\n|\r)\\}",
+                    "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            }
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"keyword.control.bnf"},"3":{ "name":"keyword.control.bnf"},"4":{ "name":"keyword.control.bnf"}}
                     }
                     ,
                     {
-                    "match":"/**/",
+                    "match":"(int32)\\(((\\-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])\\)",
+                    "name":"constant.numeric.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"constant.numeric.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"(uint64)\\(([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])\\)",
+                    "name":"constant.numeric.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"constant.numeric.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"(float)\\((\\-)?([0-9][0-9]\\.[0-9][0-9]e|E(\\+|\\-)?[0-9][0-9]|[0-9][0-9]\\.[0-9][0-9]|e|E(\\+|\\-)?[0-9][0-9]|[0-9][0-9]e|E(\\+|\\-)?[0-9][0-9]|\\.[0-9][0-9](e|E(\\+|\\-)?[0-9][0-9])?)\\)",
+                    "name":"constant.numeric.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"keyword.control.bnf"},"3":{ "name":"constant.numeric.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"\\$(int64)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
+                    "name":"keyword.control.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"\\$(int32)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
+                    "name":"keyword.control.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"\\$(\\[\\]byte)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
+                    "name":"keyword.control.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"(`.`)|(\".|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]\")",
+                    "name":"keyword.control.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"keyword.control.bnf"},"2":{ "name":"keyword.control.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"(int64)\\(((\\-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])\\)",
+                    "name":"constant.numeric.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"constant.numeric.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"\\$(double)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
+                    "name":"keyword.control.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"\\$(uint32)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
+                    "name":"keyword.control.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"\\$(bool)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
+                    "name":"keyword.control.bnf"
+                    
+                                ,"captures":{
+
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
+                    }
+                    ,
+                    {
+                    "match":"(//.\n)|(/\\*.|\\*\\*/)",
                     "name":"comment.block.bnf"
                     
                                 ,"captures":{
 
-                            }
+                            "1":{ "name":"comment.line.bnf"},"2":{ "name":"comment.block.bnf"}}
                     }
                     ,
                     {
-                    "match":"(//.\n)|(/*.|**/)",
-                    "name":"comment.block.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"//.\n", "name":"comment.line.bnf"},"2":{ "match":"/*.|**/", "name":"comment.block.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":" |\t|\n|\r",
+                    "match":"(//.\n|/\\*.|\\*\\*/)|( |\t|\n|\r)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            }
-                    }
-                    ,
-                    {
-                    "match":"(//.\n|/*.|**/)|( |\t|\n|\r)",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"//.\n|/*.|**/", "name":"comment.block.bnf"},"2":{ "match":" |\t|\n|\r", "name":"keyword.control.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"[0-9]",
-                    "name":"constant.numeric.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"[0-7]",
-                    "name":"constant.numeric.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"[0-9]|[A-F]|[a-f]",
-                    "name":"constant.numeric.bnf"
-                    
-                                ,"captures":{
-
-                            }
+                            "1":{ "name":"comment.block.bnf"},"2":{ "name":"keyword.control.bnf"}}
                     }
                     ,
                     {
@@ -253,142 +199,124 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[1-9][0-9]", "name":"constant.numeric.bnf"},"2":{ "match":"0[0-7]", "name":"constant.numeric.bnf"},"3":{ "match":"0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"constant.numeric.bnf"},"2":{ "name":"constant.numeric.bnf"},"3":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"",
+                    "match":"[1-9]([0-9])",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            }
+                            "1":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"0",
+                    "match":"0([0-7])",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            }
+                            "1":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"0([0-9]|[A-F]|[a-f])",
+                    "match":"0x([0-9]|[A-F]|[a-f])([0-9]|[A-F]|[a-f])",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"constant.numeric.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"(-)?([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])",
+                    "match":"(\\-)?([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"(-)?", "name":"keyword.control.bnf"},"2":{ "match":"[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"keyword.control.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"(int64)(((-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]))",
+                    "match":"(int64)\\(((\\-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])\\)",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"int64", "name":"variable.language.bnf"},"2":{ "match":"(-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"(int32)(((-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]))",
+                    "match":"(int32)\\(((\\-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])\\)",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"int32", "name":"variable.language.bnf"},"2":{ "match":"(-)?[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"(uint64)(([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]))",
+                    "match":"(uint64)\\(([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])\\)",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"uint64", "name":"variable.language.bnf"},"2":{ "match":"[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"(uint32)(([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]))",
+                    "match":"(uint32)\\(([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])\\)",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"uint32", "name":"variable.language.bnf"},"2":{ "match":"[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"([0-9])",
+                    "match":"([0-9])([0-9])",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[0-9]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"constant.numeric.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"(+|-)?([0-9][0-9])",
+                    "match":"e(\\+|\\-)?([0-9][0-9])",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"(+|-)?", "name":"keyword.control.bnf"},"2":{ "match":"[0-9][0-9]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"keyword.control.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"|||",
+                    "match":"([0-9][0-9])|([0-9][0-9])|([0-9][0-9])|\\.",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            }
+                            "1":{ "name":"constant.numeric.bnf"},"2":{ "name":"constant.numeric.bnf"},"3":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"(double)((-)?)",
+                    "match":"(double)\\((\\-)?([0-9][0-9]\\.[0-9][0-9]e|E(\\+|\\-)?[0-9][0-9]|[0-9][0-9]\\.[0-9][0-9]|e|E(\\+|\\-)?[0-9][0-9]|[0-9][0-9]e|E(\\+|\\-)?[0-9][0-9]|\\.[0-9][0-9](e|E(\\+|\\-)?[0-9][0-9])?)\\)",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"double", "name":"variable.language.bnf"},"2":{ "match":"(-)?", "name":"keyword.control.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"keyword.control.bnf"},"3":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"(float)((-)?)",
+                    "match":"(float)\\((\\-)?([0-9][0-9]\\.[0-9][0-9]e|E(\\+|\\-)?[0-9][0-9]|[0-9][0-9]\\.[0-9][0-9]|e|E(\\+|\\-)?[0-9][0-9]|[0-9][0-9]e|E(\\+|\\-)?[0-9][0-9]|\\.[0-9][0-9](e|E(\\+|\\-)?[0-9][0-9])?)\\)",
                     "name":"constant.numeric.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"float", "name":"variable.language.bnf"},"2":{ "match":"(-)?", "name":"keyword.control.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"[A-Z]",
-                    "name":"constant.character.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"[a-z]",
-                    "name":"constant.character.bnf"
-                    
-                                ,"captures":{
-
-                            }
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"keyword.control.bnf"},"3":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
@@ -397,16 +325,16 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[A-Z]", "name":"constant.character.bnf"},"2":{ "match":"[a-z]", "name":"constant.character.bnf"},"3":{ "match":"[0-9]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"constant.character.bnf"},"2":{ "name":"constant.character.bnf"},"3":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
-                    "match":"",
+                    "match":"([A-Z])([A-Z]|[a-z]|_|[0-9])",
                     "name":"string.quoted.double.bnf"
                     
                                 ,"captures":{
 
-                            }
+                            "1":{ "name":"constant.character.bnf"},"2":{ "name":"constant.character.bnf"}}
                     }
                     ,
                     {
@@ -415,178 +343,97 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"double",
-                    "name":"variable.language.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"float",
-                    "name":"variable.language.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"int64",
-                    "name":"variable.language.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"uint64",
-                    "name":"variable.language.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"int32",
-                    "name":"variable.language.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"uint32",
-                    "name":"variable.language.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"[]byte",
-                    "name":"variable.language.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"string",
-                    "name":"variable.language.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"bool",
-                    "name":"variable.language.bnf"
-                    
-                                ,"captures":{
-
-                            }
-                    }
-                    ,
-                    {
-                    "match":"([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])",
+                    "match":"([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\.",
                     "name":"string.quoted.double.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(double)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(double)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"double", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(float)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(float)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"float", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(int64)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(int64)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"int64", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(uint64)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(uint64)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"uint64", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(int32)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(int32)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"int32", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(uint32)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(uint32)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"uint32", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$([]byte)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(\\[\\]byte)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[]byte", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(string)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(string)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"string", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
-                    "match":"$(bool)(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]))",
+                    "match":"\\$(bool)\\(([A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]\\.[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9])\\)",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"bool", "name":"variable.language.bnf"},"2":{ "match":"[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9].[A-Z]|[a-z]|_[A-Z]|[a-z]|_|[0-9]", "name":"string.quoted.double.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"string.quoted.double.bnf"}}
                     }
                     ,
                     {
@@ -595,7 +442,7 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"2":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"3":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"4":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"5":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"6":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"7":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"8":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"constant.numeric.bnf"},"2":{ "name":"constant.numeric.bnf"},"3":{ "name":"constant.numeric.bnf"},"4":{ "name":"constant.numeric.bnf"},"5":{ "name":"constant.numeric.bnf"},"6":{ "name":"constant.numeric.bnf"},"7":{ "name":"constant.numeric.bnf"},"8":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
@@ -604,7 +451,7 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"2":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"3":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"4":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"constant.numeric.bnf"},"2":{ "name":"constant.numeric.bnf"},"3":{ "name":"constant.numeric.bnf"},"4":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
@@ -613,7 +460,7 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"2":{ "match":"[0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"constant.numeric.bnf"},"2":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
@@ -622,7 +469,7 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[0-7]", "name":"constant.numeric.bnf"},"2":{ "match":"[0-7]", "name":"constant.numeric.bnf"},"3":{ "match":"[0-7]", "name":"constant.numeric.bnf"}}
+                            "1":{ "name":"constant.numeric.bnf"},"2":{ "name":"constant.numeric.bnf"},"3":{ "name":"constant.numeric.bnf"}}
                     }
                     ,
                     {
@@ -631,43 +478,25 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"\\[0-7][0-7][0-7]", "name":"keyword.control.bnf"},"2":{ "match":"\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"keyword.control.bnf"}}
+                            "1":{ "name":"keyword.control.bnf"},"2":{ "name":"keyword.control.bnf"}}
                     }
                     ,
                     {
-                    "match":"``",
+                    "match":"\\.|(\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])|(\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])|(\\a|b|f|n|r|t|v|\\|'|\")",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            }
+                            "1":{ "name":"keyword.control.bnf"},"2":{ "name":"keyword.control.bnf"},"3":{ "name":"keyword.control.bnf"}}
                     }
                     ,
                     {
-                    "match":"\\",
+                    "match":"\"(.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\")\"",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            }
-                    }
-                    ,
-                    {
-                    "match":"\.|(\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])|(\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f])|(\\a|b|f|n|r|t|v|\\|'|\")",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            "1":{ "match":"\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"keyword.control.bnf"},"2":{ "match":"\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"keyword.control.bnf"},"3":{ "match":"\\a|b|f|n|r|t|v|\\|'|\"", "name":"keyword.control.bnf"}}
-                    }
-                    ,
-                    {
-                    "match":"\"\"",
-                    "name":"keyword.control.bnf"
-                    
-                                ,"captures":{
-
-                            }
+                            "1":{ "name":"keyword.control.bnf"}}
                     }
                     ,
                     {
@@ -676,16 +505,16 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"`.`", "name":"keyword.control.bnf"},"2":{ "match":"\".|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]\"", "name":"keyword.control.bnf"}}
+                            "1":{ "name":"keyword.control.bnf"},"2":{ "name":"keyword.control.bnf"}}
                     }
                     ,
                     {
-                    "match":"''",
+                    "match":"'(.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\")'",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            }
+                            "1":{ "name":"keyword.control.bnf"}}
                     }
                     ,
                     {
@@ -694,19 +523,19 @@
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]", "name":"constant.numeric.bnf"},"2":{ "match":"'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]'", "name":"keyword.control.bnf"}}
+                            "1":{ "name":"constant.numeric.bnf"},"2":{ "name":"keyword.control.bnf"}}
                     }
                     ,
                     {
-                    "match":"([]byte){([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]' |\t|\n|\r, |\t|\n|\r[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]')?}",
+                    "match":"(\\[\\]byte)\\{( |\t|\n|\r)([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]' |\t|\n|\r, |\t|\n|\r[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]')?( |\t|\n|\r)\\}",
                     "name":"keyword.control.bnf"
                     
                                 ,"captures":{
 
-                            "1":{ "match":"[]byte", "name":"variable.language.bnf"},"2":{ "match":"([1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]' |\t|\n|\r, |\t|\n|\r[1-9][0-9]|0[0-7]|0x|X[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|'.|\\u[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\U[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]|\\a|b|f|n|r|t|v|\\|'|\"|\\[0-7][0-7][0-7]|\\x[0-9]|[A-F]|[a-f][0-9]|[A-F]|[a-f]')?", "name":"keyword.control.bnf"}}
+                            "1":{ "name":"variable.language.bnf"},"2":{ "name":"keyword.control.bnf"},"3":{ "name":"keyword.control.bnf"},"4":{ "name":"keyword.control.bnf"}}
                     }
                     
                     ],
-		  "uuid": "1f72c3fa-8d05-4877-496a-077ad82f6d77"
+		  "uuid": "b977e247-c642-41ac-7e4e-52f335989d3a"
 		}
 	
