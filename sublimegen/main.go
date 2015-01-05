@@ -119,6 +119,9 @@ func escape(somechar string) string{
         case "]":{
             return "\\\\]"
         }
+        case " ":{
+            return "\\\" \\\""
+        }
         default:{
             return somechar
         }
@@ -280,7 +283,6 @@ func createpattern(group int, regex string, groups *list.List, repoitems *list.L
         }
         case *ast.LexGroupPattern:{
             pattern2 := term.(*ast.LexGroupPattern).LexPattern
-            
             for index,val := range pattern2.Alternatives{
                 //adding or in regex if there are alternatives
                 if index>0{
@@ -312,9 +314,7 @@ func createpattern(group int, regex string, groups *list.List, repoitems *list.L
             }
         }
         default:{
-            fmt.Println("--------------xx-------------")
             fmt.Println(reflect.TypeOf(term))
-            fmt.Println("--------------xx-------------")
         }
     }
     return 0,"",nil
@@ -364,7 +364,7 @@ func main() {
     */
     tokendefs := grammarX.LexPart.TokDefs //list of token definitions
     for key,value := range tokendefs{ //the key is the name that appears on the left hand side, value is the right hand side
-
+        
         //creating an object that will convert the token to the appropriate item for the json patterns field
         patternobj,err := repository.NewRepoItem(key)
 
