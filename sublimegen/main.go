@@ -342,16 +342,16 @@ type JSONSyntax struct{
     Name string `json:"name"`
     ScopeName string `json:"scopeName"`
     FileTypes []string `json:"fileTypes"`
-    Patterns []PatternEntry `json:"patterns"`
+    Patterns []PatternEntry `json:"patterns,omitempty"`
     Uuid string `json:"uuid"`
 }
 type PatternEntry struct{
-    Match string `json:"match"`
-    Name string `json:"name"`
-    Captures map[string]CaptureEntryName `json:"captures"`
+    Match string `json:"match,omitempty"`
+    Name string `json:"name,omitempty"`
+    Captures map[string]CaptureEntryName `json:"captures,omitempty"`
 }
 type CaptureEntryName struct{
-    Name string `json:"name"`
+    Name string `json:"name,omitempty"`
 }
 
 func main() {
