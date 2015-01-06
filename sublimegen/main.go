@@ -27,6 +27,7 @@ import (
     "github.com/AdeebNqo/sublimegen/repository"
     "container/list"
     "encoding/json"
+    "regexp"
     //"os/exec"
 )
 
@@ -46,6 +47,7 @@ func stripliteral(somelit string) (retval string){
         somelit = somelit[1:len(somelit)-1]
     }
     retval = escape(somelit)
+    //retval = somelit
     return
 }
 /*
@@ -56,18 +58,14 @@ for a regex
 */
 func escape(somechar string) string{
     switch somechar{
-        case "\\":{
+        /*case "\\":{
             return "\\\\"   
         }
-        case "\"":{
-            return "\\\""
-        }
-        case ".":{
+       
+        case "\\.":{
             return "\\\\."
         }
-        case "*":{
-            return "\\\\*"
-        }
+        
         case "-":{
             return "\\\\-"
         }
@@ -113,16 +111,35 @@ func escape(somechar string) string{
         case ")":{
             return "\\\\)"
         }
+        case " ":{
+            return "\\\" \\\""
+        }
+        case "*":{
+            return "\\\\*"
+        }
+        case "\"":{
+            return "\\\""
+        }
         case "[":{
             return "\\\\["
         }
         case "]":{
             return "\\\\]"
         }
-        case " ":{
-            return "\\\" \\\""
+        case "+":{
+            return "\\\\+"
         }
+        case "-":{
+            return "\\\\-"
+        }
+        case "\\":{
+            return "\\\\"
+        }
+        case "x":{
+            return "\\\\\\\\x"
+        }*/
         default:{
+            //fmt.Println(somechar)
             return somechar
         }
     }
@@ -202,7 +219,7 @@ func switchpattern(tokenlist *list.List, alternative interface{}) string{
                                 tmpregex += switchpattern(tokenlist,alternative)
                             }
                         }
-                        tmpregex += ")?"
+                        tmpregex += ")" //i just removed a question mark here.
                         return tmpregex
                     }
                     case *ast.LexDot:{
@@ -270,7 +287,7 @@ func createpattern(group int, regex string, groups *list.List, repoitems *list.L
                     tmpregex += switchpattern(repoitems, alternative)
                 }
             }
-            tmpregex += ")?"
+            tmpregex += ")" //removing question mark at the end because python does not like nested optional quantifiers
             group += 1
             regex += tmpregex
             groups.PushBack(tmpregex+"|keyword.control.bnf") //for consistency
@@ -502,7 +519,56 @@ func main() {
                 }
                 capturespart += "}"
                 
-                repositoryfield+= fmt.Sprintf(item, regex, repository.GetScope(listitemwithtype), capturespart)
+                
+                //----------------------------------------------------------------------------------------------
+                //In the following section, we're trying to sanitize the regex
+                
+            
+                
+                
+                /*rp := regexp.MustCompile("\\\\\\\\([A-Z]|[a-z])")
+                matches := rp.FindAllString(regex,-1)
+                
+                //REMOVING THE UNICODE-LIKE OFFENDING CHARS
+                if len(matches) != 0 {
+                    for _, val := range matches{
+                        if val!="\\\\r" || val!="\\\\t" || val != "\\\\n"{
+                            regex = strings.Replace(regex, val, "\\\\"+fmt.Sprintf("%v", val), -1)
+                        }
+                    }
+                }
+                
+
+                regex = strings.Replace(regex, "*", "\\\\*", -1)
+                regex = strings.Replace(regex, " ", "\\\" \\\"", -1)
+                regex = strings.Replace(regex, "\"", "\\\"", -1)
+                regex = strings.Replace(regex, "\\", "\\\\", -1)
+                regex = strings.Replace(regex, ".", "\\\\.", -1)
+                regex = strings.Replace(regex, "*", "\\\\*", -1)
+                regex = strings.Replace(regex, "\\", "\\\\\\", -1)
+                regex = strings.Replace(regex, "\"", "\\\"", -1)
+                regex = strings.Replace(regex, "-", "\\\\-", -1)
+                regex = strings.Replace(regex, ":", "\\\\:", -1)
+                regex = strings.Replace(regex, "|", "\\\\|", -1)
+                regex = strings.Replace(regex, ">", "\\\\>", -1)
+                regex = strings.Replace(regex, "<", "\\\\<", -1)
+                regex = strings.Replace(regex, "!", "\\\\!", -1)
+                regex = strings.Replace(regex, "=", "\\\\=", -1)
+                regex = strings.Replace(regex, "}", "\\\\}", -1)
+                regex = strings.Replace(regex, "{", "\\\\{", -1)
+                regex = strings.Replace(regex, "+", "\\\\+", -1)
+                regex = strings.Replace(regex, "?", "\\\\?", -1)
+                regex = strings.Replace(regex, "^", "\\\\^", -1)
+                regex = strings.Replace(regex, "$", "\\\\$", -1)
+                regex = strings.Replace(regex, "(", "\\\\(", -1)
+                regex = strings.Replace(regex, ")", "\\\\)", -1)
+                regex = strings.Replace(regex, "[", "\\\\[", -1)
+                regex = strings.Replace(regex, "]", "\\\\]", -1)
+                */
+                
+                //----------------------------------------------------------------------------------------------
+                
+                repositoryfield+= fmt.Sprintf(item, regexp.QuoteMeta(regex), repository.GetScope(listitemwithtype), capturespart)
                 if listitem.Next()!=nil{
                         repositoryfield+= ","
                 }
