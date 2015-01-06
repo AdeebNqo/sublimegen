@@ -27,7 +27,7 @@ import (
     "github.com/AdeebNqo/sublimegen/repository"
     "container/list"
     "encoding/json"
-    "regexp"
+    //"regexp"
     "strconv"
     //"os/exec"
 )
@@ -558,7 +558,8 @@ func main() {
                 //----------------------------------------------------------------------------------------------
                 
                 //creating pattern entry
-                patternentry := PatternEntry{Match:regexp.QuoteMeta(regex),Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
+                //patternentry := PatternEntry{Match:regexp.QuoteMeta(regex),Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
+                patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
                 patternarray = append(patternarray, patternentry)
             }
         }
