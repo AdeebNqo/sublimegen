@@ -28,6 +28,7 @@ import (
     "container/list"
     "encoding/json"
     "regexp"
+    "strconv"
     //"os/exec"
 )
 
@@ -337,6 +338,22 @@ func createpattern(group int, regex string, groups *list.List, repoitems *list.L
     return 0,"",nil
 }
 
+type JSONSyntax struct{
+    Name string `json:"name"`
+    ScopeName string `json:"scopeName"`
+    FileTypes []string `json:"fileTypes"`
+    Patterns []PatternEntry `json:"patterns"`
+    Uuid string `json:"uuid"`
+}
+type PatternEntry struct{
+    Match string `json:"match"`
+    Name string `json:"name"`
+    Captures map[string]CaptureEntryName `json:"captures"`
+}
+type CaptureEntryName struct{
+    Name string `json:"name"`
+}
+
 func main() {
 	flag.Parse() //parsing commandline flags
 
@@ -427,35 +444,24 @@ func main() {
         repoitems.PushBack(patternobj)
     }
 
-    //constructing the syntax highlighting file for sublime text
-	jsonhighlight := `
-		{ "name": "%v",
-		  "scopeName": "%v",
-		  "fileTypes": ["%v"],
-		  "patterns": [
-		  	%v
-                    ],
-		  "uuid": "%v"
-		}
-	`
     //generating uuid for syntax highlighting file
 	u, err := uuid.NewV4()
 	if (err!=nil){
+        //it was not possible to generated uuid, quiting...
+        
 		fmt.Println("Could not generate uuid.")
 		os.Exit(1)
 	}else{
-
-		repositoryfield := ""
-    
+        //genating patterns since uuid has been successfully generated
+        
+        patternarray := make([]PatternEntry,1)
         //0. Generate repository field from bnf file
         for listitem := repoitems.Front(); listitem != nil; listitem = listitem.Next() {
             listitemwithtype := listitem.Value.(*repository.Repoitem)
-            //repository.SetScope(listitemwithtype, tmpscope)
 
             alternatives := repository.GetRighthandside(listitemwithtype).Alternatives
             
             regex := ""
-            group := 0
             groups := list.New()
             groups.Init()
 
@@ -467,8 +473,7 @@ func main() {
                 //processing elements
                 for _, term:= range val.Terms{
                     
-                    groupX, regexX, listX := createpattern(0, "", list.New().Init(),repoitems, term)
-                    group = groupX
+                    _, regexX, listX := createpattern(0, "", list.New().Init(),repoitems, term)
                     regex += regexX
                     if listX!=nil{
                         groups.PushBackList(listX)
@@ -481,43 +486,27 @@ func main() {
                 repository.Setregex(listitemwithtype, regex)
             }
             
-            group += 0
-            item := `
-                    {
-                    "match":"%v",
-                    "name":"%v"
-                    %v
-                    }
-                    `
             
             //In the following lines, I am creating the "patterns" field for the json string declared above.
             //the final string will create the json file which will further be converted to plist. In particular,
             // I am creating the items (match and name, alongside the neccessary groups) which will be contained in "patterns" array.
-            capturespart := `
-                                ,"captures":{
 
-                            `
             captureindex := 1
             numberofgroups := groups.Len()
+            capturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
+            
             if numberofgroups != 0{
                 for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
                     val := listitemX.Value.(string)
                     lastindex := strings.LastIndex(val, "|")
                     if lastindex > -1 {
                         //captureregex := val[0:lastindex]
-                        capturename := val[lastindex+1:len(val)]
-                        //capturespart+= fmt.Sprintf("\"%v\":{ \"match\":\"%v\", \"name\":\"%v\"}", captureindex, captureregex, capturename)
-                        // the above line is commented because it complains when it is included due to the regex being stated again from within the capture
                         
-                        capturespart+= fmt.Sprintf("\"%v\":{ \"name\":\"%v\"}", captureindex, capturename)
-
-                        if listitemX.Next()!=nil{
-                            capturespart+= ","
-                        }
+                        capturename := val[lastindex+1:len(val)]
+                        capturesmap[strconv.Itoa(captureindex)] = CaptureEntryName{Name:capturename}
                     }
                     captureindex += 1
                 }
-                capturespart += "}"
                 
                 
                 //----------------------------------------------------------------------------------------------
@@ -568,23 +557,26 @@ func main() {
                 
                 //----------------------------------------------------------------------------------------------
                 
-                repositoryfield+= fmt.Sprintf(item, regexp.QuoteMeta(regex), repository.GetScope(listitemwithtype), capturespart)
-                if listitem.Next()!=nil{
-                        repositoryfield+= ","
-                }
+                //creating pattern entry
+                patternentry := PatternEntry{Match:regexp.QuoteMeta(regex),Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
+                patternarray = append(patternarray, patternentry)
             }
         }
-        
-		result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, repositoryfield, u)
-        //fmt.Println(fmt.Sprintf("result is %v", result))
-        
-		//1. save result in a JSON file.
-        d1 := []byte(result)
-        err := ioutil.WriteFile(fmt.Sprintf("%v.tmLanguage.json", *name), d1, 0644)
+		//result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, repositoryfield, u)
+        jsonsyntaxobj := JSONSyntax{Name:*name, ScopeName:*scope, FileTypes:strings.Split(*fileTypes,","), Patterns:patternarray, Uuid:u.String()}
+        jsonsyntaxobj_result, err := json.MarshalIndent(jsonsyntaxobj,"", "  ")
         if err!=nil{
-            fmt.Println("we have a problem saving output.")
+            fmt.Println("we have a problem marshalling output.")
             os.Exit(1)
+        }else{
+            err := ioutil.WriteFile(fmt.Sprintf("%v.tmLanguage.json", *name), jsonsyntaxobj_result, 0644)
+             if err!=nil{
+                fmt.Println("we have a problem writing to file.")
+                os.Exit(1)
+             }
         }
+        
+        
 		//2. convert result to a plist file and save it.
         //err = exec.Command("python convertor.py "+fmt.Sprintf("%v.tmLanguage.json", *name)+" "+fmt.Sprintf("%v.tmLanguage", *name)).Run() 
 		//if err!=nil{
