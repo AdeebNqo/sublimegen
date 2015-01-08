@@ -203,7 +203,7 @@ func createpattern(group int, regex string, groups *list.List, repoitems *list.L
                     tmpregex += switchpattern(repoitems, alternative)
                 }
             }
-            tmpregex += ")" //removing question mark at the end because python does not like nested optional quantifiers
+            tmpregex += ")" //removed question mark at the end because python does not like nested optional quantifiers
             group += 1
             regex += tmpregex
             groups.PushBack(tmpregex+"|keyword.control.bnf") //for consistency
@@ -272,7 +272,7 @@ type CaptureEntryName struct{
 func main() {
 	flag.Parse() //parsing commandline flags
 
-    //walter
+    //reading in the provided bnf file and parsing it.
 	scanner := &scanner.Scanner{}
 	srcBuffer, err := ioutil.ReadFile(*source)
 	if err != nil {
@@ -288,6 +288,7 @@ func main() {
 	}
 
     //loading tokens and scopes
+    defaultscope := fmt.Sprintf("keyword.control.%v",*fileTypes) //default scope
     type config map[string]string
     var data config
     file, _ := ioutil.ReadFile("scopes.json")
@@ -301,7 +302,6 @@ func main() {
     //the grammar
     grammarX := grammar.(*ast.Grammar)
 
-    tmpscope := fmt.Sprintf("keyword.control.%v",*fileTypes) //default scope that will be used in the meantime
     var repoitems *list.List
     repoitems = list.New()
     repoitems.Init()
@@ -327,7 +327,7 @@ func main() {
         if somescope!=""{
             repository.SetScope(patternobj,somescope)
         }else{
-            repository.SetScope(patternobj, tmpscope)
+            repository.SetScope(patternobj, defaultscope)
         }
         repoitems.PushBack(patternobj)
     }
@@ -354,7 +354,7 @@ func main() {
         if somescope!=""{
             repository.SetScope(patternobj,somescope)
         }else{
-            repository.SetScope(patternobj, tmpscope)
+            repository.SetScope(patternobj, defaultscope)
         }
         repoitems.PushBack(patternobj)
     }
@@ -438,7 +438,8 @@ func main() {
         }else{
             err := ioutil.WriteFile(fmt.Sprintf("%v.tmLanguage.json", *name), jsonsyntaxobj_result, 0644)
              if err!=nil{
-                fmt.Println("we have a problem writing to file.")
+                fmt.Println("(Error): we have a problem writing to file.")
+                fmt.Println("(Reason):", err)
                 os.Exit(1)
              }
         }
@@ -447,6 +448,22 @@ func main() {
 		err = exec.Command("python", "convertor.py", fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v.tmLanguage", *name)).Run()
         if err!=nil{
             fmt.Println(fmt.Sprintf("(Error): Could not convert json to plist.\n(Reason): %v",err))
+            os.Exit(1)
+        }
+        //moving the files into a folder with the name provided as cmdline arg
+        err0 := os.Mkdir(*name, 0775)
+        if err0!=nil{
+            fmt.Println("(Error): Could not create folder for storing generated files")
+            fmt.Println("(Reason):", err0)
+            os.Exit(1)
+        }
+        err1 := os.Rename(fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v/%v.tmLanguage.json", *name, *name))
+        err2 := os.Rename(fmt.Sprintf("%v.tmLanguage", *name), fmt.Sprintf("%v/%v.tmLanguage", *name, *name))
+        if err1!=nil || err2!=nil {
+            fmt.Println("(Error): Could not move files")
+            fmt.Println("(Reason):", err1,"and/or", err2)
+            os.Exit(1)
         }
 	}
+    os.Exit(0)
 }
