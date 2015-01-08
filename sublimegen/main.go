@@ -29,7 +29,7 @@ import (
     "encoding/json"
     "regexp"
     "strconv"
-    //"os/exec"
+    "os/exec"
 )
 
 var name = flag.String("name", "default", "This is the name of the syntax.")
@@ -58,93 +58,6 @@ for a regex
 
 */
 func escape(somechar string) string{
-    /*switch somechar{
-        case "\\":{
-            return "\\\\"
-        }
-        case "\\.":{
-            return "\\\\."
-        }
-        case "-":{
-            return "\\\\-"
-        }
-        case ":":{
-            return "\\\\:"
-        }
-        case "|":{
-            return "\\\\|"
-        }
-        case ">":{
-            return "\\\\>"
-        }
-        case "<":{
-            return "\\\\<"
-        }
-        case "!":{
-            return "\\\\!"
-        }
-        case "=":{
-            return "\\\\="
-        }
-        case "}":{
-            return "\\\\}"
-        }
-        case "{":{
-            return "\\\\{"
-        }
-        case "+":{
-            return "\\\\+"
-        }
-        case "?":{
-            return "\\\\?"
-        }
-        case "^":{
-            return "\\\\^"
-        }
-        case "$":{
-            return "\\\\$"
-        }
-        case "(":{
-            return "\\\\("
-        }
-        case ")":{
-            return "\\\\)"
-        }
-        case "\"":{
-            return "\\\""
-        }
-        case "[":{
-            return "\\\\["
-        }
-        case "]":{
-            return "\\\\]"
-        }
-        case "-":{
-            return "\\\\-"
-        }
-        case "\\":{
-            return "\\\\"
-        }
-        case "x":{
-            return "\\\\\\\\x"
-        }
-	case " ":{
-		return "\\\" \\\""
-	}
-	case "*":{
-		return "\\*"
-	}
-	case "/":{
-		return "\\/"
-	}
-	case "+":{
-		return "\\+"
-	}
-        default:{
-            //fmt.Println(somechar)
-            return somechar
-        }
-    }*/
 	return regexp.QuoteMeta(somechar)
 }
 
@@ -509,62 +422,13 @@ func main() {
                     }
                     captureindex += 1
                 }
-
-
-                //----------------------------------------------------------------------------------------------
-                //In the following section, we're trying to sanitize the regex
-
-
-
-
-                /*rp := regexp.MustCompile("\\\\\\\\([A-Z]|[a-z])")
-                matches := rp.FindAllString(regex,-1)
-
-                //REMOVING THE UNICODE-LIKE OFFENDING CHARS
-                if len(matches) != 0 {
-                    for _, val := range matches{
-                        if val!="\\\\r" || val!="\\\\t" || val != "\\\\n"{
-                            regex = strings.Replace(regex, val, "\\\\"+fmt.Sprintf("%v", val), -1)
-                        }
-                    }
-                }
-
-
-                regex = strings.Replace(regex, "*", "\\\\*", -1)
-                regex = strings.Replace(regex, " ", "\\\" \\\"", -1)
-                regex = strings.Replace(regex, "\"", "\\\"", -1)
-                regex = strings.Replace(regex, "\\", "\\\\", -1)
-                regex = strings.Replace(regex, ".", "\\\\.", -1)
-                regex = strings.Replace(regex, "*", "\\\\*", -1)
-                regex = strings.Replace(regex, "\\", "\\\\\\", -1)
-                regex = strings.Replace(regex, "\"", "\\\"", -1)
-                regex = strings.Replace(regex, "-", "\\\\-", -1)
-                regex = strings.Replace(regex, ":", "\\\\:", -1)
-                regex = strings.Replace(regex, "|", "\\\\|", -1)
-                regex = strings.Replace(regex, ">", "\\\\>", -1)
-                regex = strings.Replace(regex, "<", "\\\\<", -1)
-                regex = strings.Replace(regex, "!", "\\\\!", -1)
-                regex = strings.Replace(regex, "=", "\\\\=", -1)
-                regex = strings.Replace(regex, "}", "\\\\}", -1)
-                regex = strings.Replace(regex, "{", "\\\\{", -1)
-                regex = strings.Replace(regex, "+", "\\\\+", -1)
-                regex = strings.Replace(regex, "?", "\\\\?", -1)
-                regex = strings.Replace(regex, "^", "\\\\^", -1)
-                regex = strings.Replace(regex, "$", "\\\\$", -1)
-                regex = strings.Replace(regex, "(", "\\\\(", -1)
-                regex = strings.Replace(regex, ")", "\\\\)", -1)
-                regex = strings.Replace(regex, "[", "\\\\[", -1)
-                regex = strings.Replace(regex, "]", "\\\\]", -1)
-                */
-
-                //----------------------------------------------------------------------------------------------
-
+                
                 //creating pattern entry
-                //patternentry := PatternEntry{Match:regexp.QuoteMeta(regex),Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
                 patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
                 patternarray = append(patternarray, patternentry)
             }
         }
+        
 		//result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, repositoryfield, u)
         jsonsyntaxobj := JSONSyntax{Name:*name, ScopeName:*scope, FileTypes:strings.Split(*fileTypes,","), Patterns:patternarray, Uuid:u.String()}
         jsonsyntaxobj_result, err := json.MarshalIndent(jsonsyntaxobj,"", "  ")
@@ -578,13 +442,11 @@ func main() {
                 os.Exit(1)
              }
         }
-
-
-		//2. convert result to a plist file and save it.
-        //err = exec.Command("python convertor.py "+fmt.Sprintf("%v.tmLanguage.json", *name)+" "+fmt.Sprintf("%v.tmLanguage", *name)).Run()
-		//if err!=nil{
-        //    fmt.Println(fmt.Sprintf("Err: could not convert json to plist. %v",err))
-        //}
-        //fmt.Println(result)
+        
+		//convert resulting json to a plist file and save it.
+		err = exec.Command("python", "convertor.py", fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v.tmLanguage", *name)).Run()
+        if err!=nil{
+            fmt.Println(fmt.Sprintf("(Error): Could not convert json to plist.\n(Reason): %v",err))
+        }
 	}
 }
