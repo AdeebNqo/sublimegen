@@ -80,7 +80,7 @@ func reallygetregex(lexterm interface{}) string{
     switch lexterm.(type){
         case *ast.LexCharLit:{
             term := lexterm.(*ast.LexCharLit)
-            termasstring := term.String()
+            termasstring := stripliteral(term.String())
             
             //The outside character classes are .^$*+?()[{\|
             //The inside character classes are ^-]\
@@ -89,8 +89,19 @@ func reallygetregex(lexterm interface{}) string{
                 return "\\/"
             }else if termasstring=="$"{
                 return "\\$"
+            }else if termasstring=="*"{
+                return "\\*"
+            }else if termasstring=="["{
+                return "\\["
+            }else if termasstring=="]"{
+                return "\\]"
+            }else if termasstring=="\\"{
+                return "\\\\"
+            }else if termasstring==" "{
+                return "[ ]"
             }
-            return stripliteral(termasstring)
+            
+            return termasstring
             /*if len(termasstring)==2{
                 fmt.Println("length is two. ")
                 return stripliteral(termasstring) //only cater for the \t, \n, etc
