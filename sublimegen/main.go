@@ -30,6 +30,7 @@ import (
     "regexp"
     "strconv"
     "os/exec"
+    "github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre" //(documentation: https://godoc.org/github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre)
 )
 
 var name = flag.String("name", "default", "This is the name of the syntax.")
@@ -86,6 +87,8 @@ func reallygetregex(lexterm interface{}) string{
             
             if termasstring=="/"{
                 return "\\/"
+            }else if termasstring=="$"{
+                return "\\$"
             }
             return stripliteral(termasstring)
             /*if len(termasstring)==2{
@@ -210,7 +213,6 @@ func constructregexandfillgroups(alternatives []*ast.LexAlt, grouplist *list.Lis
         regex += getregex(lexitem)
     }
     fmt.Println("json:",regex) //debug
-    fmt.Println() //debug
     return list.New().Init(),regex
 }
 
@@ -346,6 +348,13 @@ func main() {
             
             groups, regex = constructregexandfillgroups(alternatives, groups) //we are extracting the regex for the 
 
+            //testing if regex is okay
+            _, compileerr := pcre.Compile(regex,0)
+            if compileerr!=nil{
+                fmt.Println("err:",compileerr)
+                fmt.Println()
+            }
+            
             //setting regex
             if repository.Isregexempty(listitemwithtype){
                 repository.Setregex(listitemwithtype, regex)
