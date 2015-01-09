@@ -37,6 +37,154 @@ var scope = flag.String("scope", "source.default", "This is the scope of the syn
 var fileTypes = flag.String("fileTypes", "default", "Comma seperated list of file types.")
 var source = flag.String("source","defaultinput", "the bnf file for the language you want to highlight.")
 
+var repoitems *list.List
+
+/*
+
+Method for retrieving a repo item from a list.
+Should be used in cases where the regex of a regular
+definition is neeeded.
+
+*/
+func getItem(container *list.List, id string) (*repository.Repoitem){
+    for val := container.Front(); val != nil; val = val.Next(){
+        rval := val.Value.(*repository.Repoitem)
+        if repository.GetRealname(rval)==id{
+            return rval
+        }
+    }
+    return nil
+}
+
+/*
+
+Method for strip the start and end (') characters from a token
+
+*/
+
+func stripliteral(somelit string) string{
+    if somelit != "" {
+        somelit = somelit[1:len(somelit)-1]
+    }
+    return somelit
+}
+
+/*
+
+function for reall retrieving regex from individual lexterm items
+
+return a string, the regex
+*/
+func reallygetregex(lexterm interface{}) string{
+    switch lexterm.(type){
+        case *ast.LexCharLit:{
+            term := lexterm.(*ast.LexCharLit)
+            termasstring := term.String()
+            
+            //The outside character classes are .^$*+?()[{\|
+            //The inside character classes are ^-]\
+            
+            if termasstring=="/"{
+                return "\\/"
+            }
+            return stripliteral(termasstring)
+            /*if len(termasstring)==2{
+                fmt.Println("length is two. ")
+                return stripliteral(termasstring) //only cater for the \t, \n, etc
+            }else{
+                return regexp.QuoteMeta(stripliteral(termasstring))
+            }*/
+        }
+        case *ast.LexCharRange:{
+            term := lexterm.(*ast.LexCharRange)
+            retval := fmt.Sprintf("[%v-%v]",reallygetregex(term.From),reallygetregex(term.To))
+            //fmt.Println("hello",retval) //debug
+            return retval
+        }
+        case *ast.LexGroupPattern:{
+            term := lexterm.(*ast.LexGroupPattern)
+            //fmt.Println("pattern:",term.LexPattern) //debug
+            retval := "("
+            for index,lexalt := range term.LexPattern.Alternatives{
+                if index>0{
+                    retval += "|"
+                }
+                retval +=  getregex(lexalt)
+            }
+            retval += ")"
+            //fmt.Println("retval:",retval) //debug
+            return retval
+        }
+        case *ast.LexOptPattern:{
+            term := lexterm.(*ast.LexOptPattern)
+
+            alternatives := term.LexPattern.Alternatives
+            //TODO; Remove round braces if the optional term is a terminal.
+            retval := "("
+            for index,lexalt := range alternatives{
+                if index>0{
+                    retval += "|"
+                }
+                retval += getregex(lexalt)
+            }
+            retval += ")?"
+            //fmt.Println(retval) //debug
+            return retval   
+        }
+        case *ast.LexRepPattern:{
+            term := lexterm.(*ast.LexRepPattern)
+            
+            alternatives := term.LexPattern.Alternatives
+   
+             //TODO; Remove round braces if the optional term is a terminal.
+            retval := "("
+            for index,lexalt := range alternatives{
+                if index>0{
+                    retval += "|"
+                }
+                retval += getregex(lexalt)
+            }
+            retval += ")*"
+            //fmt.Println(retval) //debug
+            return retval
+        }
+        case *ast.LexDot:{
+            return "."
+        }
+        case *ast.LexRegDefId:{
+            term := lexterm.(*ast.LexRegDefId)
+            
+            //TODO: do not fetch rval, use a pointer
+            for val := repoitems.Front(); val != nil; val = val.Next(){
+                rval := val.Value.(*repository.Repoitem)
+                if repository.GetRealname(rval)==term.Id{
+                    if repository.Isregexempty(rval){
+                
+                        alternatives := repository.GetRighthandside(rval).Alternatives
+                        retval := ""
+                        for index,lexalt := range alternatives{
+                            if index>0{
+                                retval += "|"
+                            }
+                            retval += getregex(lexalt)
+                        }
+                        repository.Setregex(rval,retval)
+                        return retval
+                        
+                    }else{
+                        return repository.Getregex(rval)
+                    }
+                }
+            }
+        }
+        default:{
+            //fmt.Println("type:",reflect.TypeOf(lexterm), "term: ",lexterm)
+            return "A"
+        }
+    }
+    return ""
+}
+
 /*
 
 function for retrieving regex from individual lexalt item
@@ -44,16 +192,11 @@ function for retrieving regex from individual lexalt item
 return a string, the regex
 */
 func getregex(lexitem *ast.LexAlt) string{
-    fmt.Print(lexitem) //debug
-    switch lexitem.(type){
-        case *ast.LexCharLit:{
-            fmt.Println("list")
-        }
-        default:{
-            fmt.Println("else")
-        }
+    regex := ""
+    for _,term := range lexitem.Terms{
+        regex += reallygetregex(term)
     }
-    return ""
+    return regex
 }
 /*
 
@@ -61,11 +204,12 @@ Function for unravelling a pattern to obtain it's regex
 
 */
 func constructregexandfillgroups(alternatives []*ast.LexAlt, grouplist *list.List) (*list.List,string){
-    fmt.Println(alternatives) //debug
+    fmt.Println("bnf:",alternatives) //debug
     regex := ""
     for _,lexitem := range alternatives{
         regex += getregex(lexitem)
     }
+    fmt.Println("json:",regex) //debug
     fmt.Println() //debug
     return list.New().Init(),regex
 }
@@ -121,7 +265,7 @@ func main() {
     //the grammar
     grammarX := grammar.(*ast.Grammar)
 
-    var repoitems *list.List
+    //instantiating the list that will contain all the repoitems, that is, pattern field entries.
     repoitems = list.New()
     repoitems.Init()
 
@@ -302,20 +446,7 @@ func main() {
 ///=====================================================================================================================================
 ///=====================================================================================================================================
 
-/*
 
-Method for retrieving lex pattern
-
-*/
-func getItem(container *list.List, id string) (*repository.Repoitem){
-    for val := container.Front(); val != nil; val = val.Next(){
-        rval := val.Value.(*repository.Repoitem)
-        if repository.GetRealname(rval)==id{
-            return rval
-        }
-    }
-    return nil
-}
 
 /*
 function for obtaining regex from lexpatern
@@ -518,7 +649,7 @@ Method for strip the start and end (') characters from a token
 
 */
 
-func stripliteral(somelit string) (retval string){
+/*func stripliteral(somelit string) (retval string){
     if somelit != "" {
         somelit = somelit[1:len(somelit)-1]
     }
@@ -526,6 +657,9 @@ func stripliteral(somelit string) (retval string){
     //retval = somelit
     return
 }
+*/
+
+
 /*
 
 function for escaping char lits
