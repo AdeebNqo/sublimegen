@@ -40,6 +40,89 @@ var source = flag.String("source","defaultinput", "the bnf file for the language
 
 var repoitems *list.List
 
+
+/*
+
+Inefficient method for retrieving scope of regex
+*/
+func retrievescopefromcapturegroup(capturedregex string) (bool, string){
+    capturedregex = capturedregex[1:len(capturedregex)-1]
+    for ritem := repoitems.Front(); ritem !=nil; ritem = ritem.Next(){
+        if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex{
+            return true, repository.GetScope(ritem.Value.(*repository.Repoitem))
+        }
+    }
+    return false, ""
+}
+
+/*
+
+Method for retrieving groups to be used
+
+*/
+func getgroups(currentregex string, originalregex string,identifiedgroups int, alternatives []*ast.LexAlt, scopecontainer *list.List) *list.List{
+    
+    count := 0
+    regexlength := len(currentregex)
+    stack := Stack{}
+    
+    STARTBRACE:
+        for pos:=0; pos<regexlength; pos++{
+            currcharacter := string(currentregex[pos])
+            if currcharacter=="(" {
+                if pos==0 || string(currentregex[pos-1])!="\\"{
+                    //found starting brace
+                    count+=1
+                    stack.Push(currcharacter)
+                    //pushing in the rest till we find matching brace
+                    for innerindex:=pos+1; innerindex<regexlength; innerindex++{
+
+                        currcharacter2 := string(currentregex[innerindex])
+                        if currcharacter2==")"{
+                            if innerindex!=0 || string(currentregex[innerindex-1])!="\\"{
+                                count-=1
+                                stack.Push(currcharacter2)
+                            }
+                        }else if currcharacter2=="("{
+                            if innerindex==0 || string(currentregex[innerindex-1])!="\\"{
+                                count+=1
+                                stack.Push(currcharacter2)
+                            }
+                        }else{
+                            stack.Push(currcharacter2)
+                        }
+                        if count==0{
+                            biggest := ""
+                            for {
+                                head := stack.Pop()
+                                if head==nil{
+                                    break
+                                }
+                                biggest = head.(string)+biggest
+                            }
+                            //TODO: Check if this matches any special definitions.
+                            // if it doesnt, and there is still other braces after the  the closing one -- process the following ones.
+                            // else process the items within the braces. ||
+                            //                                           \/
+                            matched, scope := retrievescopefromcapturegroup(biggest)
+                            if matched{
+                                scopecontainer.PushBack(scope)
+                            }
+                            if (len(biggest) < regexlength){
+                                scopecontainer = getgroups(originalregex ,  currentregex[len(biggest)+1:],identifiedgroups, alternatives, scopecontainer)
+                            }
+                            if !matched{
+                                //scopecontainer = getgroups(originalregex ,  biggest[1:len(biggest)-1],identifiedgroups, alternatives, scopecontainer)
+                            }
+                            break STARTBRACE
+                        }
+                    }
+                }
+            }
+        }
+    return scopecontainer
+}
+
 /*
 
 Method for retrieving a repo item from a list.
@@ -76,7 +159,7 @@ function for reall retrieving regex from individual lexterm items
 
 return a string, the regex
 */
-func reallygetregex(lexterm interface{}, groups *list.List) (string,*list.List){
+func reallygetregex(lexterm interface{}) string{
     switch lexterm.(type){
         case *ast.LexCharLit:{
             term := lexterm.(*ast.LexCharLit)
@@ -86,42 +169,36 @@ func reallygetregex(lexterm interface{}, groups *list.List) (string,*list.List){
             //The inside character classes are ^-]\
             
             if termasstring=="/"{
-                return "\\/",groups
+                return "\\/"
             }else if termasstring=="$"{
-                return "\\$",groups
+                return "\\$"
             }else if termasstring=="*"{
-                return "\\*",groups
+                return "\\*"
             }else if termasstring=="["{
-                return "\\[",groups
+                return "\\["
             }else if termasstring=="]"{
-                return "\\]",groups
+                return "\\]"
             }else if termasstring=="\\"{
-                return "\\\\",groups
+                return "\\\\"
             }else if termasstring==" "{
-                return "[ ]",groups
+                return "[ ]"
             }else if termasstring=="+" {
-                return "\\+",groups
+                return "\\+"
             }else if termasstring=="("{
-                return "\\(",groups
+                return "\\("
             }else if termasstring==")"{
-                return "\\)",groups
+                return "\\)"
             }
             
-            return termasstring,groups
-            /*if len(termasstring)==2{
-                fmt.Println("length is two. ")
-                return stripliteral(termasstring) //only cater for the \t, \n, etc
-            }else{
-                return regexp.QuoteMeta(stripliteral(termasstring))
-            }*/
+            return termasstring
         }
         case *ast.LexCharRange:{
             term := lexterm.(*ast.LexCharRange)
-            from, groups := reallygetregex(term.From, groups)
-            to,groups := reallygetregex(term.To, groups)
+            from := reallygetregex(term.From)
+            to := reallygetregex(term.To)
             retval := fmt.Sprintf("[%v-%v]", from, to)
             //fmt.Println("hello",retval) //debug
-            return retval,groups
+            return retval
         }
         case *ast.LexGroupPattern:{
             term := lexterm.(*ast.LexGroupPattern)
@@ -131,13 +208,11 @@ func reallygetregex(lexterm interface{}, groups *list.List) (string,*list.List){
                 if index>0{
                     retval += "|"
                 }
-                var tmpregex string
-                tmpregex, groups =  getregex(lexalt, groups)
-                retval += tmpregex
+                retval += getregex(lexalt)
             }
             retval += ")"
             //fmt.Println("retval:",retval) //debug
-            return retval,groups
+            return retval
         }
         case *ast.LexOptPattern:{
             term := lexterm.(*ast.LexOptPattern)
@@ -151,14 +226,10 @@ func reallygetregex(lexterm interface{}, groups *list.List) (string,*list.List){
                 if len(terms)==1{
                     switch terms[0].(type){
                         case *ast.LexCharLit:{
-                            var tmpregex string
-                            tmpregex, groups = getregex(alternatives[0], groups)
-                            return fmt.Sprintf("%v?", tmpregex),groups
+                            return fmt.Sprintf("%v?", getregex(alternatives[0]))
                         }
                         case *ast.LexDot:{
-                            var tmpregex string
-                            tmpregex, groups = getregex(alternatives[0], groups)
-                            return fmt.Sprintf("%v?", tmpregex),groups
+                            return fmt.Sprintf("%v?", getregex(alternatives[0]))
                         }
                     }
                 }
@@ -168,13 +239,11 @@ func reallygetregex(lexterm interface{}, groups *list.List) (string,*list.List){
                 if index>0{
                     retval += "|"
                 }
-                var tmpregex string
-                tmpregex, groups = getregex(lexalt, groups)
-                retval += tmpregex
+                retval += getregex(lexalt)
             }
             retval += ")?"
             //fmt.Println(retval) //debug
-            return retval, groups
+            return retval
         }
         case *ast.LexRepPattern:{
             term := lexterm.(*ast.LexRepPattern)
@@ -188,14 +257,10 @@ func reallygetregex(lexterm interface{}, groups *list.List) (string,*list.List){
                 if len(terms)==1{
                     switch terms[0].(type){
                         case *ast.LexCharLit:{
-                            var tmpregex string
-                            tmpregex, groups = getregex(alternatives[0], groups)
-                            return fmt.Sprintf("%v*", tmpregex), groups
+                            return fmt.Sprintf("%v*", getregex(alternatives[0]))
                         }
                         case *ast.LexDot:{
-                            var tmpregex string
-                            tmpregex, groups = getregex(alternatives[0], groups)
-                            return fmt.Sprintf("%v*", tmpregex), groups
+                            return fmt.Sprintf("%v*", getregex(alternatives[0]))
                         }
                     }
                 }
@@ -205,16 +270,14 @@ func reallygetregex(lexterm interface{}, groups *list.List) (string,*list.List){
                 if index>0{
                     retval += "|"
                 }
-                var tmpregex string
-                tmpregex, groups = getregex(lexalt, groups)
-                retval += tmpregex
+                retval += getregex(lexalt)
             }
             retval += ")*"
             //fmt.Println(retval) //debug
-            return retval, groups
+            return retval
         }
         case *ast.LexDot:{
-            return ".", groups
+            return "."
         }
         case *ast.LexRegDefId:{
             term := lexterm.(*ast.LexRegDefId)
@@ -231,28 +294,23 @@ func reallygetregex(lexterm interface{}, groups *list.List) (string,*list.List){
                             if index>0{
                                 retval += "|"
                             }
-                            var tmpregex string
-                            tmpregex, groups = getregex(lexalt, groups) 
-                            retval += tmpregex
+                            retval += getregex(lexalt)
                         }
                         repository.Setregex(rval,retval)
-                        groups.PushBack(repository.Getregex(rval)+"|"+repository.GetScope(rval))
-                        return retval, groups
+                        return retval
                         
                     }else{
-                        //groups.PushBack(repository.Getregex(token)+"|"+repository.GetScope(token))
-                        groups.PushBack(repository.Getregex(rval)+"|"+repository.GetScope(rval))
-                        return "("+repository.Getregex(rval)+")", groups
+                        return "("+repository.Getregex(rval)+")"
                     }
                 }
             }
         }
         default:{
             //fmt.Println("type:",reflect.TypeOf(lexterm), "term: ",lexterm)
-            return "A", groups
+            return "A"
         }
     }
-    return "", groups
+    return ""
 }
 
 /*
@@ -261,31 +319,27 @@ function for retrieving regex from individual lexalt item
 
 return a string, the regex
 */
-func getregex(lexitem *ast.LexAlt, groups *list.List) (string, *list.List) {
+func getregex(lexitem *ast.LexAlt) string {
     regex := ""
     for _,term := range lexitem.Terms{
-        var tmpregex string
-        tmpregex, groups = reallygetregex(term, groups)
-        regex += tmpregex
+        regex += reallygetregex(term)
     }
-    return regex, groups
+    return regex
 }
 /*
 
 Function for unravelling a pattern to obtain it's regex
 
 */
-func constructregexandfillgroups(alternatives []*ast.LexAlt, grouplist *list.List) (*list.List,string){
+func constructregexandfillgroups(alternatives []*ast.LexAlt) string{
     //fmt.Println("bnf:",alternatives) //debug
     regex := ""
     for _,lexitem := range alternatives{
-        tmpregex, tmpgroups := getregex(lexitem, grouplist)
+        tmpregex := getregex(lexitem)
         regex += tmpregex
-        grouplist.PushBackList(tmpgroups)
     }
     //fmt.Println("json:",regex) //debug
-    return grouplist,regex
-    //return list.New().Init(), regex //debug
+    return regex
 }
 
 
@@ -414,11 +468,7 @@ func main() {
 
             alternatives := repository.GetRighthandside(listitemwithtype).Alternatives
             
-            regex := ""
-            groups := list.New()
-            groups.Init()
-            
-            groups, regex = constructregexandfillgroups(alternatives, groups) //we are extracting the regex for the 
+            regex := constructregexandfillgroups(alternatives) //we are extracting the regex for the 
 
             //testing if regex is okay
             regp, compileerr := pcre.Compile(regex,0)
@@ -427,16 +477,13 @@ func main() {
                 fmt.Println() //debug
             }
             
-            //here
-            fmt.Println(alternatives)
-            fmt.Println(regex)
-            fmt.Println(regp.Groups())
-            fmt.Println()
-            
             //setting regex
             if repository.Isregexempty(listitemwithtype){
                 repository.Setregex(listitemwithtype, regex)
             }
+            
+            //getting groups
+            groups := getgroups(regex , regex ,regp.Groups(), alternatives, list.New().Init())
 
 
             //In the following lines, I am creating the "patterns" field for the json string declared above.
@@ -447,21 +494,14 @@ func main() {
             numberofgroups := groups.Len()
             capturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
 
-            numberofgroups += 0
             if numberofgroups!=0{
                 for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
                     val := listitemX.Value.(string)
-                    lastindex := strings.LastIndex(val, "|")
-                    if lastindex > -1 {
-                        //captureregex := val[0:lastindex]
-
-                        capturename := val[lastindex+1:len(val)]
-                        capturesmap[strconv.Itoa(captureindex)] = CaptureEntryName{Name:capturename}
-                    }
+                    capturesmap[strconv.Itoa(captureindex)] = CaptureEntryName{Name:val}
                     captureindex += 1
                 }
             }
-
+            
             //creating pattern entry
             patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
             patternarray = append(patternarray, patternentry)
