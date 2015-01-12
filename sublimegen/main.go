@@ -99,6 +99,8 @@ func reallygetregex(lexterm interface{}) string{
                 return "\\\\"
             }else if termasstring==" "{
                 return "[ ]"
+            }else if termasstring=="+" {
+                return "\\+"
             }
             
             return termasstring
@@ -133,7 +135,22 @@ func reallygetregex(lexterm interface{}) string{
             term := lexterm.(*ast.LexOptPattern)
 
             alternatives := term.LexPattern.Alternatives
-            //TODO; Remove round braces if the optional term is a terminal.
+            //TODO; Test if len==1 works
+            if len(alternatives)==1{
+                //trying to remove round braces
+                //fmt.Println(alternatives) //debug
+                terms := alternatives[0].Terms
+                if len(terms)==1{
+                    switch terms[0].(type){
+                        case *ast.LexCharLit:{
+                            return fmt.Sprintf("%v?", getregex(alternatives[0]))
+                        }
+                        case *ast.LexDot:{
+                            return fmt.Sprintf("%v?", getregex(alternatives[0]))
+                        }
+                    }
+                }
+             }
             retval := "("
             for index,lexalt := range alternatives{
                 if index>0{
@@ -149,8 +166,22 @@ func reallygetregex(lexterm interface{}) string{
             term := lexterm.(*ast.LexRepPattern)
             
             alternatives := term.LexPattern.Alternatives
-   
-             //TODO; Remove round braces if the optional term is a terminal.
+            //TODO; Test if len==1 works
+            if len(alternatives)==1{
+                //trying to remove round braces
+                //fmt.Println(alternatives) //debug
+                terms := alternatives[0].Terms
+                if len(terms)==1{
+                    switch terms[0].(type){
+                        case *ast.LexCharLit:{
+                            return fmt.Sprintf("%v*", getregex(alternatives[0]))
+                        }
+                        case *ast.LexDot:{
+                            return fmt.Sprintf("%v?", getregex(alternatives[0]))
+                        }
+                    }
+                }
+             }
             retval := "("
             for index,lexalt := range alternatives{
                 if index>0{
@@ -362,9 +393,10 @@ func main() {
             //testing if regex is okay
             _, compileerr := pcre.Compile(regex,0)
             if compileerr!=nil{
-                fmt.Println("err:",compileerr)
-                fmt.Println()
+                fmt.Println("err:",compileerr) //debug
+                fmt.Println() //debug
             }
+            //fmt.Println("Groups:", regp.Groups()) //debug
             
             //setting regex
             if repository.Isregexempty(listitemwithtype){
@@ -565,7 +597,7 @@ Function for creating pattern entry from lexpattern
 return values: group, regex and groups
 */
 func createpattern(group int, regex string, groups *list.List, repoitems *list.List, term interface{}) (int, string, *list.List){
-    fmt.Println("term:",term,",type:",reflect.TypeOf(term)) //debug
+    //fmt.Println("term:",term,",type:",reflect.TypeOf(term)) //debug
     /*switch term.(type){
         case *ast.LexCharLit:{
             termX := term.(*ast.LexCharLit)
