@@ -60,7 +60,7 @@ func retrievescopefromcapturegroup(capturedregex string) (bool, string){
 Method for retrieving groups to be used
 
 */
-func getgroups(currentregex string, originalregex string,identifiedgroups int, alternatives []*ast.LexAlt, scopecontainer *list.List) *list.List{
+func getgroups(currentregex string, originalregex string,groupcount int, alternatives []*ast.LexAlt, scopecontainer *list.List) *list.List{
     
     count := 0
     regexlength := len(currentregex)
@@ -104,15 +104,18 @@ func getgroups(currentregex string, originalregex string,identifiedgroups int, a
                             // if it doesnt, and there is still other braces after the  the closing one -- process the following ones.
                             // else process the items within the braces. ||
                             //                                           \/
+                            fmt.Println(biggest) //debug
                             matched, scope := retrievescopefromcapturegroup(biggest)
                             if matched{
-                                scopecontainer.PushBack(scope)
+                                groupcount+=1
+                                scopecontainer.PushBack(scope+"|"+strconv.Itoa(groupcount))
                             }
-                            if (len(biggest) < regexlength){
-                                scopecontainer = getgroups(originalregex ,  currentregex[len(biggest)+1:],identifiedgroups, alternatives, scopecontainer)
+                            if (len(biggest) < regexlength) {
+                                scopecontainer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, alternatives, scopecontainer)
                             }
                             if !matched{
-                                //scopecontainer = getgroups(originalregex ,  biggest[1:len(biggest)-1],identifiedgroups, alternatives, scopecontainer)
+                                groupcount +=1
+                                scopecontainer = getgroups(originalregex ,  biggest[1:len(biggest)-1],groupcount, alternatives, scopecontainer)
                             }
                             break STARTBRACE
                         }
@@ -482,9 +485,12 @@ func main() {
                 repository.Setregex(listitemwithtype, regex)
             }
             
+            fmt.Println("---processing---")
             //getting groups
             groups := getgroups(regex , regex ,regp.Groups(), alternatives, list.New().Init())
-
+            fmt.Println(regex) //debug
+            fmt.Println(regp.Groups()) //debug
+            fmt.Println()
 
             //In the following lines, I am creating the "patterns" field for the json string declared above.
             //the final string will create the json file which will further be converted to plist. In particular,
