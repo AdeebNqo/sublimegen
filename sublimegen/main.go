@@ -45,8 +45,10 @@ var repoitems *list.List
 
 Inefficient method for retrieving scope of regex
 */
-func retrievescopefromcapturegroup(capturedregex string) (bool, string){
-    capturedregex = capturedregex[1:len(capturedregex)-1]
+func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string){
+    if activate{
+        capturedregex = capturedregex[1:len(capturedregex)-1]
+    }
     for ritem := repoitems.Front(); ritem !=nil; ritem = ritem.Next(){
         if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex{
             return true, repository.GetScope(ritem.Value.(*repository.Repoitem))
@@ -62,76 +64,83 @@ Method for retrieving groups to be used
 */
 func getgroups(currentregex string, originalregex string,groupcount int, alternatives []*ast.LexAlt, scopecontainer *list.List) *list.List{
     
-    count := 0
-    regexlength := len(currentregex)
-    stack := Stack{}
-    
-    STARTBRACE:
-        for pos:=0; pos<regexlength; pos++{
-            currcharacter := string(currentregex[pos])
-            if currcharacter=="(" {
-                if pos==0 || string(currentregex[pos-1])!="\\"{
-                    //found starting brace
-                    count+=1
-                    stack.Push(currcharacter)
-                    //pushing in the rest till we find matching brace
-                    for innerindex:=pos+1; innerindex<regexlength; innerindex++{
+    matched, scope := retrievescopefromcapturegroup(currentregex, false)
+    if matched{
+        groupcount+=1
+        scopecontainer.PushBack(scope+"|"+strconv.Itoa(groupcount))
+    }else{
 
-                        currcharacter2 := string(currentregex[innerindex])
-                        if currcharacter2==")"{
-                            if innerindex!=0 || string(currentregex[innerindex-1])!="\\"{
-                                count-=1
-                                stack.Push(currcharacter2)
-                                
-                                //checking if following character is a *, + or ?
-                                if innerindex+1 < len(currentregex){
-                                    charafterrbrace := string(currentregex[innerindex+1])
-                                    if charafterrbrace=="*" || charafterrbrace=="+" || charafterrbrace=="?"{
-                                        innerindex+=1;
-                                        stack.Push(charafterrbrace)
+        count := 0
+        regexlength := len(currentregex)
+        stack := Stack{}
+
+        STARTBRACE:
+            for pos:=0; pos<regexlength; pos++{
+                currcharacter := string(currentregex[pos])
+                if currcharacter=="(" {
+                    if pos==0 || string(currentregex[pos-1])!="\\"{
+                        //found starting brace
+                        count+=1
+                        stack.Push(currcharacter)
+                        //pushing in the rest till we find matching brace
+                        for innerindex:=pos+1; innerindex<regexlength; innerindex++{
+
+                            currcharacter2 := string(currentregex[innerindex])
+                            if currcharacter2==")"{
+                                if innerindex!=0 || string(currentregex[innerindex-1])!="\\"{
+                                    count-=1
+                                    stack.Push(currcharacter2)
+
+                                    //checking if following character is a *, + or ?
+                                    if innerindex+1 < len(currentregex){
+                                        charafterrbrace := string(currentregex[innerindex+1])
+                                        if charafterrbrace=="*" || charafterrbrace=="+" || charafterrbrace=="?"{
+                                            innerindex+=1;
+                                            stack.Push(charafterrbrace)
+                                        }
                                     }
                                 }
-                            }
-                        }else if currcharacter2=="("{
-                            if innerindex==0 || string(currentregex[innerindex-1])!="\\"{
-                                count+=1
+                            }else if currcharacter2=="("{
+                                if innerindex==0 || string(currentregex[innerindex-1])!="\\"{
+                                    count+=1
+                                    stack.Push(currcharacter2)
+                                }
+                            }else{
                                 stack.Push(currcharacter2)
                             }
-                        }else{
-                            stack.Push(currcharacter2)
-                        }
-                        if count==0{
-                            biggest := ""
-                            for {
-                                head := stack.Pop()
-                                if head==nil{
-                                    break
+                            if count==0{
+                                biggest := ""
+                                for {
+                                    head := stack.Pop()
+                                    if head==nil{
+                                        break
+                                    }
+                                    biggest = head.(string)+biggest
                                 }
-                                biggest = head.(string)+biggest
+                                //TODO: Check if this matches any special definitions.
+                                // if it doesnt, and there is still other braces after the  the closing one -- process the following ones.
+                                // else process the items within the braces. ||
+                                //                                           \/
+                                fmt.Println(biggest, " - count:",groupcount) //debug
+                                matched, scope := retrievescopefromcapturegroup(biggest, true)
+                                if matched{
+                                    groupcount+=1
+                                    scopecontainer.PushBack(scope+"|"+strconv.Itoa(groupcount))
+                                }
+                                if (len(biggest) < regexlength) {
+                                    scopecontainer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, alternatives, scopecontainer)
+                                }
+                                if !matched{
+                                    groupcount +=1
+                                    scopecontainer = getgroups(originalregex ,  biggest[1:len(biggest)-1],groupcount, alternatives, scopecontainer)
+                                }
+                                break STARTBRACE
                             }
-                            //TODO: Check if this matches any special definitions.
-                            // if it doesnt, and there is still other braces after the  the closing one -- process the following ones.
-                            // else process the items within the braces. ||
-                            //                                           \/
-                            fmt.Println(biggest, " - count:",groupcount) //debug
-                            matched, scope := retrievescopefromcapturegroup(biggest)
-                            if matched{
-                                groupcount+=1
-                                scopecontainer.PushBack(scope+"|"+strconv.Itoa(groupcount))
-                            }
-                            if (len(biggest) < regexlength) {
-                                scopecontainer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, alternatives, scopecontainer)
-                            }
-                            if !matched{
-                                groupcount +=1
-                                scopecontainer = getgroups(originalregex ,  biggest[1:len(biggest)-1],groupcount, alternatives, scopecontainer)
-                            }
-                            break STARTBRACE
                         }
                     }
                 }
             }
-        }
+    }
     return scopecontainer
 }
 
