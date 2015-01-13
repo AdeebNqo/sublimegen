@@ -1,0 +1,131 @@
+/* Lex Part */
+
+comma : ',' ;
+int : 'i' 'n' 't' ;
+main : 'm' 'a' 'i' 'n';
+lrbrace : '(';
+rrbrace : ')';
+lcbrace : '{';
+rcbrace : '}';
+int_literal : ['-'] _int_lit;
+rsbrace : '[';
+lsbrace : ']';
+dsbrace :'[' ']';
+id : _id;
+semicolon : ':';
+void : 'v' 'o' 'i' 'd';
+float : 'f' 'l' 'o' 'a' 't';
+if : 'i' 'f';
+else : 'e' 'l' 's' 'e';
+for : 'f' 'o' 'r';
+equal : '=';
+return : 'r' 'e' 't' 'u' 'r' 'n';
+plus : '+';
+minus : '-';
+float_literal :  ['-'] _float_lit  ;
+not : '!';
+
+_id : (_upcase | _lowcase | '_' ) {_id_char} ;
+_upcase : 'A'-'Z' ;
+_lowcase : 'a'-'z' ;
+_id_char : _upcase | _lowcase | '_' | _decimal_digit ;
+
+_float_lit : ( _decimals '.' _decimals _exponent )
+			| ( _decimals '.' ( _decimals | _exponent ) )
+          	| ( _decimals _exponent )
+          	| ( '.' _decimals [ _exponent ] ) 
+          	;
+_int_lit     : _decimal_lit | _octal_lit | _hex_lit ;
+_decimal_lit : ( '1' - '9' ) { _decimal_digit } ;
+_octal_lit   : '0' { _octal_digit } ;
+_hex_lit     : '0' ( 'x' | 'X' ) _hex_digit { _hex_digit } ;
+_exponent  : ( 'e' | 'E' ) [ '+' | '-' ] _decimals ;
+_decimals  : _decimal_digit { _decimal_digit } ;
+_decimal_digit : '0' - '9' ;
+_octal_digit : '0' - '7' ;
+_hex_digit : '0' - '9' | 'A' - 'F' | 'a' - 'f';
+
+
+
+/* Syn. Part*/
+
+S : Program;
+
+Program : MainDecl;
+
+MainDecl : Int main lrbrace FormalList rrbrace lcbrace VarDeclSTAR StatementSTAR rcbrace;
+
+Int : int;
+
+ArrayBrackets : lsbrace int_literal rsbrace
+              | dsbrace;
+
+ArrayBracketsSTAR : ArrayBrackets ArrayBracketsSTAR
+                  | "empty"; //epsilon
+
+IdentList : IdentList comma id ArrayBracketsSTAR
+          | id ArrayBracketsSTAR;
+
+DeclList : VarDecl
+         | FuncDecl;
+
+DeclListSTAR : DeclList DeclListSTAR
+             | "empty";
+
+VarDecl : Type IdentList semicolon;
+
+VarDeclSTAR : VarDecl VarDeclSTAR
+            | "empty";
+
+FuncDecl : Type id lrbrace FormalList rrbrace lcbrace VarDeclSTAR StatementSTAR rcbrace;
+
+FormalList : Type id ArrayBracketsSTAR FormalRestSTAR
+            | void
+            | "empty";
+
+FormalRest : comma Type id ArrayBracketsSTAR;
+
+FormalRestSTAR : FormalRest FormalRestSTAR
+               | "empty";
+
+Type : int
+     | float;
+
+Statement : lcbrace StatementSTAR rcbrace
+          | if lrbrace Exp rrbrace Statement else Statement
+          | if lrbrace Exp rrbrace Statement
+          | for lrbrace ExpList semicolon ExpList semicolon ExpList rrbrace Statement
+          | id equal Exp semicolon
+          | id lsbrace Exp rsbrace equal Exp semicolon
+          | return Exp semicolon
+          | return semicolon
+          | id lrbrace ExpList rrbrace semicolon;
+
+StatementSTAR : Statement StatementSTAR
+              | "empty";
+
+Exp : Exp Binop Exp
+    | id equal Exp
+    | id lsbrace Exp rsbrace equal Exp
+    | id lsbrace Exp rsbrace
+    | id lrbrace Exp rrbrace
+    | int_literal
+    | float_literal
+    | id
+    | Unop Exp
+    | lrbrace Exp rrbrace;
+
+ExpList : Exp ExpRestSTAR
+        | "empty";
+
+ExpRest : comma Exp;
+
+ExpRestSTAR : ExpRest ExpRestSTAR
+            | "empty";
+
+Binop : Exp minus Exp
+      | Exp plus Exp;
+
+Unop : not Exp
+     | plus Exp
+     | minus Exp;
