@@ -4,5 +4,7 @@ ToDO
 1. The logic behind providing the "groups" or patterns uses
 paranthesis for identifying the sections to be highlighted, however,
 it does not account for when there is a ?, + or * after the closing brace.
-Fix this!
+Fix this! [FIXED]
 
+2. When the groups list has one item, check if it is not only group 1. It seems to be redundant.
+To fix or not fix? [FIXED]
