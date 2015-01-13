@@ -423,7 +423,7 @@ func main() {
     Processing token definitions
 
     */
-   /* tokendefs := grammarX.LexPart.TokDefs //list of token definitions
+    /*tokendefs := grammarX.LexPart.TokDefs //list of token definitions
     for key,value := range tokendefs{ //the key is the name that appears on the left hand side, value is the right hand side
         
         //creating an object that will convert the token to the appropriate item for the json patterns field
@@ -519,7 +519,7 @@ func main() {
             numberofgroups := groups.Len()
             capturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
 
-            if numberofgroups!=0{
+            if numberofgroups>0 && regp.Groups() !=0 {
                 for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
                     val := listitemX.Value.(string)
                     lastindex := strings.LastIndex(val, "|")
