@@ -30,6 +30,7 @@ import (
     "regexp"
     "strconv"
     "os/exec"
+    "sort"
     "github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre" //(documentation: https://godoc.org/github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre)
 )
 
@@ -64,7 +65,11 @@ Method for retrieving groups to be used
 */
 func getgroups(currentregex string, originalregex string,groupcount int, alternatives []*ast.LexAlt, scopecontainer *list.List) *list.List{
     
-    matched, scope := retrievescopefromcapturegroup(currentregex, false)
+    var matched bool
+    var scope string
+    if currentregex!=originalregex{
+        matched, scope = retrievescopefromcapturegroup(currentregex, false)
+    }
     if matched{
         groupcount+=1
         scopecontainer.PushBack(scope+"|"+strconv.Itoa(groupcount))
@@ -121,7 +126,6 @@ func getgroups(currentregex string, originalregex string,groupcount int, alterna
                                 // if it doesnt, and there is still other braces after the  the closing one -- process the following ones.
                                 // else process the items within the braces. ||
                                 //                                           \/
-                                fmt.Println(biggest, " - count:",groupcount) //debug
                                 matched, scope := retrievescopefromcapturegroup(biggest, true)
                                 if matched{
                                     groupcount+=1
@@ -209,6 +213,10 @@ func reallygetregex(lexterm interface{}) string{
                 return "\\("
             }else if termasstring==")"{
                 return "\\)"
+            }else if termasstring=="{"{
+                return "\\{"
+            }else if termasstring=="}"{
+                return "\\}"
             }
             
             return termasstring
@@ -381,6 +389,21 @@ type CaptureEntryName struct{
     Name string `json:"name,omitempty"`
 }
 
+//implenting sort interface in order to sort Patterns []PatternEntry from JSONSyntax
+//by length of regex
+type patternarraytype []PatternEntry
+
+func (p patternarraytype) Len() int { 
+    return len(p)
+}
+func (p patternarraytype) Swap(i, j int) {
+    p[i], p[j] = p[j], p[i]
+}
+func (p patternarraytype) Less(i, j int) bool { 
+    return len(p[i].Match) < len(p[j].Match) //changed to become more on purpose, the slice that needs to be sorted should be in descdending order
+}
+
+
 func main() {
 	flag.Parse() //parsing commandline flags
 
@@ -482,7 +505,8 @@ func main() {
 	}else{
         //genating patterns since uuid has been successfully generated
 
-        patternarray := make([]PatternEntry,1)
+        //patternarray := make([]PatternEntry,1)
+        patternarray := make(patternarraytype,1)
         //0. Generate repository field from bnf file
         for listitem := repoitems.Front(); listitem != nil; listitem = listitem.Next() {
             listitemwithtype := listitem.Value.(*repository.Repoitem)
@@ -490,7 +514,8 @@ func main() {
             alternatives := repository.GetRighthandside(listitemwithtype).Alternatives
             
             regex := constructregexandfillgroups(alternatives) //we are extracting the regex for the 
-
+            regex = fmt.Sprintf("^%v$",regex)// debug: trying to make sure that we match whole word    
+            
             //testing if regex is okay
             regp, compileerr := pcre.Compile(regex,0)
             if compileerr!=nil{
@@ -503,14 +528,8 @@ func main() {
                 repository.Setregex(listitemwithtype, regex)
             }
             
-            fmt.Println("---processing---")
             //getting groups
             groups := getgroups(regex , regex ,0, alternatives, list.New().Init())
-            fmt.Println("--->")
-            fmt.Println(alternatives)
-            fmt.Println(regex) //debug
-            fmt.Println(regp.Groups()) //debug
-            fmt.Println()
 
             //In the following lines, I am creating the "patterns" field for the json string declared above.
             //the final string will create the json file which will further be converted to plist. In particular,
@@ -536,6 +555,7 @@ func main() {
             patternarray = append(patternarray, patternentry)
         }
         
+        sort.Sort(patternarray)
 		//result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, repositoryfield, u)
         jsonsyntaxobj := JSONSyntax{Name:*name, ScopeName:*scope, FileTypes:strings.Split(*fileTypes,","), Patterns:patternarray, Uuid:u.String()}
         jsonsyntaxobj_result, err := json.MarshalIndent(jsonsyntaxobj,"", "  ")
