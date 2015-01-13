@@ -8,3 +8,7 @@ Fix this! [FIXED]
 
 2. When the groups list has one item, check if it is not only group 1. It seems to be redundant.
 To fix or not fix? [FIXED]
+
+3. Investigate whether sublime text priorritizes matching using position on the plist.
+
+4. Escape all pcre special characters
