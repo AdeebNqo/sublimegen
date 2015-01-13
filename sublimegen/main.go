@@ -82,6 +82,15 @@ func getgroups(currentregex string, originalregex string,groupcount int, alterna
                             if innerindex!=0 || string(currentregex[innerindex-1])!="\\"{
                                 count-=1
                                 stack.Push(currcharacter2)
+                                
+                                //checking if following character is a *, + or ?
+                                if innerindex+1 < len(currentregex){
+                                    charafterrbrace := string(currentregex[innerindex+1])
+                                    if charafterrbrace=="*" || charafterrbrace=="+" || charafterrbrace=="?"{
+                                        innerindex+=1;
+                                        stack.Push(charafterrbrace)
+                                    }
+                                }
                             }
                         }else if currcharacter2=="("{
                             if innerindex==0 || string(currentregex[innerindex-1])!="\\"{
@@ -488,6 +497,8 @@ func main() {
             fmt.Println("---processing---")
             //getting groups
             groups := getgroups(regex , regex ,0, alternatives, list.New().Init())
+            fmt.Println("--->")
+            fmt.Println(alternatives)
             fmt.Println(regex) //debug
             fmt.Println(regp.Groups()) //debug
             fmt.Println()
