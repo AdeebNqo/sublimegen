@@ -104,7 +104,7 @@ func getgroups(currentregex string, originalregex string,groupcount int, alterna
                             // if it doesnt, and there is still other braces after the  the closing one -- process the following ones.
                             // else process the items within the braces. ||
                             //                                           \/
-                            fmt.Println(biggest) //debug
+                            fmt.Println(biggest, " - count:",groupcount) //debug
                             matched, scope := retrievescopefromcapturegroup(biggest)
                             if matched{
                                 groupcount+=1
@@ -487,7 +487,7 @@ func main() {
             
             fmt.Println("---processing---")
             //getting groups
-            groups := getgroups(regex , regex ,regp.Groups(), alternatives, list.New().Init())
+            groups := getgroups(regex , regex ,0, alternatives, list.New().Init())
             fmt.Println(regex) //debug
             fmt.Println(regp.Groups()) //debug
             fmt.Println()
@@ -496,15 +496,18 @@ func main() {
             //the final string will create the json file which will further be converted to plist. In particular,
             // I am creating the items (match and name, alongside the neccessary groups) which will be contained in "patterns" array.
 
-            captureindex := 1
             numberofgroups := groups.Len()
             capturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
 
             if numberofgroups!=0{
                 for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
                     val := listitemX.Value.(string)
-                    capturesmap[strconv.Itoa(captureindex)] = CaptureEntryName{Name:val}
-                    captureindex += 1
+                    lastindex := strings.LastIndex(val, "|")
+                    if lastindex > -1 {
+                        scopename := val[0:lastindex]
+                        scopenumber := val[lastindex+1:len(val)]
+                        capturesmap[scopenumber] = CaptureEntryName{Name:scopename}
+                    }
                 }
             }
             
