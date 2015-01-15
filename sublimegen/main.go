@@ -325,8 +325,8 @@ func reallygetregex(lexterm interface{}) string{
             return retval
         }
         case *ast.LexDot:{
-            //return "."
-            return "[\\S\\s]"
+            return "."
+            //return "[\\S\\s]"
         }
         case *ast.LexRegDefId:{
             term := lexterm.(*ast.LexRegDefId)
@@ -567,7 +567,26 @@ func main() {
             numberofgroups := groups.Len()
             capturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
 
-            if numberofgroups>0 && regp.Groups() !=0 {
+            donotskip := true //variable to be used to skip the groups --- kinda a "hack"
+            skippingscope := repository.GetScope(listitemwithtype)
+            skippingfront := groups.Front()
+            
+            
+            if numberofgroups==1{
+                if skippingfront==nil || skippingscope==defaultscope{
+                    donotskip = false
+                }
+                skippingfrontvalue := skippingfront.Value.(string)
+                skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
+                fmt.Println("skippingtruefrontvalue:", skippingtruefrontvalue)
+                fmt.Println("skippingscope:",skippingscope)
+                fmt.Println(skippingtruefrontvalue==skippingscope)
+                donotskip = !(skippingtruefrontvalue==skippingscope)
+            }
+            fmt.Println(capturesmap)
+            //adding items to "captures"
+            if numberofgroups>0 && regp.Groups() !=0 && donotskip {
+                fmt.Println("inside if")
                 for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
                     val := listitemX.Value.(string)
                     lastindex := strings.LastIndex(val, "|")
@@ -581,11 +600,11 @@ func main() {
             
             //creating pattern entry
             
-            if strings.Contains(regex,"[\\S\\s]"){
-                regex = fmt.Sprintf("^%v",regex)
-            }else{
-                regex = fmt.Sprintf("^%v$",regex)
-            }
+            //if strings.Contains(regex,"[\\S\\s]"){
+            //    regex = fmt.Sprintf("^%v",regex)
+            //}else{
+            regex = fmt.Sprintf("^%v$",regex)
+            //}
             patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
             patternarray = append(patternarray, patternentry)
         }
