@@ -420,7 +420,7 @@ func (p patternarraytype) Swap(i, j int) {
     p[i], p[j] = p[j], p[i]
 }
 func (p patternarraytype) Less(i, j int) bool { 
-    return len(p[i].Match) < len(p[j].Match) //changed to become more on purpose, the slice that needs to be sorted should be in descdending order
+    return len(p[i].Match) > len(p[j].Match) //changed to become more on purpose, the slice that needs to be sorted should be in descdending order
 }
 
 
@@ -603,7 +603,7 @@ func main() {
             //if strings.Contains(regex,"[\\S\\s]"){
             //    regex = fmt.Sprintf("^%v",regex)
             //}else{
-            regex = fmt.Sprintf("^%v$",regex)
+            //regex = fmt.Sprintf("^%v$",regex)
             //}
             patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
             patternarray = append(patternarray, patternentry)
