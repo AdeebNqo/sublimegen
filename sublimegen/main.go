@@ -92,6 +92,7 @@ func getgroups(currentregex string, originalregex string,groupcount int, alterna
                 currcharacter := string(currentregex[pos])
                 if currcharacter=="(" {
                     if pos==0 || string(currentregex[pos-1])!="\\"{
+                        
                         //found starting brace
                         count+=1
                         stack.Push(currcharacter)
