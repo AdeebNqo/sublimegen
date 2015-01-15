@@ -1,0 +1,74 @@
+{
+    "_lineComment":"comment.line.walt",
+    "_blockComment":"comment.block.walt",
+    "_comment":"comment.block.walt",
+    "_decimal_digit":"constant.numeric.walt",
+    "_octal_digit":"constant.numeric.walt",
+    "_hex_digit":"constant.numeric.walt",
+    "_int_lit":"constant.numeric.walt",
+    "_decimal_lit":"constant.numeric.walt",
+    "_octal_lit":"constant.numeric.walt",
+    "_hex_lit":"constant.numeric.walt",
+    
+    "_singed_int_lit":"constant.numeric.walt",
+    
+    "int64_lit":"constant.numeric.walt",
+    "int32_lit":"constant.numeric.walt",
+    "uint64_lit":"constant.numeric.walt",
+    "uint32_lit":"constant.numeric.walt",
+    
+    "_decimals":"constant.numeric.walt",
+    "_exponent":"constant.numeric.walt",
+    
+    "_float_lit":"constant.numeric.walt",
+    
+    "double_lit":"constant.numeric.walt",
+    
+    "float_lit":"constant.numeric.walt",
+    
+    "_upcase":"constant.character.walt",
+    "_lowcase":"constant.character.walt",
+    "_id_char":"constant.character.walt",
+    
+    "_id":"string.quoted.double.walt",
+    "id":"string.quoted.double.walt",
+    
+    "_double":"keyword.walt",
+    "_float":"keyword.walt",
+    "_int64":"keyword.walt",
+    "_uint64":"keyword.walt",
+    "_int32":"keyword.walt",
+    "_uint32":"keyword.walt",
+    "_bytes":"keyword.walt",
+    "_string":"keyword.walt",
+    "_bool":"keyword.walt",
+    
+    "_qualid":"variable.language.walt",
+    
+    "double_var":"variable.other.walt",
+    "float_var":"variable.other.walt",
+    "int64_var":"variable.other.walt",
+    "uint64_var":"variable.other.walt",
+    "int32_var":"variable.other.walt",
+    "uint32_var":"variable.other.walt",
+    "bytes_var":"variable.other.walt",
+    "string_var":"variable.other.walt",
+    "bool_var":"variable.other.walt",
+    
+    "_big_u_value":"constant.numeric.walt",
+    "_little_u_value":"constant.numeric.walt",
+    "_hex_byte_u_value":"constant.numeric.walt",
+    
+    "_octal_byte_u_value":"constant.numeric.walt",
+    "_byte_value":"constant.numeric.walt",
+    "_raw_string":"string.interpolated.walt",
+    "_escaped_char":"constant.character.escape.walt",
+    "_unicode_value":"constant.numeric.walt",
+    "_interpreted_string":"string.quoted.double.walt",
+    
+    "_char_lit":"constant.character.walt",
+    
+    "_byte_elem":"constant.numeric.walt",
+    
+    "bytes_lit":"constant.numeric.walt"
+}

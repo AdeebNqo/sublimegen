@@ -1,0 +1,29 @@
+{
+
+    "int":"keyword.lang",
+    "main":"keyword.lang",
+    "int_literal": "constant.numeric.lang",
+    "id":"string.quoted.double.lang",
+    "void":"keyword.lang",
+    "float":"keyword.lang",
+    "if":"keyword.lang",
+    "else":"keyword.lang",
+    "for":"keyword.lang",
+    "return":"keyword.lang",
+    "float_literal":"constant.numeric.lang",
+    
+    "_id":"string.quoted.double.lang",
+    "_upcase":"constant.character.lang",
+    "_lowcase":"constant.character.lang",
+    "_id_char":"constant.character.lang",
+    "_float_lit":"constant.numeric.lang",
+    "_int_lit":"constant.numeric.lang",
+    "_decimal_lit":"constant.numeric.lang",
+    "_octal_lit":"constant.numeric.lang",
+    "_hex_lit":"constant.numeric.lang",
+    "_exponent":"constant.numeric.lang",
+    "_decimals":"constant.numeric.lang",
+    "_decimal_digit":"constant.numeric.lang",
+    "_octal_digit":"constant.numeric.lang",
+    "_hex_digit":"constant.numeric.lang"
+}
