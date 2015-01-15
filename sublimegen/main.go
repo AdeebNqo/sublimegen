@@ -40,7 +40,7 @@ var fileTypes = flag.String("fileTypes", "default", "Comma seperated list of fil
 var source = flag.String("source","defaultinput", "the bnf file for the language you want to highlight.")
 
 var repoitems *list.List
-
+var defaultscope string
 
 /*
 
@@ -52,7 +52,12 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
     }
     for ritem := repoitems.Front(); ritem !=nil; ritem = ritem.Next(){
         if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex{
-            return true, repository.GetScope(ritem.Value.(*repository.Repoitem))
+            tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
+            fmt.Println("name:",repository.GetRealname(ritem.Value.(*repository.Repoitem)), ",scope:",tmpscope)
+            if tmpscope!=defaultscope{
+                fmt.Println("matched!")
+                return true,tmpscope
+            }
         }
     }
     return false, ""
@@ -63,18 +68,21 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
 Method for retrieving groups to be used
 
 */
-func getgroups(currentregex string, originalregex string,groupcount int, alternatives []*ast.LexAlt, scopecontainer *list.List) *list.List{
+func getgroups(currentregex string, originalregex string,groupcount int, alternatives []*ast.LexAlt, scopecontainer *list.List, nextlayer *list.List) (*list.List, *list.List){
     
     var matched bool
     var scope string
-    if currentregex!=originalregex{
-        matched, scope = retrievescopefromcapturegroup(currentregex, false)
-    }
+    
+    //if currentregex==originalregex{
+    matched, scope = retrievescopefromcapturegroup(currentregex, false)
+    //}
     if matched{
+        
         groupcount+=1
         scopecontainer.PushBack(scope+"|"+strconv.Itoa(groupcount))
+        return scopecontainer, nextlayer
     }else{
-
+        
         count := 0
         regexlength := len(currentregex)
         stack := Stack{}
@@ -126,26 +134,36 @@ func getgroups(currentregex string, originalregex string,groupcount int, alterna
                                 // if it doesnt, and there is still other braces after the  the closing one -- process the following ones.
                                 // else process the items within the braces. ||
                                 //                                           \/
+                                fmt.Println(biggest, groupcount)
                                 matched, scope := retrievescopefromcapturegroup(biggest, true)
                                 if matched{
                                     groupcount+=1
                                     scopecontainer.PushBack(scope+"|"+strconv.Itoa(groupcount))
                                 }
-                                if (len(biggest) < regexlength) {
-                                    scopecontainer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, alternatives, scopecontainer)
-                                }
                                 if !matched{
                                     groupcount +=1
-                                    scopecontainer = getgroups(originalregex ,  biggest[1:len(biggest)-1],groupcount, alternatives, scopecontainer)
+                                    //scopecontainer = getgroups(biggest[1:len(biggest)-1], originalregex ,groupcount, alternatives, scopecontainer)
+                                    nextlayer.PushFront(biggest)
+                                }
+                                if (len(biggest) < regexlength) {
+                                    scopecontainer,nextlayer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, alternatives, scopecontainer, nextlayer)
+                                }
+                                if nextlayer.Len()!=0{
+                                    for it := nextlayer.Back(); it !=nil; it = it.Prev(){
+                                        nextlayer.Remove(it)
+                                        itvalue := it.Value.(string)
+                                        scopecontainer,nextlayer = getgroups(itvalue[1:len(itvalue)-1], originalregex, groupcount, alternatives, scopecontainer, nextlayer)
+                                    }
                                 }
                                 break STARTBRACE
                             }
                         }
+                        break
                     }
                 }
             }
     }
-    return scopecontainer
+    return scopecontainer, nextlayer
 }
 
 /*
@@ -306,7 +324,8 @@ func reallygetregex(lexterm interface{}) string{
             return retval
         }
         case *ast.LexDot:{
-            return "."
+            //return "."
+            return "[\\S\\s]"
         }
         case *ast.LexRegDefId:{
             term := lexterm.(*ast.LexRegDefId)
@@ -423,7 +442,7 @@ func main() {
 	}
 
     //loading tokens and scopes
-    defaultscope := fmt.Sprintf("source.%v",*fileTypes) //default scope
+    defaultscope = fmt.Sprintf("source.%v",*fileTypes) //default scope
     type config map[string]string
     var data config
     file, _ := ioutil.ReadFile("scopes.json")
@@ -513,8 +532,7 @@ func main() {
 
             alternatives := repository.GetRighthandside(listitemwithtype).Alternatives
             
-            regex := constructregexandfillgroups(alternatives) //we are extracting the regex for the 
-            regex = fmt.Sprintf("^%v$",regex)// debug: trying to make sure that we match whole word    
+            regex := constructregexandfillgroups(alternatives) //we are extracting the regex for the  
             
             //testing if regex is okay
             regp, compileerr := pcre.Compile(regex,0)
@@ -528,8 +546,18 @@ func main() {
                 repository.Setregex(listitemwithtype, regex)
             }
             
+                        //debug
+            fmt.Println("----------------")
+            fmt.Println(alternatives)
+            fmt.Println(regex)
+            fmt.Println("----------------")         
+
             //getting groups
-            groups := getgroups(regex , regex ,0, alternatives, list.New().Init())
+            groups,_ := getgroups(regex , regex ,0, alternatives, list.New().Init(), list.New().Init())
+            //if nextlayer.Len()!=0{
+                //getgroups(, 0, alternatives, groups, nextlayer)
+            //}
+            fmt.Println() //debug
 
             //In the following lines, I am creating the "patterns" field for the json string declared above.
             //the final string will create the json file which will further be converted to plist. In particular,
@@ -551,6 +579,12 @@ func main() {
             }
             
             //creating pattern entry
+            
+            if strings.Contains(regex,"[\\S\\s]"){
+                regex = fmt.Sprintf("^%v",regex)
+            }else{
+                regex = fmt.Sprintf("^%v$",regex)
+            }
             patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
             patternarray = append(patternarray, patternentry)
         }
