@@ -46,7 +46,6 @@ var defaultscope string
 func determinebeginandend(someregex string) (bool, string, string){
     var begin string
     var end string
-    fmt.Println(someregex)
     for index, somechar := range someregex{
         //we possibly found the middle part
         if somechar=='('{
@@ -57,7 +56,6 @@ func determinebeginandend(someregex string) (bool, string, string){
                 //collecting the middle part
                 for innerindex,innersomechar := range slice{
                     if innersomechar==')'{
-                        fmt.Println("starting end")
                         possibleend := someregex[index+innerindex+1:]
                         if len(possibleend)==0{
                             return false,"",""
@@ -113,7 +111,7 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
 Method for retrieving groups to be used
 
 */
-func getgroups(currentregex string, originalregex string,groupcount int, alternatives []*ast.LexAlt, scopecontainer *list.List, nextlayer *list.List) (*list.List, *list.List){
+func getgroups(currentregex string, originalregex string,groupcount int, scopecontainer *list.List, nextlayer *list.List) (*list.List, *list.List){
     
     var matched bool
     var scope string
@@ -192,13 +190,13 @@ func getgroups(currentregex string, originalregex string,groupcount int, alterna
                                     nextlayer.PushFront(biggest)
                                 }
                                 if (len(biggest) < regexlength) {
-                                    scopecontainer,nextlayer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, alternatives, scopecontainer, nextlayer)
+                                    scopecontainer,nextlayer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, scopecontainer, nextlayer)
                                 }
                                 if nextlayer.Len()!=0{
                                     for it := nextlayer.Back(); it !=nil; it = it.Prev(){
                                         nextlayer.Remove(it)
                                         itvalue := it.Value.(string)
-                                        scopecontainer,nextlayer = getgroups(itvalue[1:len(itvalue)-1], originalregex, groupcount, alternatives, scopecontainer, nextlayer)
+                                        scopecontainer,nextlayer = getgroups(itvalue[1:len(itvalue)-1], originalregex, groupcount, scopecontainer, nextlayer)
                                     }
                                 }
                                 break STARTBRACE
@@ -468,7 +466,7 @@ func (p patternarraytype) Swap(i, j int) {
     p[i], p[j] = p[j], p[i]
 }
 func (p patternarraytype) Less(i, j int) bool { 
-    return len(p[i].Match) > len(p[j].Match) //changed to become more on purpose, the slice that needs to be sorted should be in descdending order
+    return len(p[i].Match) < len(p[j].Match) //changed to become more on purpose, the slice that needs to be sorted should be in descdending order
 }
 
 
@@ -604,7 +602,7 @@ func main() {
                 patternarray = append(patternarray, patternentry)
             }else{
                 //getting groups
-                groups,_ := getgroups(regex , regex ,0, alternatives, list.New().Init(), list.New().Init())
+                groups,_ := getgroups(regex , regex ,0, list.New().Init(), list.New().Init())
 
                 //In the following lines, I am creating the "patterns" field for the json string declared above.
                 //the final string will create the json file which will further be converted to plist. In particular,
