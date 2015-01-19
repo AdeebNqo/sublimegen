@@ -1,6 +1,3 @@
-VasTech Internship
-====================
-
 sublimegen
 ---------------
 
