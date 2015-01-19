@@ -19,5 +19,5 @@ dependecies
 additional
 ---------------
 
-The python scripts are used for testing. The tool does not depend on them.
+The python scripts (generate-*.py) are used for testing. The tool does not depend on them.
 They depend on xeger (found in rstr, https://pypi.python.org/pypi/rstr/2.1.2).
