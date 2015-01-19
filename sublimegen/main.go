@@ -587,7 +587,7 @@ func main() {
             regp, compileerr := pcre.Compile(regex,0)
             if compileerr!=nil{
                 fmt.Println("err:",compileerr) //debug
-                fmt.Println() //debug
+                break
             }
             
             //setting regex
