@@ -42,6 +42,51 @@ var source = flag.String("source","defaultinput", "the bnf file for the language
 var repoitems *list.List
 var defaultscope string
 
+
+func determinebeginandend(someregex string) (bool, string, string){
+    var begin string
+    var end string
+    fmt.Println(someregex)
+    for index, somechar := range someregex{
+        //we possibly found the middle part
+        if somechar=='('{
+            slice := someregex[index:]
+            if len(slice)==0{
+                return false, "", ""
+            }else{
+                //collecting the middle part
+                for innerindex,innersomechar := range slice{
+                    if innersomechar==')'{
+                        fmt.Println("starting end")
+                        possibleend := someregex[index+innerindex+1:]
+                        if len(possibleend)==0{
+                            return false,"",""
+                        }else{
+                            if possibleend[0]=='?' || possibleend[0]=='+' || possibleend[0]=='*'{
+                                possibleend = possibleend[1:]
+                            }
+                            //collecting end part
+                            for _, endchar := range possibleend{
+                                if endchar=='(' || endchar==')'{
+                                    return false,"",""
+                                }
+                                end += string(endchar)
+                            }
+                        }
+                    }
+                    //else we throw away the middle chars
+                }
+            }
+            break
+        }
+        //appending to the begin char
+        begin += string(somechar)
+    }
+    if len(end)==0 || len(begin)==0{
+        return false,"",""
+    }
+    return true, begin, end
+}
 /*
 
 Inefficient method for retrieving scope of regex
@@ -53,9 +98,9 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
     for ritem := repoitems.Front(); ritem !=nil; ritem = ritem.Next(){
         if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex{
             tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
-            fmt.Println("name:",repository.GetRealname(ritem.Value.(*repository.Repoitem)), ",scope:",tmpscope)
+            //fmt.Println("name:",repository.GetRealname(ritem.Value.(*repository.Repoitem)), ",scope:",tmpscope)
             if tmpscope!=defaultscope{
-                fmt.Println("matched!")
+                //fmt.Println("matched!")
                 return true,tmpscope
             }
         }
@@ -135,7 +180,7 @@ func getgroups(currentregex string, originalregex string,groupcount int, alterna
                                 // if it doesnt, and there is still other braces after the  the closing one -- process the following ones.
                                 // else process the items within the braces. ||
                                 //                                           \/
-                                fmt.Println(biggest, groupcount)
+                                //fmt.Println(biggest, groupcount)
                                 matched, scope := retrievescopefromcapturegroup(biggest, true)
                                 if matched{
                                     groupcount+=1
@@ -326,7 +371,7 @@ func reallygetregex(lexterm interface{}) string{
         }
         case *ast.LexDot:{
             return "."
-            //return "[\\S\\s]"
+            //return "((.|\\s)*)" //debug
         }
         case *ast.LexRegDefId:{
             term := lexterm.(*ast.LexRegDefId)
@@ -346,7 +391,8 @@ func reallygetregex(lexterm interface{}) string{
                             retval += getregex(lexalt)
                         }
                         repository.Setregex(rval,retval)
-                        return retval
+                        //return retval
+                        return fmt.Sprintf("(%s)",retval) //debug
                         
                     }else{
                         return "("+repository.Getregex(rval)+")"
@@ -402,6 +448,8 @@ type JSONSyntax struct{
 }
 type PatternEntry struct{
     Match string `json:"match,omitempty"`
+    Begin string `json:"begin,omitempty"`
+    End string `json:"end,omitempty"`
     Name string `json:"name,omitempty"`
     Captures map[string]CaptureEntryName `json:"captures,omitempty"`
 }
@@ -547,70 +595,61 @@ func main() {
                 repository.Setregex(listitemwithtype, regex)
             }
             
-                        //debug
-            fmt.Println("----------------")
-            fmt.Println(alternatives)
-            fmt.Println(regex)
-            fmt.Println("----------------")         
-
-            //getting groups
-            groups,_ := getgroups(regex , regex ,0, alternatives, list.New().Init(), list.New().Init())
-            //if nextlayer.Len()!=0{
-                //getgroups(, 0, alternatives, groups, nextlayer)
-            //}
-            fmt.Println() //debug
-
-            //In the following lines, I am creating the "patterns" field for the json string declared above.
-            //the final string will create the json file which will further be converted to plist. In particular,
-            // I am creating the items (match and name, alongside the neccessary groups) which will be contained in "patterns" array.
-
-            numberofgroups := groups.Len()
-            capturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
-
-            donotskip := true //variable to be used to skip the groups --- kinda a "hack"
-            skippingscope := repository.GetScope(listitemwithtype)
-            skippingfront := groups.Front()
+            //determining if one should use begin and end
+            usebeginandend, begin, end:= determinebeginandend(regex)
             
-            
-            if numberofgroups==1{
-                if skippingfront==nil || skippingscope==defaultscope{
-                    donotskip = false
+            if usebeginandend{
+                //creating pattern entry
+                patternentry := PatternEntry{Begin:begin, End:end,Name:repository.GetScope(listitemwithtype)}
+                patternarray = append(patternarray, patternentry)
+            }else{
+                //getting groups
+                groups,_ := getgroups(regex , regex ,0, alternatives, list.New().Init(), list.New().Init())
+
+                //In the following lines, I am creating the "patterns" field for the json string declared above.
+                //the final string will create the json file which will further be converted to plist. In particular,
+                // I am creating the items (match and name, alongside the neccessary groups) which will be contained in "patterns" array.
+
+                numberofgroups := groups.Len()
+                capturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
+
+                donotskip := true //variable to be used to skip the groups --- kinda a "hack"
+                skippingscope := repository.GetScope(listitemwithtype)
+                skippingfront := groups.Front()
+
+
+                if numberofgroups==1{
+                    if skippingfront==nil || skippingscope==defaultscope{
+                        donotskip = false
+                    }
+                    skippingfrontvalue := skippingfront.Value.(string)
+                    skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
+                    donotskip = !(skippingtruefrontvalue==skippingscope)
                 }
-                skippingfrontvalue := skippingfront.Value.(string)
-                skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
-                fmt.Println("skippingtruefrontvalue:", skippingtruefrontvalue)
-                fmt.Println("skippingscope:",skippingscope)
-                fmt.Println(skippingtruefrontvalue==skippingscope)
-                donotskip = !(skippingtruefrontvalue==skippingscope)
-            }
-            fmt.Println(capturesmap)
-            //adding items to "captures"
-            if numberofgroups>0 && regp.Groups() !=0 && donotskip {
-                fmt.Println("inside if")
-                for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
-                    val := listitemX.Value.(string)
-                    lastindex := strings.LastIndex(val, "|")
-                    if lastindex > -1 {
-                        scopename := val[0:lastindex]
-                        scopenumber := val[lastindex+1:len(val)]
-                        capturesmap[scopenumber] = CaptureEntryName{Name:scopename}
+
+                //adding items to "captures"
+                if numberofgroups>0 && regp.Groups() !=0 && donotskip {
+                    for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
+                        val := listitemX.Value.(string)
+                        lastindex := strings.LastIndex(val, "|")
+                        if lastindex > -1 {
+                            scopename := val[0:lastindex]
+                            scopenumber := val[lastindex+1:len(val)]
+                            capturesmap[scopenumber] = CaptureEntryName{Name:scopename}
+                        }
                     }
                 }
+
+                //creating pattern entry
+                patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
+                patternarray = append(patternarray, patternentry)
             }
-            
-            //creating pattern entry
-            
-            //if strings.Contains(regex,"[\\S\\s]"){
-            //    regex = fmt.Sprintf("^%v",regex)
-            //}else{
-            //regex = fmt.Sprintf("^%v$",regex)
-            //}
-            patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
-            patternarray = append(patternarray, patternentry)
         }
         
+        //sorting regexes
         sort.Sort(patternarray)
-		//result := fmt.Sprintf(jsonhighlight, *name, *scope, *fileTypes, repositoryfield, u)
+        
+        //marshaling output into proper json
         jsonsyntaxobj := JSONSyntax{Name:*name, ScopeName:*scope, FileTypes:strings.Split(*fileTypes,","), Patterns:patternarray, Uuid:u.String()}
         jsonsyntaxobj_result, err := json.MarshalIndent(jsonsyntaxobj,"", "  ")
         if err!=nil{
@@ -636,22 +675,26 @@ func main() {
         if _, err := os.Stat(*name); err != nil {
             if os.IsNotExist(err) {
                         directoryexists = false
-                    }
+            }
         }
+        //removing old directory with the same name
         if directoryexists{
             err := os.RemoveAll(*name)
             if err!=nil{
                 fmt.Println("(Error)Cannot remove old directory")
                 fmt.Println("(Reason):",err)
+                os.Exit(1)
             }
         }
         
+        //creating folder for syntax highlighting files
         err0 := os.Mkdir(*name, 0775)
         if err0!=nil{
             fmt.Println("(Error): Could not create folder for storing generated files")
             fmt.Println("(Reason):", err0)
             os.Exit(1)
         }
+        //moving files into created folder
         err1 := os.Rename(fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v/%v.tmLanguage.json", *name, *name))
         err2 := os.Rename(fmt.Sprintf("%v.tmLanguage", *name), fmt.Sprintf("%v/%v.tmLanguage", *name, *name))
         if err1!=nil || err2!=nil {
