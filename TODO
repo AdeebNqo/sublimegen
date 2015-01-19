@@ -20,3 +20,7 @@ To fix or not fix? [FIXED]
 7. Remove alternatives as argument in getgroups function.[DONE]
 
 8. Order regexes properly
+
+9. Organize code -- make it look cleaner
+
+10. Write unit tests
