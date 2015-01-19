@@ -11,6 +11,8 @@ To fix or not fix? [FIXED]
 
 3. Investigate whether sublime text priorritizes matching using position on the plist. [DONE]
 
-4. Escape all pcre special characters
+4. Escape all pcre special characters[DONE]
 
-5. Handle multiline regex
+5. Handle multiline regex[DONE]
+
+6. Handle multiline when the middle part is to be highlighted differently
