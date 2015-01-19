@@ -446,8 +446,13 @@ type JSONSyntax struct{
 }
 type PatternEntry struct{
     Match string `json:"match,omitempty"`
+    
     Begin string `json:"begin,omitempty"`
+    BeginCaptures map[string]CaptureEntryName `json:"beginCaptures,omitempty"`
+    
     End string `json:"end,omitempty"`
+    EndCaptures map[string]CaptureEntryName `json:"endCaptures,omitempty"`
+    
     Name string `json:"name,omitempty"`
     Captures map[string]CaptureEntryName `json:"captures,omitempty"`
 }
@@ -584,7 +589,8 @@ func main() {
             //testing if regex is okay
             regp, compileerr := pcre.Compile(regex,0)
             if compileerr!=nil{
-                fmt.Println("err:",compileerr) //debug
+                //regex is compatile so skip it.
+                fmt.Println("err:",compileerr)
                 break
             }
             
@@ -597,8 +603,71 @@ func main() {
             usebeginandend, begin, end:= determinebeginandend(regex)
             
             if usebeginandend{
+                
+                
+                //sorting out captures for begin regex
+                groups,_ := getgroups(begin , begin ,0, list.New().Init(), list.New().Init())
+                numberofgroups := groups.Len()
+                begincapturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
+
+                donotskip := true //variable to be used to skip the groups --- kinda a "hack"
+                skippingscope := repository.GetScope(listitemwithtype)
+                skippingfront := groups.Front()
+
+                if numberofgroups==1{
+                    if skippingfront==nil || skippingscope==defaultscope{
+                        donotskip = false
+                    }
+                    skippingfrontvalue := skippingfront.Value.(string)
+                    skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
+                    donotskip = !(skippingtruefrontvalue==skippingscope)
+                }
+                //adding items to "begincaptures"
+                if numberofgroups>0 && regp.Groups() !=0 && donotskip {
+                    for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
+                        val := listitemX.Value.(string)
+                        lastindex := strings.LastIndex(val, "|")
+                        if lastindex > -1 {
+                            scopename := val[0:lastindex]
+                            scopenumber := val[lastindex+1:len(val)]
+                            begincapturesmap[scopenumber] = CaptureEntryName{Name:scopename}
+                        }
+                    }
+                }
+                
+                
+                //sorting out captures for end regex
+                groups,_ = getgroups(end , end ,0, list.New().Init(), list.New().Init())
+                numberofgroups = groups.Len()
+                endcapturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
+
+                donotskip = true //variable to be used to skip the groups --- kinda a "hack"
+                skippingscope = repository.GetScope(listitemwithtype)
+                skippingfront = groups.Front()
+
+                if numberofgroups==1{
+                    if skippingfront==nil || skippingscope==defaultscope{
+                        donotskip = false
+                    }
+                    skippingfrontvalue := skippingfront.Value.(string)
+                    skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
+                    donotskip = !(skippingtruefrontvalue==skippingscope)
+                }
+                //adding items to "begincaptures"
+                if numberofgroups>0 && regp.Groups() !=0 && donotskip {
+                    for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next(){
+                        val := listitemX.Value.(string)
+                        lastindex := strings.LastIndex(val, "|")
+                        if lastindex > -1 {
+                            scopename := val[0:lastindex]
+                            scopenumber := val[lastindex+1:len(val)]
+                            endcapturesmap[scopenumber] = CaptureEntryName{Name:scopename}
+                        }
+                    }
+                }
+                
                 //creating pattern entry
-                patternentry := PatternEntry{Begin:begin, End:end,Name:repository.GetScope(listitemwithtype)}
+                patternentry := PatternEntry{Begin:begin, End:end,Name:repository.GetScope(listitemwithtype), EndCaptures:endcapturesmap}
                 patternarray = append(patternarray, patternentry)
             }else{
                 //getting groups
