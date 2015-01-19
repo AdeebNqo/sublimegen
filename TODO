@@ -18,3 +18,5 @@ To fix or not fix? [FIXED]
 6. Handle multiline when the middle part is to be highlighted differently
 
 7. Remove alternatives as argument in getgroups function.[DONE]
+
+8. Order regexes properly
