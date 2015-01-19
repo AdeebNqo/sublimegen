@@ -15,7 +15,7 @@ To fix or not fix? [FIXED]
 
 5. Handle multiline regex[DONE]
 
-6. Handle multiline when the middle part is to be highlighted differently
+6. Handle multiline when the middle part is to be highlighted differently[DONE]
 
 7. Remove alternatives as argument in getgroups function.[DONE]
 
