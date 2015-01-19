@@ -1,3 +1,11 @@
+#
+# Copyright 2015 Zola Mahlaza <adeebnqo@gmail.com>
+# 19 January 2015
+#
+# This is a simple script for generating strings
+# which the regex provided as a string. It's manily
+# used for testing.
+
 import rstr
 import traceback
 

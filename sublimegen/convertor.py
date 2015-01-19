@@ -1,3 +1,10 @@
+#
+# Copyright 2015 Zola Mahlaza <adeebnqo@gmail.com>
+# 19 January 2015
+#
+# This is a script for converting from json to the plist format
+#
+
 import json
 import plistlib
 import sys

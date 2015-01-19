@@ -1,3 +1,14 @@
+/*
+
+Copyright 2015 Zola Mahlaza <adeebnqo@gmail.com>
+19 January 2014
+
+This is a repository for all the items which will
+fall into the patterns field in the syntax highlighting
+file.
+
+*/
+
 package repository
 
 import (

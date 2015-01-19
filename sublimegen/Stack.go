@@ -1,3 +1,11 @@
+/*
+
+Credits:
+Douglas Hall (bemasher)
+https://gist.github.com/bemasher/1777766
+
+*/
+
 package main
 
 type Stack struct {
