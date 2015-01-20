@@ -30,7 +30,7 @@ import (
     "regexp"
     "strconv"
     "os/exec"
-    //"sort"
+    "sort"
     "github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre" //(documentation: https://godoc.org/github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre)
 )
 
@@ -471,15 +471,40 @@ type CaptureEntryName struct{
 //by length of regex
 type patternarraytype []PatternEntry
 
-/*func (p patternarraytype) Len() int { 
+func (p patternarraytype) Len() int { 
     return len(p)
 }
 func (p patternarraytype) Swap(i, j int) {
     p[i], p[j] = p[j], p[i]
 }
 func (p patternarraytype) Less(i, j int) bool { 
-    return len(p[i].Match) < len(p[j].Match) //changed to become more on purpose, the slice that needs to be sorted should be in descdending order
-}*/
+    
+    if p[i].Match=="" || p[j].Match==""{
+        return len(p[i].Match) < len(p[j].Match)
+    }
+    
+    fmt.Println("-------------------------------------------")
+    fmt.Println("Comparing: ")
+    fmt.Println("A:",p[i].Match)
+    fmt.Println("B", p[j].Match)
+    fmt.Println("-------------------------------------------")
+    
+    cmd := exec.Command("python","greenery/compare.py", p[i].Match, p[j].Match)
+    
+    output, err := cmd.CombinedOutput()
+    fmt.Println(string(output))
+    
+    if err==nil{
+        output := string(output)
+        if output=="subset"{
+            return true
+        }else{
+            return false
+        }
+    }else{
+        return len(p[i].Match) < len(p[j].Match) //changed to become more on purpose, the slice that needs to be sorted should be in descdending order
+    }
+}
 
 
 func main() {
@@ -759,7 +784,9 @@ func main() {
         }
         
         //sorting regexes
-        //sort.Sort(patternarray)
+        fmt.Print("Sorting regexes...")
+        sort.Sort(patternarray)
+        fmt.Println("Done!")
         
         //marshaling output into proper json
         jsonsyntaxobj := JSONSyntax{Name:*name, ScopeName:*scope, FileTypes:strings.Split(*fileTypes,","), Patterns:patternarray, Uuid:u.String()}
