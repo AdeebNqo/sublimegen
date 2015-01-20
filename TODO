@@ -25,9 +25,9 @@ To fix or not fix? [FIXED]
 
 10. Write unit tests
 
-11. Make greenery require that forward slashes be escaped
+11. Make greenery require that forward slashes be escaped[Fixed] (task was wrong, solved it another way)
 
 12. Make a pull request on greenery and add ($,^) in the special outer regex elements
 
 13. Make sure that in the LESS(i,j) function in main.go that you handle match first as sometimes
-it is not there.
+it is not there.[Done]
