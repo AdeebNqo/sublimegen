@@ -31,3 +31,5 @@ To fix or not fix? [FIXED]
 
 13. Make sure that in the LESS(i,j) function in main.go that you handle match first as sometimes
 it is not there.[Done]
+
+14. Optimize retrievescopefromcapturegroup method in processing.go
