@@ -11,7 +11,7 @@ _option : 'o' 'p' 't' 'i' 'o' 'n';
 _message : 'm' 'e' 's' 's' 'a' 'g' 'e';
 _extend : 'e' 'x' 't' 'e' 'n' 'd';
 _enum : 'e' 'n' 'u' 'm';
-_service : 's' 'e' 'r' 'v' 'i' 'c' 'e;
+_service : 's' 'e' 'r' 'v' 'i' 'c' 'e';
 _rpc : 'r' 'p' 'c';
 _group: 'g' 'r' 'o' 'u' 'p';
 _default : 'd' 'e' 'f' 'a' 'u' 'l' 't';
@@ -40,7 +40,7 @@ _bytes : 'b' 'y' 't' 'e' 's';
 _semicolon : ';';
 _colon : ':';
 _dot : '.';
-_equal : '='
+_equal : '=';
 _leftqt: '`';
 _leftcb: '{';
 _rightcb : '}';
@@ -50,38 +50,38 @@ _leftsb : '[';
 _rightsb : ']';
 _comma : ',';
 
-proto : {( _message | _extend | _enum | import | _package | _options | _semicolon)};
+proto : { message | extend | enum | import | package | option | _semicolon } ;
 
-quote : 
-hexEscape : 
-octEscape : 
-charEscape : 
-strLit : 
+quote : '"' | '\'';
+hexEscape : '\\' [ 'X' | 'x' ] ['A'-'F' | 'a'-'f' | '0'-'9'] {'1' '2'};
+octEscape : '\\' [ '0' ] '0'-'7' {'1' '3'};
+charEscape : '\\' ['a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\' | '?' | ''' | '"'];
 import : _import strLit _semicolon;
 
-ident :
+ident : ['A'-'Z' | 'a'-'z' | '_' ]{'\w' | '_' };
 package : _package ident {( _dot ident )} _semicolon;
 
 
 _true : 't' 'r' 'u' 'e';
 _false : 'f' 'a' 'l' 's' 'e';
 boolLit : _true | _false;
-strLit : 
+strLit : quote { hexEscape | octEscape | charEscape | [ '^' | '\0' | '\n'] } quote ;
 floatLit : 
-intLit : 
-constant :
-optionBody : 
+intLit : decInt | hexInt | octInt;
+constant : ident | intLit | floatLit | strLit | boolLit
+optionBody : ident { _dot ident} _equal constant
 option : _leftqt optionBody _semicolon;
 
-extensions:
-extend : 
-enumField : 
-enum : 
-field : 
-messageBody: _leftcb {( field | enum | message | extend | extensions | group | option | _colon )} _rightcb
+extension: intLit [ _to (intLit | _max) ]
+extensions: _extensions extension { _comma extension } _semicolon;
+extend : _extend userType _lefttcb { field | group | _semicolon} _rightcb
+enumField : ident _equal intLit _semicolon;
+enum : _enum ident _leftcb { option | enumField | _semicolon } _rightcb;
+field : label type ident _equal intLit [ _leftsb fieldOption { _comma fieldOption} _rightsb] _semicolon;
+messageBody: _leftcb {( field | enum | message | extend | extensions | group | option | _colon )} _rightcb;
 message : _message ident messageBody;
 
-camelIdent : ['A'-'Z']{['\' 'w' '_']}
+camelIdent : ['A'-'Z']{ '\w' | '_'}
 label: _enumField | _optional | _repeated;
 group: label _group camelIdent _equal intLit messageBody;
 
