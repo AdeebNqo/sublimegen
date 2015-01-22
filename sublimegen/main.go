@@ -44,74 +44,6 @@ var repoitems *list.List
 var defaultscope string
 
 
-//the following structs are used to produce a json file
-type JSONSyntax struct{
-    Name string `json:"name"`
-    ScopeName string `json:"scopeName"`
-    FileTypes []string `json:"fileTypes"`
-    Patterns []PatternEntry `json:"patterns,omitempty"`
-    Uuid string `json:"uuid"`
-}
-type PatternEntry struct{
-    Match string `json:"match,omitempty"`
-    
-    Begin string `json:"begin,omitempty"`
-    BeginCaptures map[string]CaptureEntryName `json:"beginCaptures,omitempty"`
-    
-    End string `json:"end,omitempty"`
-    EndCaptures map[string]CaptureEntryName `json:"endCaptures,omitempty"`
-    
-    Name string `json:"name,omitempty"`
-    Captures map[string]CaptureEntryName `json:"captures,omitempty"`
-    
-    MorePatterns []PatternEntry `json:"patterns,omitempty"`
-}
-type CaptureEntryName struct{
-    Name string `json:"name,omitempty"`
-}
-
-//implenting sort interface in order to sort Patterns []PatternEntry from JSONSyntax
-//by length of regex
-type patternarraytype []PatternEntry
-
-func (p patternarraytype) Len() int { 
-    return len(p)
-}
-func (p patternarraytype) Swap(i, j int) {
-    p[i], p[j] = p[j], p[i]
-}
-func (p patternarraytype) Less(i, j int) bool { 
-    
-    if p[i].Match=="" || p[j].Match==""{
-        return len(p[i].Match) < len(p[j].Match)
-    }    
-    
-    cmd := exec.Command("python","-m","cProfile","greenery/compare.py", p[i].Match, p[j].Match)
-    cmd2 := exec.Command("python","greenery/compare.py",  p[j].Match, p[i].Match)
-    
-    output, err := cmd.CombinedOutput()
-    output2, err2 := cmd2.CombinedOutput()
-    outputString  := string(output)
-    output2String := string(output2)
-    
-    if err==nil && err2==nil{
-        outputString = strings.TrimSpace(outputString)
-        output2String = strings.TrimSpace(output2String)
-        if outputString=="notsubset" && output2String=="notsubset"{
-            return len(p[i].Match) < len(p[j].Match)  
-        }else if outputString=="subset"{
-            return true
-        }else if outputString=="notsubset"{
-            return false
-        }else{
-            return len(p[i].Match) < len(p[j].Match)
-        }
-    }else{
-        return len(p[i].Match) < len(p[j].Match)
-    }
-}
-
-
 func main() {
 	flag.Parse() //parsing commandline flags
 
@@ -119,14 +51,15 @@ func main() {
 	scanner := &scanner.Scanner{}
 	srcBuffer, err := ioutil.ReadFile(*source)
 	if err != nil {
-		fmt.Println(err)
+        mylogger.Err(fmt.Sprintf("Cannot read file because %v",err))
 		os.Exit(1)
 	}
 	scanner.Init(srcBuffer, token.FRONTENDTokens)
 	parser := parser.NewParser(parser.ActionTable, parser.GotoTable, parser.ProductionsTable, token.FRONTENDTokens)
 	grammar, err := parser.Parse(scanner)
-	if err != nil {
-		fmt.Printf("Parse error: %s\n", err)
+	
+    if err != nil {
+        mylogger.Err(fmt.Sprintf("Parse error: %v",err))
 		os.Exit(1)
 	}
 
@@ -137,6 +70,7 @@ func main() {
     file, _ := ioutil.ReadFile("scopes.json")
     err = json.Unmarshal(file, &data)
     if err!=nil{
+        mylogger.Err(fmt.Sprintf("Cannot parse json file with scopes because %v",err))
         fmt.Printf("Err(%s) : cannot parse json file with scopes", err)
 		os.Exit(1)
     }
@@ -189,7 +123,7 @@ func main() {
 
         if err != nil{
             //ignoring token
-            fmt.Println(fmt.Sprintf("could not process %v. reason: %v",prodid, err))
+            mylogger.Err(fmt.Sprintf("could not process %v. reason: %v",prodid, err))
             break
         }
         repository.SetRighthandside(patternobj,prod.LexPattern())
@@ -407,9 +341,11 @@ func main() {
         if *verbose==1{
             mylogger.Inform("Transforming syntax highlighting data to json...")
         }
+        
         //marshaling output into proper json
         jsonsyntaxobj := JSONSyntax{Name:*name, ScopeName:*scope, FileTypes:strings.Split(*fileTypes,","), Patterns:patternarray, Uuid:u.String()}
         jsonsyntaxobj_result, err := json.MarshalIndent(jsonsyntaxobj,"", "  ")
+        
         if err!=nil{
             if *verbose==1{
                 mylogger.Err(fmt.Sprintf("Could not transform syntax highlighting data to json becase %v",err))
