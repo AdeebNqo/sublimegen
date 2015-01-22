@@ -23,21 +23,25 @@ import (
 	"fmt"
 	"github.com/nu7hatch/gouuid"
     "strings"
-    "reflect"
+    //"reflect"
     "github.com/AdeebNqo/sublimegen/repository"
     "container/list"
     "encoding/json"
-    "regexp"
+    //"regexp"
     "strconv"
     "os/exec"
     "sort"
     "github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre" //(documentation: https://godoc.org/github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre)
+    "github.com/AdeebNqo/sublimegen/logger"
 )
 
 var name = flag.String("name", "default", "This is the name of the syntax.")
 var scope = flag.String("scope", "source.default", "This is the scope of the syntax file.")
 var fileTypes = flag.String("fileTypes", "default", "Comma seperated list of file types.")
 var source = flag.String("source","defaultinput", "the bnf file for the language you want to highlight.")
+var doregexorder = flag.Int("orderregex",1,"Program to attempt to order regexes in file. 0 for no, 1 for yes")
+var verbose = flag.Int("verbose",1,"Output status and other progress information. 0 for no, 1 for yes")
+var mylogger = logger.Init(os.Stdout, os.Stdout, os.Stderr)
 
 var repoitems *list.List
 var defaultscope string
@@ -481,28 +485,30 @@ func (p patternarraytype) Less(i, j int) bool {
     
     if p[i].Match=="" || p[j].Match==""{
         return len(p[i].Match) < len(p[j].Match)
-    }
+    }    
     
-    fmt.Println("-------------------------------------------")
-    fmt.Println("Comparing: ")
-    fmt.Println("A:",p[i].Match)
-    fmt.Println("B", p[j].Match)
-    fmt.Println("-------------------------------------------")
-    
-    cmd := exec.Command("python","greenery/compare.py", p[i].Match, p[j].Match)
+    cmd := exec.Command("python","-m","cProfile","greenery/compare.py", p[i].Match, p[j].Match)
+    cmd2 := exec.Command("python","greenery/compare.py",  p[j].Match, p[i].Match)
     
     output, err := cmd.CombinedOutput()
-    fmt.Println(string(output))
+    output2, err2 := cmd2.CombinedOutput()
+    outputString  := string(output)
+    output2String := string(output2)
     
-    if err==nil{
-        output := string(output)
-        if output=="subset"{
+    if err==nil && err2==nil{
+        outputString = strings.TrimSpace(outputString)
+        output2String = strings.TrimSpace(output2String)
+        if outputString=="notsubset" && output2String=="notsubset"{
+            return len(p[i].Match) < len(p[j].Match)  
+        }else if outputString=="subset"{
             return true
-        }else{
+        }else if outputString=="notsubset"{
             return false
+        }else{
+            return len(p[i].Match) < len(p[j].Match)
         }
     }else{
-        return len(p[i].Match) < len(p[j].Match) //changed to become more on purpose, the slice that needs to be sorted should be in descdending order
+        return len(p[i].Match) < len(p[j].Match)
     }
 }
 
@@ -598,14 +604,18 @@ func main() {
         repoitems.PushBack(patternobj)
     }
 
+    if *verbose==1{
+        mylogger.Inform("Generating uuid for syntax highlighting file.")
+    }
     //generating uuid for syntax highlighting file
 	u, err := uuid.NewV4()
 	if (err!=nil){
         //it was not possible to generated uuid, quiting...
-
-		fmt.Println("Could not generate uuid.")
+        mylogger.Err("Could not generate uuid.")
+		//fmt.Println("Could not generate uuid.")
 		os.Exit(1)
 	}else{
+        mylogger.Inform("Finished generating uuid. Now processing bnf file...")
         //genating patterns since uuid has been successfully generated
 
         //patternarray := make([]PatternEntry,1)
@@ -623,7 +633,8 @@ func main() {
             regp, compileerr := pcre.Compile(regex,0)
             if compileerr!=nil{
                 //regex is compatile so skip it.
-                fmt.Println("err:",compileerr)
+                mylogger.Err(compileerr.String())
+                //fmt.Println("err:",compileerr)
                 break
             }
 
@@ -783,311 +794,111 @@ func main() {
             }
         }
         
-        //sorting regexes
-        fmt.Print("Sorting regexes...")
-        sort.Sort(patternarray)
-        fmt.Println("Done!")
+        if *verbose==1{
+            mylogger.Inform("Finished processing bnf file.")
+        }
         
+        if *doregexorder==1{
+            //sorting regexes
+            mylogger.Inform("Sorting regexes...")
+            sort.Sort(patternarray)
+            mylogger.Inform("Done sorting!")
+        }
+        
+        if *verbose==1{
+            mylogger.Inform("Transforming syntax highlighting data to json...")
+        }
         //marshaling output into proper json
         jsonsyntaxobj := JSONSyntax{Name:*name, ScopeName:*scope, FileTypes:strings.Split(*fileTypes,","), Patterns:patternarray, Uuid:u.String()}
         jsonsyntaxobj_result, err := json.MarshalIndent(jsonsyntaxobj,"", "  ")
         if err!=nil{
-            fmt.Println("we have a problem marshalling output.")
+            if *verbose==1{
+                mylogger.Err(fmt.Sprintf("Could not transform syntax highlighting data to json becase %v",err))
+            }
+            //fmt.Println("we have a problem marshalling output.")
             os.Exit(1)
         }else{
+            if (*verbose==1){
+                mylogger.Inform("done converting syntax highlighting data to json. Now saving json file...")
+            }
             err := ioutil.WriteFile(fmt.Sprintf("%v.tmLanguage.json", *name), jsonsyntaxobj_result, 0644)
-             if err!=nil{
-                fmt.Println("(Error): we have a problem writing to file.")
-                fmt.Println("(Reason):", err)
+            if err!=nil{
+                mylogger.Err(fmt.Sprintf("We a problem writing to file because %v",err))
+                //fmt.Println("(Error): we have a problem writing to file.")
+                //fmt.Println("(Reason):", err)
                 os.Exit(1)
-             }
+            }else{
+                if (*verbose==1){
+                    mylogger.Inform("json file saved.")
+                }
+            }
         }
         
+        if *verbose==1{
+            mylogger.Inform("Converting json to plist...")
+        }
 		//convert resulting json to a plist file and save it.
 		err = exec.Command("python", "convertor.py", fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v.tmLanguage", *name)).Run()
         if err!=nil{
-            fmt.Println(fmt.Sprintf("(Error): Could not convert json to plist.\n(Reason): %v",err))
+            mylogger.Err(fmt.Sprintf("(Error): Could not convert json to plist.\n(Reason): %v",err))
+            //fmt.Println(fmt.Sprintf("(Error): Could not convert json to plist.\n(Reason): %v",err))
             os.Exit(1)
+        }else{
+            if *verbose==1{
+                mylogger.Inform("Finished converting json to plist!")
+            }
         }
         //moving the files into a folder with the name provided as cmdline arg
         directoryexists := true
         if _, err := os.Stat(*name); err != nil {
             if os.IsNotExist(err) {
-                        directoryexists = false
+                directoryexists = false
             }
         }
+
         //removing old directory with the same name
         if directoryexists{
+            if (*verbose==1){
+                mylogger.Inform("Found old directory with same name as target directory, deleting...")
+            }
             err := os.RemoveAll(*name)
             if err!=nil{
-                fmt.Println("(Error)Cannot remove old directory")
-                fmt.Println("(Reason):",err)
+                mylogger.Err(fmt.Sprintf("Cannot remove old directory because %v",err))
+                //fmt.Println("(Error)Cannot remove old directory")
+                //fmt.Println("(Reason):",err)
                 os.Exit(1)
+            }else{
+                if (*verbose==1){
+                    mylogger.Inform("Old directory with same name as target directory, deleted!")
+                }
             }
         }
         
         //creating folder for syntax highlighting files
         err0 := os.Mkdir(*name, 0775)
         if err0!=nil{
-            fmt.Println("(Error): Could not create folder for storing generated files")
-            fmt.Println("(Reason):", err0)
+            mylogger.Err(fmt.Sprintf("Could not create folder for storing generated files because %v",err0))
+            //fmt.Println("(Error): Could not create folder for storing generated files")
+            //fmt.Println("(Reason):", err0)
             os.Exit(1)
+        }
+        
+        if (*verbose==1){
+            mylogger.Inform("Moving files into new folder!")
         }
         //moving files into created folder
         err1 := os.Rename(fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v/%v.tmLanguage.json", *name, *name))
         err2 := os.Rename(fmt.Sprintf("%v.tmLanguage", *name), fmt.Sprintf("%v/%v.tmLanguage", *name, *name))
         if err1!=nil || err2!=nil {
-            fmt.Println("(Error): Could not move files")
-            fmt.Println("(Reason):", err1,"and/or", err2)
+            mylogger.Err(fmt.Sprintf("Could not move files because %v and/or %v",err1,err2))
+            //fmt.Println("(Error): Could not move files")
+            //fmt.Println("(Reason):", err1,"and/or", err2)
             os.Exit(1)
         }
 	}
+    
+    if (*verbose==1){
+        mylogger.Inform("Finished!")
+    }
     os.Exit(0)
-}
-
-
-
-
-
-
-
-///=====================================================================================================================================
-///=====================================================================================================================================
-///=====================================================================================================================================
-///All the code below has been abandonded.
-///=====================================================================================================================================
-///=====================================================================================================================================
-///=====================================================================================================================================
-
-
-
-/*
-function for obtaining regex from lexpatern
-*/
-func switchpattern(tokenlist *list.List, alternative interface{}) string{
-    switch alternative.(type){
-                    case *ast.LexRegDefId:{
-                        castedterm := alternative.(*ast.LexRegDefId)
-                        token := getItem(tokenlist ,castedterm.Id)
-                        retrieveregex(tokenlist, token)
-                        return fmt.Sprintf("%v",repository.Getregex(token))
-                        //repository.Appendregex(sometoken, fmt.Sprintf("%v",repository.Getregex(token)))
-                    }
-                    case *ast.LexCharRange:{
-                        tmpregex := "["+stripliteral(alternative.(*ast.LexCharRange).From.String())+"-"+stripliteral(alternative.(*ast.LexCharRange).To.String())+"]"
-
-                        //repository.Appendregex(sometoken, tmpregex)
-                        return tmpregex
-                    }
-                    case *ast.LexCharLit:{
-                        //repository.Appendregex(sometoken, stripliteral(alternative.(*ast.LexCharLit).String()))
-                        return stripliteral(alternative.(*ast.LexCharLit).String())
-                    }
-                    case *ast.LexRepPattern:{
-                        pattern2 := alternative.(*ast.LexRepPattern).LexPattern
-                        tmpregex := ""
-                        for index,val := range pattern2.Alternatives{
-                            if index > 0{
-                                tmpregex += "|"
-                            }
-                            for _,alternative := range val.Terms{
-                                tmpregex += switchpattern(tokenlist,alternative)
-                            }
-                        }
-                        return tmpregex
-                    }
-                    case *ast.LexGroupPattern:{
-                        pattern2 := alternative.(*ast.LexGroupPattern).LexPattern
-                        tmpregex := ""
-                        for index,val := range pattern2.Alternatives{
-                            if index > 0{
-                                tmpregex += "|"
-                            }
-                            for _,alternative := range val.Terms{
-                                tmpregex += switchpattern(tokenlist,alternative)
-                            }
-                        }
-                        return tmpregex
-                    }
-                    case *ast.LexOptPattern:{
-                        pattern2 := alternative.(*ast.LexOptPattern).LexPattern
-                        tmpregex := "("
-                        for index,val := range pattern2.Alternatives{
-                            if index > 0{
-                                tmpregex += "|"
-                            }
-                            for _,alternative := range val.Terms{
-                                tmpregex += switchpattern(tokenlist,alternative)
-                            }
-                        }
-                        tmpregex += ")" //i just removed a question mark here.
-                        return tmpregex
-                    }
-                    case *ast.LexDot:{
-                        return "."
-                    }
-                    default:{
-                        fmt.Println("in default, type: ", reflect.TypeOf(alternative), " value: ", alternative)
-                        return ""
-                    }
-                }
-}
-
-/*
-function for expanding regex
-*/
-func retrieveregex(tokenlist *list.List, sometoken *repository.Repoitem){
-    if repository.Isregexempty(sometoken){
-        pattern := repository.GetRighthandside(sometoken)
-        for index,val := range pattern.Alternatives{
-            if index > 0{
-                repository.Appendregex(sometoken,"|")
-            }
-            for _,alternative := range val.Terms{
-                repository.Appendregex(sometoken, switchpattern(tokenlist, alternative))
-            }
-        }
-    }
-}
-
-
-/*
-
-Function for creating pattern entry from lexpattern
-
-return values: group, regex and groups
-*/
-func createpattern(group int, regex string, groups *list.List, repoitems *list.List, term interface{}) (int, string, *list.List){
-    //fmt.Println("term:",term,",type:",reflect.TypeOf(term)) //debug
-    /*switch term.(type){
-        case *ast.LexCharLit:{
-            termX := term.(*ast.LexCharLit)
-            return group, stripliteral(termX.String()), groups
-        }
-        case *ast.LexRegDefId:{
-            castedterm := term.(*ast.LexRegDefId)
-            token := getItem(repoitems ,castedterm.Id)
-
-            if repository.Isregexempty(token){
-                retrieveregex(repoitems, token) //expand regex
-            }
-            //get regex, assign group if we are not working with comment.
-            group += 1
-            regex += "("+repository.Getregex(token)+")"
-
-            groups.PushBack(repository.Getregex(token)+"|"+repository.GetScope(token))
-            return group, regex, groups
-        }
-        case *ast.LexRegDefId:{
-            castedterm := term.(*ast.LexRegDefId)
-            token := getItem(repoitems ,castedterm.Id)
-
-            if repository.Isregexempty(token){
-                retrieveregex(repoitems, token) //expand regex
-            }
-            //get regex, assign group if we are not working with comment.
-            group += 1
-            regex += "("+repository.Getregex(token)+")"
-
-            groups.PushBack(repository.Getregex(token)+"|"+repository.GetScope(token))
-            return group, regex, groups
-        }
-        case *ast.LexOptPattern:{
-            pattern2 := term.(*ast.LexOptPattern).LexPattern
-            tmpregex := "("
-            for index,val := range pattern2.Alternatives{
-                if index > 0{
-                    tmpregex += "|"
-                }
-                for _,alternative := range val.Terms{
-                    tmpregex += switchpattern(repoitems, alternative)
-                }
-            }
-            tmpregex += ")" //removed question mark at the end because python does not like nested optional quantifiers
-            group += 1
-            regex += tmpregex
-            groups.PushBack(tmpregex+"|keyword.control.bnf") //for consistency
-            return group, regex, groups
-        }
-        case *ast.LexCharRange:{
-            pattern2 := term.(*ast.LexCharRange)
-            regex +=  "["+stripliteral(pattern2.From.String())+"-"+stripliteral(pattern2.To.String())+"]"
-            return group, regex, groups
-        }
-        case *ast.LexGroupPattern:{
-            pattern2 := term.(*ast.LexGroupPattern).LexPattern
-            for index,val := range pattern2.Alternatives{
-                //adding or in regex if there are alternatives
-                if index>0{
-                    regex += "|"
-                }
-                //processing elements
-                for _, term2:= range val.Terms{
-                    group, regex, groups = createpattern(group, regex, groups, repoitems, term2)
-                    return group, regex, groups
-                }
-            }
-        }
-        case *ast.LexDot:{
-            regex += "."
-            return group, regex, groups
-        }
-        case *ast.LexRepPattern:{
-            pattern2 := term.(*ast.LexRepPattern).LexPattern
-            //fmt.Println(pattern2) //debug
-            for index,val := range pattern2.Alternatives{
-                //adding or in regex if there are alternatives
-                if index>0{
-                    regex += "|"
-                }
-                //processing elements
-                for _, term2:= range val.Terms{
-                    group, regex, groups = createpattern(group, regex, groups, repoitems, term2)
-                    //regex = fmt.Sprintf("(%v)*",regex)
-                    //fmt.Println(regex) //debug
-                    return group, regex, groups
-                }
-            }
-        }
-        default:{
-            fmt.Println(reflect.TypeOf(term))
-        }
-    }*/
-    return 0,"",nil
-}
-
-/*
-
-Method for strip the start and end (') characters from a token
-
-*/
-
-/*func stripliteral(somelit string) (retval string){
-    if somelit != "" {
-        somelit = somelit[1:len(somelit)-1]
-    }
-    retval = escape(somelit)
-    //retval = somelit
-    return
-}
-*/
-
-
-/*
-
-function for escaping char lits
-for a regex
-
-*/
-func escape(somechar string) string{
-    //fmt.Println("value:", somechar, "length:",len(somechar)) //debug
-    if somechar==" "{
-        return "[ ]"
-    }else if somechar=="\n"{
-        return "$"
-    }else if len(somechar)!=1{
-        return somechar
-    }else{
-        return regexp.QuoteMeta(somechar)
-    }
 }
