@@ -33,3 +33,5 @@ To fix or not fix? [FIXED]
 it is not there.[Done]
 
 14. Optimize retrievescopefromcapturegroup method in processing.go
+
+14. Update s-lang scopes file and bnf file.
