@@ -1,0 +1,92 @@
+/*
+
+Copyright 2015 Zola Mahlaza <adeebnqo@gmail.com>
+proto gocc bnf file
+
+*/
+
+_import : 'i' 'm' 'p' 'o' 'r' 't';
+_package : 'p' 'a' 'c' 'k' 'a' 'g' 'e';
+_option : 'o' 'p' 't' 'i' 'o' 'n';
+_message : 'm' 'e' 's' 's' 'a' 'g' 'e';
+_extend : 'e' 'x' 't' 'e' 'n' 'd';
+_enum : 'e' 'n' 'u' 'm';
+_service : 's' 'e' 'r' 'v' 'i' 'c' 'e;
+_rpc : 'r' 'p' 'c';
+_group: 'g' 'r' 'o' 'u' 'p';
+_default : 'd' 'e' 'f' 'a' 'u' 'l' 't';
+_extensions : 'e' 'x' 't' 'e' 'n' 's' 'i' 'o' 'n' 's';
+_to : 't' 'o';
+_max : 'm' 'a' 'x';
+_required : 'r' 'e' 'q' 'u' 'i' 'r' 'e' 'd';
+_optional: 'o' 'p' 't' 'i' 'o' 'n' 'a' 'l';
+_repeated: 'r' 'e' 'p' 'e' 'a' 't' 'e' 'd';
+_double: 'd' 'o' 'u' 'b' 'l' 'e';
+_float : 'f' 'l' 'o' 'a' 't';
+_int32 : 'i' 'n' 't' '3' '2';
+_int64 : 'i' 'n' 't' '6' '4';
+_uint32 : 'u' 'i' 'n' 't' '3' '2';
+_uint64 : 'u' 'i' 'n' 't' '6' '4';
+_sint32 : 's' 'i' 'n' 't' '3' '2';
+_sint64 : 's' 'i' 'n' 't' '6' '4';
+_fixed32 : 'f' 'i' 'x' 'e' 'd' '3' '2';
+_fixed64 : 'f' 'i' 'x' 'e' 'd' '6' '4';
+_sfixed32 : 's' 'f' 'i' 'x' 'e' 'd' '3' '2';
+_sfixed64 : 's' 'f' 'i' 'x' 'e' 'd' '6' '4';
+_bool : 'b' 'o' 'o' 'l';
+_string : 's' 't' 'r' 'i' 'n' 'g';
+_bytes : 'b' 'y' 't' 'e' 's';
+
+_semicolon : ';';
+_colon : ':';
+_dot : '.';
+_equal : '='
+_leftqt: '`';
+_leftcb: '{';
+_rightcb : '}';
+_leftrb : '(';
+_rightrb : ')';
+_leftsb : '[';
+_rightsb : ']';
+_comma : ',';
+
+proto : {( _message | _extend | _enum | import | _package | _options | _semicolon)};
+
+quote : 
+hexEscape : 
+octEscape : 
+charEscape : 
+strLit : 
+import : _import strLit _semicolon;
+
+ident :
+package : _package ident {( _dot ident )} _semicolon;
+
+
+_true : 't' 'r' 'u' 'e';
+_false : 'f' 'a' 'l' 's' 'e';
+boolLit : _true | _false;
+strLit : 
+floatLit : 
+intLit : 
+constant :
+optionBody : 
+option : _leftqt optionBody _semicolon;
+
+extensions:
+extend : 
+enumField : 
+enum : 
+field : 
+messageBody: _leftcb {( field | enum | message | extend | extensions | group | option | _colon )} _rightcb
+message : _message ident messageBody;
+
+camelIdent : ['A'-'Z']{['\' 'w' '_']}
+label: _enumField | _optional | _repeated;
+group: label _group camelIdent _equal intLit messageBody;
+
+userType : [_dot] ident {(_dot ident)};
+fieldOption : optionBody | (_default _equal constant)
+type : _double | _float | _int32 | _int64 | _uint32 | _uint64 | _sint32 | _sint64 | _fixed32 | _fixed64 | _sfixed32 | _sfixed64 | _bool | _string | _bytes | userType;
+field : label type ident _equal intLit [( _leftsb fieldOption {( _comma fieldOption)} _rightsb )] _semicolon;
+
