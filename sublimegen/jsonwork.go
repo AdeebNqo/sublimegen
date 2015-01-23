@@ -53,11 +53,15 @@ func (p patternarraytype) Less(i, j int) bool {
     }    
     
     cmd := exec.Command("python","-m","cProfile","greenery/compare.py", p[i].Match, p[j].Match)
-    cmd2 := exec.Command("python","greenery/compare.py",  p[j].Match, p[i].Match)
-    
     output, err := cmd.CombinedOutput()
-    output2, err2 := cmd2.CombinedOutput()
     outputString  := string(output)
+    
+    if outputString=="subset"{
+        return true
+    }
+    
+    cmd2 := exec.Command("python","greenery/compare.py",  p[j].Match, p[i].Match)
+    output2, err2 := cmd2.CombinedOutput()
     output2String := string(output2)
     
     if err==nil && err2==nil{
