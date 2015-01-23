@@ -120,7 +120,7 @@ func reallygetregex(lexterm interface{}) string{
 
             alternatives := term.LexPattern.Alternatives
 
-            if len(alternatives)==1{
+            /*if len(alternatives)==1{
                 terms := alternatives[0].Terms
                 if len(terms)==1{
                     switch terms[0].(type){
@@ -132,7 +132,7 @@ func reallygetregex(lexterm interface{}) string{
                         }
                     }
                 }
-            }
+            }*/
             retval := "("
             for index,lexalt := range alternatives{
                 if index>0{
@@ -148,7 +148,7 @@ func reallygetregex(lexterm interface{}) string{
             
             alternatives := term.LexPattern.Alternatives
             
-            if len(alternatives)==1{
+            /*if len(alternatives)==1{
                 terms := alternatives[0].Terms
                 if len(terms)==1{
                     switch terms[0].(type){
@@ -160,7 +160,7 @@ func reallygetregex(lexterm interface{}) string{
                         }
                     }
                 }
-             }
+             }*/
             retval := "("
             for index,lexalt := range alternatives{
                 if index>0{
