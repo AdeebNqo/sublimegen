@@ -7,7 +7,7 @@ proto gocc bnf file
 
 _import : 'i' 'm' 'p' 'o' 'r' 't';
 _package : 'p' 'a' 'c' 'k' 'a' 'g' 'e';
-__option : 'o' 'p' 't' 'i' 'o' 'n';
+_option : 'o' 'p' 't' 'i' 'o' 'n';
 _message : 'm' 'e' 's' 's' 'a' 'g' 'e';
 _extend : 'e' 'x' 't' 'e' 'n' 'd';
 _enum : 'e' 'n' 'u' 'm';
