@@ -9,13 +9,13 @@ https://gist.github.com/bemasher/1777766
 package main
 
 type Stack struct {
-	top *Element
+	top  *Element
 	size int
 }
 
 type Element struct {
 	value interface{} // All types satisfy the empty interface, so we can store anything here.
-	next *Element
+	next  *Element
 }
 
 // Return the stack's length
