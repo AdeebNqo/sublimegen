@@ -81,7 +81,7 @@ _userType : [ _dot ] _ident { _dot _ident };
 
 _optionBody : _ident { _dot _ident} _equal _constant;
 
-_option : _leftqt _optionBody _semicolon;
+_optionLit : _leftqt _optionBody _semicolon;
 _packageLit : _package _ident {( _dot _ident )} _semicolon;
 _extension: _intLit [ _to (_intLit | _max) ];
 _extensionsLit: _extensions _extension { _comma _extension } _semicolon;
@@ -96,10 +96,12 @@ _type : _double | _float | _int32 | _int64 | _uint32 | _uint64 | _sint32 | _sint
 _groupLit: _label _group _camel_ident _equal _intLit _messageBody;
 _messageLit : _message _ident _messageBody;
 
-_enumLit : _enum _ident _leftcb { _option | _enumField | _semicolon } _rightcb;
+_enumLit : _enum _ident _leftcb { _optionLit | _enumField | _semicolon } _rightcb;
 _enumField : _ident _equal _intLit _semicolon;
 _extendLit : _extend _userType _lefttcb { _field | _groupLit | _semicolon} _rightcb;
 
-_messageBody: _leftcb { _field | _enumLit | _messageLit | _extendLit | _extensionsLit | _groupLit | _option | _colon  } _rightcb;
+_messageBody: _leftcb { _field | _enumLit | _messageLit | _extendLit | _extensionsLit | _groupLit | _optionLit | _colon  } _rightcb;
 
 proto : { (_messageLit | _extendLit | _enumLit | _importLit | _packageLit | _option | _semicolon) } ;
+
+_serviceLit : _service _ident _lefttcb { _option | _rpc | _semicolon } _rightcb;
