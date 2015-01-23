@@ -168,7 +168,7 @@ func main() {
                 //regex is compatile so skip it.
                 mylogger.Err(compileerr.String())
                 //fmt.Println("err:",compileerr)
-                break
+                continue
             }
 
             //setting regex
