@@ -162,27 +162,14 @@ func main() {
             if !found{
                 if strings.HasPrefix(synprodname, "\"") && strings.HasSuffix(synprodname,"\""){
                     prodid := synprodname[1:len(synprodname)-1]
-                    //patternobj,err := repository.NewRepoItem(prodid)
-                    _,err := repository.NewRepoItem(prodid)
+                    patternobj,err := repository.NewRepoItem(prodid)
+                    //_,err := repository.NewRepoItem(prodid)
                     if err != nil{
                         //ignoring token
                         mylogger.Err(fmt.Sprintf("could not process %v. reason: %v",prodid, err))
                         break
                     }
-                    
-                    
-                    var someterm interface{}
-                    if prodid=="."{
-                        someterm = LexDot{}
-                    }else{
-                        
-                        chars := make([]LexCharLit, len(prodid))
-                        for _,char := range prodid{
-                            chars = append(chars, LexCharLit{Val:char, Lit:[]byte(char), s:string(char)})
-                        }
-                    }
-                    
-                    repository.SetRighthandside(patternobj,someterm)
+                    repository.SetRighthandside(patternobj,nil)
                     somescope := data[repository.GetRealname(patternobj)]
                     if somescope!=""{
                         repository.SetScope(patternobj,somescope)
@@ -190,11 +177,17 @@ func main() {
                         repository.SetScope(patternobj, defaultscope)
                     }
 
-                    repoitems.PushBack(patternobj)
+                    tmpprodid := ""
+                    for _,char := range prodid{
+                        tmpprodid += string(char)
+                    }
+                    prodid = tmpprodid
+                    if strings.ContainsAny(prodid,"abcdefghijklmnopqrstuvwxyz") && somescope!=defaultscope{
+                        repoitems.PushBack(patternobj)
+                    }
                 }
             }
         }
-        fmt.Println()
     }
     
     if *verbose==1{
@@ -218,15 +211,21 @@ func main() {
             listitemwithtype := listitem.Value.(*repository.Repoitem)
 
             realname := repository.GetRealname(listitemwithtype)
-            alternatives := repository.GetRighthandside(listitemwithtype).Alternatives
-            regex := constructregexandfillgroups(alternatives) //we are extracting the regex for the  
+            
+            beforealternatives := repository.GetRighthandside(listitemwithtype)
+            var regex string
+            if beforealternatives!=nil{
+                alternatives := beforealternatives.Alternatives
+                regex = constructregexandfillgroups(alternatives) //we are extracting the regex for the
+            }else{
+                regex = realname
+            }
             
             //testing if regex is okay
             regp, compileerr := pcre.Compile(regex,0)
             if compileerr!=nil{
-                //regex is compatile so skip it.
+                //regex is not compatile so skip it.
                 mylogger.Err(compileerr.String())
-                //fmt.Println("err:",compileerr)
                 continue
             }
 
