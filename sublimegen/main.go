@@ -50,6 +50,7 @@ func main() {
     //reading in the provided bnf file and parsing it.
 	scanner := &scanner.Scanner{}
 	srcBuffer, err := ioutil.ReadFile(*source)
+    
 	if err != nil {
         mylogger.Err(fmt.Sprintf("Cannot read file because %v",err))
 		os.Exit(1)
@@ -81,8 +82,7 @@ func main() {
 
     //instantiating the list that will contain all the repoitems, that is, pattern field entries.
     repoitems = list.New()
-    repoitems.Init()
-
+    repoitems.Init()  
     /*
 
     Processing token definitions
@@ -108,6 +108,7 @@ func main() {
         }
         repoitems.PushBack(patternobj)
     }*/
+
 
     /*
 
@@ -137,6 +138,65 @@ func main() {
         repoitems.PushBack(patternobj)
     }
 
+    /*
+
+    Processing the syntax part
+
+    */
+    for _,synprod := range grammarX.SyntaxPart.ProdList{
+        for _,synsymb := range synprod.Body.Symbols{
+            
+            synprodname := synsymb.String()
+            found := false
+            for t := repoitems.Front(); t!=nil ; t=t.Next(){
+                item := t.Value.(*repository.Repoitem)
+                realname := repository.GetRealname(item)
+                if realname==synprodname{
+                    found = true
+                    break
+                }else if fmt.Sprintf("\"%v\"",repository.GetRighthandside(item))==synprodname{
+                    found = true
+                    break
+                }
+            }
+            if !found{
+                if strings.HasPrefix(synprodname, "\"") && strings.HasSuffix(synprodname,"\""){
+                    prodid := synprodname[1:len(synprodname)-1]
+                    //patternobj,err := repository.NewRepoItem(prodid)
+                    _,err := repository.NewRepoItem(prodid)
+                    if err != nil{
+                        //ignoring token
+                        mylogger.Err(fmt.Sprintf("could not process %v. reason: %v",prodid, err))
+                        break
+                    }
+                    
+                    
+                    var someterm interface{}
+                    if prodid=="."{
+                        someterm = LexDot{}
+                    }else{
+                        
+                        chars := make([]LexCharLit, len(prodid))
+                        for _,char := range prodid{
+                            chars = append(chars, LexCharLit{Val:char, Lit:[]byte(char), s:string(char)})
+                        }
+                    }
+                    
+                    repository.SetRighthandside(patternobj,someterm)
+                    somescope := data[repository.GetRealname(patternobj)]
+                    if somescope!=""{
+                        repository.SetScope(patternobj,somescope)
+                    }else{
+                        repository.SetScope(patternobj, defaultscope)
+                    }
+
+                    repoitems.PushBack(patternobj)
+                }
+            }
+        }
+        fmt.Println()
+    }
+    
     if *verbose==1{
         mylogger.Inform("Generating uuid for syntax highlighting file.")
     }
@@ -158,9 +218,7 @@ func main() {
             listitemwithtype := listitem.Value.(*repository.Repoitem)
 
             realname := repository.GetRealname(listitemwithtype)
-            
             alternatives := repository.GetRighthandside(listitemwithtype).Alternatives
-
             regex := constructregexandfillgroups(alternatives) //we are extracting the regex for the  
             
             //testing if regex is okay
