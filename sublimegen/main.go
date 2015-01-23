@@ -158,6 +158,7 @@ func main() {
             listitemwithtype := listitem.Value.(*repository.Repoitem)
 
             realname := repository.GetRealname(listitemwithtype)
+            
             alternatives := repository.GetRighthandside(listitemwithtype).Alternatives
 
             regex := constructregexandfillgroups(alternatives) //we are extracting the regex for the  

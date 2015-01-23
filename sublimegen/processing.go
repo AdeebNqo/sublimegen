@@ -27,8 +27,11 @@ Function for disentangling a pattern to obtain it's regex
 */
 func constructregexandfillgroups(alternatives []*ast.LexAlt) string{
     regex := ""
-    for _,lexitem := range alternatives{
+    for index,lexitem := range alternatives{
         tmpregex := getregex(lexitem)
+        if index>0{
+            tmpregex = " | " + tmpregex
+        }
         regex += tmpregex
     }
     return regex
@@ -95,10 +98,12 @@ func reallygetregex(lexterm interface{}) string{
             from := reallygetregex(term.From)
             to := reallygetregex(term.To)
             retval := fmt.Sprintf("[%v-%v]", from, to)
+            
             return retval
         }
         case *ast.LexGroupPattern:{
             term := lexterm.(*ast.LexGroupPattern)
+            
             retval := "("
             for index,lexalt := range term.LexPattern.Alternatives{
                 if index>0{
@@ -110,9 +115,11 @@ func reallygetregex(lexterm interface{}) string{
             return retval
         }
         case *ast.LexOptPattern:{
+            
             term := lexterm.(*ast.LexOptPattern)
 
             alternatives := term.LexPattern.Alternatives
+
             if len(alternatives)==1{
                 terms := alternatives[0].Terms
                 if len(terms)==1{
@@ -125,7 +132,7 @@ func reallygetregex(lexterm interface{}) string{
                         }
                     }
                 }
-             }
+            }
             retval := "("
             for index,lexalt := range alternatives{
                 if index>0{
@@ -140,6 +147,7 @@ func reallygetregex(lexterm interface{}) string{
             term := lexterm.(*ast.LexRepPattern)
             
             alternatives := term.LexPattern.Alternatives
+            
             if len(alternatives)==1{
                 terms := alternatives[0].Terms
                 if len(terms)==1{
@@ -168,6 +176,7 @@ func reallygetregex(lexterm interface{}) string{
         }
         case *ast.LexRegDefId:{
             term := lexterm.(*ast.LexRegDefId)
+            
             for val := repoitems.Front(); val != nil; val = val.Next(){
                 rval := val.Value.(*repository.Repoitem)
                 if repository.GetRealname(rval)==term.Id{
