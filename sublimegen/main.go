@@ -278,7 +278,7 @@ func main() {
 
 
                 //creating pattern entry
-                patternentry := PatternEntry{Begin:begin, End:end,Name:repository.GetScope(listitemwithtype), EndCaptures:endcapturesmap, MorePatterns:middlearray}
+                patternentry := PatternEntry{Begin:begin, End:end,Name:repository.GetScope(listitemwithtype), EndCaptures:endcapturesmap, MorePatterns:middlearray, Comment:realname}
                 patternarray = append(patternarray, patternentry)
             }else{
 
@@ -321,7 +321,7 @@ func main() {
                     }
 
                     //creating pattern entry
-                    patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap}
+                    patternentry := PatternEntry{Match:regex,Name:repository.GetScope(listitemwithtype),Captures:capturesmap, Comment:realname}
                     patternarray = append(patternarray, patternentry)
                 }
             }

@@ -31,6 +31,8 @@ type PatternEntry struct{
     Captures map[string]CaptureEntryName `json:"captures,omitempty"`
     
     MorePatterns []PatternEntry `json:"patterns,omitempty"`
+    
+    Comment string `json:"_comment,omitempty"`
 }
 type CaptureEntryName struct{
     Name string `json:"name,omitempty"`
