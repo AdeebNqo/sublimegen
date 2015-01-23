@@ -65,33 +65,7 @@ func reallygetregex(lexterm interface{}) string{
             //The outside character classes are .^$*+?()[{\|
             //The inside character classes are ^-]\
             
-            if termasstring=="/"{
-                return "\\/"
-            }else if termasstring=="$"{
-                return "\\$"
-            }else if termasstring=="*"{
-                return "\\*"
-            }else if termasstring=="["{
-                return "\\["
-            }else if termasstring=="]"{
-                return "\\]"
-            }else if termasstring=="\\"{
-                return "\\\\"
-            }else if termasstring==" "{
-                return "[ ]"
-            }else if termasstring=="+" {
-                return "\\+"
-            }else if termasstring=="("{
-                return "\\("
-            }else if termasstring==")"{
-                return "\\)"
-            }else if termasstring=="{"{
-                return "\\{"
-            }else if termasstring=="}"{
-                return "\\}"
-            }
-            
-            return termasstring
+            return Escape(termasstring)
         }
         case *ast.LexCharRange:{
             term := lexterm.(*ast.LexCharRange)
@@ -205,6 +179,41 @@ func reallygetregex(lexterm interface{}) string{
         }
     }
     return ""
+}
+
+/*
+
+Method for escaping special regex characters
+
+*/
+
+func Escape(termasstring string) string{
+        if termasstring=="/"{
+            return "\\/"
+        }else if termasstring=="$"{
+            return "\\$"
+        }else if termasstring=="*"{
+            return "\\*"
+        }else if termasstring=="["{
+            return "\\["
+        }else if termasstring=="]"{
+            return "\\]"
+        }else if termasstring=="\\"{
+            return "\\\\"
+        }else if termasstring==" "{
+            return "[ ]"
+        }else if termasstring=="+" {
+            return "\\+"
+        }else if termasstring=="("{
+            return "\\("
+        }else if termasstring==")"{
+            return "\\)"
+        }else if termasstring=="{"{
+            return "\\{"
+        }else if termasstring=="}"{
+            return "\\}"
+        }
+        return termasstring
 }
 
 /*
