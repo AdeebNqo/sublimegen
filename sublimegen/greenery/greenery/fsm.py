@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+from multiprocessing import Process, Queue
+import time
 class fsm:
 	'''
 		A Finite State Machine or FSM has an alphabet and a set of states. At any
@@ -283,6 +284,16 @@ class fsm:
 			self.map
 		).reduce()
 
+
+	def parrfollow(self, start, end, queue, keys, current, symbol):
+		tmplist = []
+		for i in range(start,end+1):
+			prev = keys[i]
+			for state in current:
+				if self.map[prev][symbol] == state:
+					tmplist.append(prev)
+		queue.put(tmplist)
+
 	def __reversed__(self):
 		'''
 			Return a new FSM such that for every string that self accepts (e.g.
@@ -296,13 +307,47 @@ class fsm:
 
 		# Find every possible way to reach the current state-set
 		# using this symbol.
+
 		def follow(current, symbol):
-			return frozenset([
-				prev
-				for prev in self.map
-				for state in current
-				if self.map[prev][symbol] == state
-			])
+			maplength = len(self.map)
+			if maplength>10	:
+					resultq = Queue()
+
+					numprocesses = 8
+					keys = self.map.keys()
+					size = maplength/numprocesses
+
+					processes = []
+					
+					left = 0
+					right = size
+					index = 1
+					while right<=maplength-1:
+						processes.append(Process(target=self.parrfollow, args=(left, right, resultq, keys, current, symbol)))
+						left = right+1
+						index = index+1
+						right = index*size+(index-1)
+					if right>=maplength:
+						processes.append(Process(target=self.parrfollow, args=(left, maplength-1, resultq, keys, current, symbol)))
+
+					#processes.append(Process(target=self.parrfollow, args=(0, size, resultq, keys, current, symbol)))
+					#processes.append(Process(target=self.parrfollow, args=(size+1, 2*size+1, resultq, keys, current, symbol)))
+					#processes.append(Process(target=self.parrfollow, args=(2*size+2, 3*size+2, resultq, keys, current, symbol)))
+					#processes.append(Process(target=self.parrfollow, args=(3*size+3, maplength-1, resultq, keys, current, symbol)))
+					
+					for proc in processes:
+						proc.start()
+					for proc in processes:
+						proc.join()
+					return frozenset(resultq.get())
+			else:
+				fset = frozenset([
+					prev
+					for prev in self.map
+					for state in current
+					if self.map[prev][symbol] == state
+				])
+				return fset
 
 		# A state-set is final if the initial state is in it.
 		def final(state):
