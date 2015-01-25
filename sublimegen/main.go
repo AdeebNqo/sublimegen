@@ -33,9 +33,10 @@ import (
 )
 
 var name = flag.String("name", "default", "This is the name of the syntax.")
-var scope = flag.String("scope", "source.default", "This is the scope of the syntax file.")
+var scopeName = flag.String("scopeName", "source.default", "This is the scope of the syntax file.")
 var fileTypes = flag.String("fileTypes", "default", "Comma seperated list of file types.")
 var source = flag.String("source", "defaultinput", "the bnf file for the language you want to highlight.")
+var scopesfile = flag.String("scopes","scopes.json","the json file containing the scope selectors.")
 var doregexorder = flag.Int("orderregex", 1, "Program to attempt to order regexes in file. 0 for no, 1 for yes")
 var verbose = flag.Int("verbose", 1, "Output status and other progress information. 0 for no, 1 for yes")
 var mylogger = logger.Init(os.Stdout, os.Stdout, os.Stderr)
@@ -67,7 +68,7 @@ func main() {
 	defaultscope = fmt.Sprintf("source.%v", *fileTypes) //default scope
 	type config map[string]string
 	var data config
-	file, _ := ioutil.ReadFile("scopes.json")
+	file, _ := ioutil.ReadFile(*scopesfile)
 	err = json.Unmarshal(file, &data)
 	if err != nil {
 		mylogger.Err(fmt.Sprintf("Cannot parse json file with scopes because %v", err))
@@ -399,7 +400,7 @@ func main() {
 		}
 
 		//marshaling output into proper json
-		jsonsyntaxobj := JSONSyntax{Name: *name, ScopeName: *scope, FileTypes: strings.Split(*fileTypes, ","), Patterns: patternarray, Uuid: u.String()}
+		jsonsyntaxobj := JSONSyntax{Name: *name, ScopeName: *scopeName, FileTypes: strings.Split(*fileTypes, ","), Patterns: patternarray, Uuid: u.String()}
 		jsonsyntaxobj_result, err := json.MarshalIndent(jsonsyntaxobj, "", "  ")
 
 		if err != nil {
