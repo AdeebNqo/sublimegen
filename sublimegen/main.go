@@ -72,7 +72,6 @@ func main() {
 	err = json.Unmarshal(file, &data)
 	if err != nil {
 		mylogger.Err(fmt.Sprintf("Cannot parse json file with scopes because %v", err))
-		fmt.Printf("Err(%s) : cannot parse json file with scopes", err)
 		os.Exit(1)
 	}
 

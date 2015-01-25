@@ -438,7 +438,6 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
 			if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex {
 				tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
 				if tmpscope != defaultscope {
-					fmt.Println("regex:",capturedregex, ",matched item name:",repository.GetRealname(ritem.Value.(*repository.Repoitem)),",scope:",tmpscope)
 					return true, tmpscope
 				}
 			}
