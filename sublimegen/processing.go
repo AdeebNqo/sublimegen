@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/AdeebNqo/sublimegen/repository"
 	"strconv"
+	//"reflect"
 )
 
 //----------------------------------------------------------------------
@@ -34,6 +35,7 @@ func constructregexandfillgroups(alternatives []*ast.LexAlt) string {
 		}
 		regex += tmpregex
 	}
+	//regex += ")"
 	return regex
 }
 
@@ -100,7 +102,7 @@ func reallygetregex(lexterm interface{}) string {
 
 			alternatives := term.LexPattern.Alternatives
 
-			/*if len(alternatives)==1{
+			if len(alternatives)==1{
 			    terms := alternatives[0].Terms
 			    if len(terms)==1{
 			        switch terms[0].(type){
@@ -112,7 +114,7 @@ func reallygetregex(lexterm interface{}) string {
 			            }
 			        }
 			    }
-			}*/
+			}
 			retval := "("
 			for index, lexalt := range alternatives {
 				if index > 0 {
@@ -129,7 +131,7 @@ func reallygetregex(lexterm interface{}) string {
 
 			alternatives := term.LexPattern.Alternatives
 
-			/*if len(alternatives)==1{
+			if len(alternatives)==1{
 			   terms := alternatives[0].Terms
 			   if len(terms)==1{
 			       switch terms[0].(type){
@@ -141,7 +143,7 @@ func reallygetregex(lexterm interface{}) string {
 			           }
 			       }
 			   }
-			}*/
+			}
 			retval := "("
 			for index, lexalt := range alternatives {
 				if index > 0 {
@@ -174,12 +176,12 @@ func reallygetregex(lexterm interface{}) string {
 							retval += getregex(lexalt)
 						}
 						repository.Setregex(rval, retval)
-						return retval
-						//return fmt.Sprintf("(%s)",retval) //debug
+						//return retval
+						return fmt.Sprintf("(%s)",retval) //debug
 
 					} else {
-						return repository.Getregex(rval)
-						//return "("+repository.Getregex(rval)+")"
+						//return repository.Getregex(rval)
+						return "("+repository.Getregex(rval)+")"
 					}
 				}
 			}
@@ -295,6 +297,8 @@ func determinebeginandend(someregex string) (bool, string, string, string) {
 				}
 			}
 			break
+		}else if somechar=='|'{
+			return false, "", "", ""
 		}
 		//appending to the begin char
 		begin += string(somechar)
@@ -319,7 +323,7 @@ and the number is the number of the group within the regex.
 Please note that this method is made to be called kinda-recursively. The second list
 the levels are as follows:
 is the list of groups in a group level. for instance given the regex (A(B)(C)(D(E))))
-Level 1 -  (A(B)(C)(D(E))))
+Level 1 -  (A(B)(C)(D(E)))
 Level 2 - (B), (C), (D(E))
 Level 3 - (E)
 
@@ -333,7 +337,6 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 	matched, scope = retrievescopefromcapturegroup(currentregex, false)
 	//}
 	if matched {
-
 		groupcount += 1
 		scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
 		return scopecontainer, nextlayer
@@ -399,7 +402,6 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 							}
 							if !matched {
 								groupcount += 1
-								//scopecontainer = getgroups(biggest[1:len(biggest)-1], originalregex ,groupcount, alternatives, scopecontainer)
 								nextlayer.PushFront(biggest)
 							}
 							if len(biggest) < regexlength {
@@ -428,16 +430,17 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 Inefficient method for retrieving scope of regex
 */
 func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string) {
-	if activate {
-		capturedregex = capturedregex[1 : len(capturedregex)-1]
-	}
-	for ritem := repoitems.Front(); ritem != nil; ritem = ritem.Next() {
-		if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex {
-			tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
-			//fmt.Println("name:",repository.GetRealname(ritem.Value.(*repository.Repoitem)), ",scope:",tmpscope)
-			if tmpscope != defaultscope {
-				//fmt.Println("matched!")
-				return true, tmpscope
+	if capturedregex!=""{
+		if activate {
+			capturedregex = capturedregex[1 : len(capturedregex)-1]
+		}
+		for ritem := repoitems.Front(); ritem != nil; ritem = ritem.Next() {
+			if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex {
+				tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
+				if tmpscope != defaultscope {
+					fmt.Println("regex:",capturedregex, ",matched item name:",repository.GetRealname(ritem.Value.(*repository.Repoitem)),",scope:",tmpscope)
+					return true, tmpscope
+				}
 			}
 		}
 	}
