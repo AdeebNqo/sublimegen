@@ -2,6 +2,7 @@
     "_lineComment":"comment.line.walt",
     "_blockComment":"comment.block.walt",
     "_comment":"comment.block.walt",
+    
     "_decimal_digit":"constant.numeric.walt",
     "_octal_digit":"constant.numeric.walt",
     "_hex_digit":"constant.numeric.walt",
