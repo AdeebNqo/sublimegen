@@ -1,0 +1,24 @@
+{
+   "_double":"keyword.walt",
+   "_float":"keyword.walt",
+   "_int64":"keyword.walt",
+   "_uint64":"keyword.walt",
+   "_int32":"keyword.walt",
+   "_uint32":"keyword.walt",
+   "_bytes":"keyword.walt",
+   "_string":"keyword.walt",
+   "_bool":"keyword.walt",
+
+	"_lineComment":"comment.line.walt",
+	"_blockComment":"comment.block.walt",
+
+	"_raw_string":"string.interpolated.walt",
+	"_interpreted_string":"string.quoted.double.walt",
+   "_singed_int_lit":"constant.numeric.walt",
+   "_int_lit":"constant.numeric.walt",
+
+   "if":"keyword.walt",
+   "then":"keyword.walt",
+   "else":"keyword.walt",
+   "root":"keyword.walt"
+}
