@@ -152,12 +152,12 @@ func main() {
 				if realname == synprodname {
 					found = true
 					break
-				} else if fmt.Sprintf("\"%v\"", repository.GetRighthandside(item)) == synprodname {
+				} else if fmt.Sprintf("\"%v\"", realname) == synprodname {
 					found = true
 					break
 				}
 			}
-			if !found {
+			if found==false {
 				if strings.HasPrefix(synprodname, "\"") && strings.HasSuffix(synprodname, "\"") {
 					prodid := synprodname[1 : len(synprodname)-1]
 					patternobj, err := repository.NewRepoItem(prodid)
