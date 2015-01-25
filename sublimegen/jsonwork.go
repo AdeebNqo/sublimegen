@@ -9,7 +9,6 @@ package main
 import (
 "os/exec"
 "strings"
-"fmt"
 )
 
 //the following structs are used to produce a json file
