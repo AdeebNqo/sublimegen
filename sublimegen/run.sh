@@ -1,1 +1,1 @@
-rm -rf Walter; go clean; go build; ./sublimegen -fileTypes "walt" -name "Walter" -scope "source.walt" -source disney_languagefiles/asm.bnf -orderregex 1
+rm -rf Walter; go clean; go build; ./sublimegen -fileTypes "walt" -name "Walter" -scope "source.walt" -source disney_languagefiles/asm.bnf -orderregex 0
