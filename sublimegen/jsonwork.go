@@ -7,8 +7,9 @@ Copyright 2015 Zola Mahlaza <adeebnqo@gmail.com>
 package main
 
 import (
-//"os/exec"
-//"fmt"
+"os/exec"
+"strings"
+"fmt"
 )
 
 //the following structs are used to produce a json file
@@ -55,44 +56,30 @@ func (p patternarraytype) Less(i, j int) bool {
 		return p[i].Match < p[j].Match
 	}
 
-	/*pythonexecutable := "/tmp/pypy-2.4.0-linux64/bin/pypy"
+	pythonexecutable := "python" ///tmp/pypy-2.4.0-linux64/bin/pypy"
 
-	  cmd := exec.Command(pythonexecutable,"greenery/compare.py", p[i].Match, p[j].Match)
-	  output, _ := cmd.CombinedOutput()
-	  outputString  := string(output)
+	cmd := exec.Command(pythonexecutable,"greenery/compare.py", p[i].Match, p[j].Match)
+	output, err := cmd.CombinedOutput()
+	outputString  := string(output)
 
-	  if outputString=="subset"{
-	      return true
-	  }*/
+	if outputString=="subset"{
+		return true
+	}
 
-	return p[i].Match < p[j].Match
+	cmd2 := exec.Command(pythonexecutable,"greenery/compare.py",  p[j].Match, p[i].Match)
+	output2, err2 := cmd2.CombinedOutput()
+	output2String := string(output2)
 
-	/*cmd2 := exec.Command(pythonexecutable,"greenery/compare.py",  p[j].Match, p[i].Match)
-	  output2, err2 := cmd2.CombinedOutput()
-	  output2String := string(output2)
-
-	  if err==nil && err2==nil{
-	      outputString = strings.TrimSpace(outputString)
-	      output2String = strings.TrimSpace(output2String)
-	      if outputString=="notsubset" && output2String=="notsubset"{
-	          if one==two{
-	              return p[i].Match < p[j].Match
-	          }
-	          return  one<two
-	      }else if outputString=="subset"{
-	          return true
-	      }else if outputString=="notsubset"{
-	          return false
-	      }else{
-	          if one==two{
-	              return p[i].Match < p[j].Match
-	          }
-	          return  one<two
-	      }
-	  }else{
-	      if one==two{
+	if err==nil && err2==nil{
+	  outputString = strings.TrimSpace(outputString)
+	  output2String = strings.TrimSpace(output2String)
+	  if outputString=="notsubset" && output2String=="notsubset"{
 	          return p[i].Match < p[j].Match
-	      }
-	      return  one<two
-	  }*/
+	  }else if outputString=="subset"{
+	      return true
+	  }else if outputString=="notsubset"{
+	      return false
+	  }
+	}
+	return p[i].Match < p[j].Match
 }
