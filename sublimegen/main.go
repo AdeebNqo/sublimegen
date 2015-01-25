@@ -216,7 +216,9 @@ func main() {
 				alternatives := beforealternatives.Alternatives
 				regex = constructregexandfillgroups(alternatives) //we are extracting the regex for the
 			} else {
-				regex = realname
+				for _,char := range realname{
+					regex += Escape(string(char))
+				}
 			}
 
 			//testing if regex is okay
@@ -430,7 +432,6 @@ func main() {
 		err = exec.Command("python", "convertor.py", fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v.tmLanguage", *name)).Run()
 		if err != nil {
 			mylogger.Err(fmt.Sprintf("(Error): Could not convert json to plist.\n(Reason): %v", err))
-			//fmt.Println(fmt.Sprintf("(Error): Could not convert json to plist.\n(Reason): %v",err))
 			os.Exit(1)
 		} else {
 			if *verbose == 1 {
@@ -453,8 +454,6 @@ func main() {
 			err := os.RemoveAll(*name)
 			if err != nil {
 				mylogger.Err(fmt.Sprintf("Cannot remove old directory because %v", err))
-				//fmt.Println("(Error)Cannot remove old directory")
-				//fmt.Println("(Reason):",err)
 				os.Exit(1)
 			} else {
 				if *verbose == 1 {
@@ -467,8 +466,6 @@ func main() {
 		err0 := os.Mkdir(*name, 0775)
 		if err0 != nil {
 			mylogger.Err(fmt.Sprintf("Could not create folder for storing generated files because %v", err0))
-			//fmt.Println("(Error): Could not create folder for storing generated files")
-			//fmt.Println("(Reason):", err0)
 			os.Exit(1)
 		}
 
@@ -480,8 +477,6 @@ func main() {
 		err2 := os.Rename(fmt.Sprintf("%v.tmLanguage", *name), fmt.Sprintf("%v/%v.tmLanguage", *name, *name))
 		if err1 != nil || err2 != nil {
 			mylogger.Err(fmt.Sprintf("Could not move files because %v and/or %v", err1, err2))
-			//fmt.Println("(Error): Could not move files")
-			//fmt.Println("(Reason):", err1,"and/or", err2)
 			os.Exit(1)
 		}
 	}
