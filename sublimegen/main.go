@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/AdeebNqo/sublimegen/logger"
+	"log"
 	"github.com/AdeebNqo/sublimegen/repository"
 	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre" //(documentation: https://godoc.org/github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre)
 	"github.com/nu7hatch/gouuid"
@@ -39,10 +39,12 @@ var source = flag.String("source", "defaultinput", "the bnf file for the languag
 var scopesfile = flag.String("scopes","scopes.json","the json file containing the scope selectors.")
 var doregexorder = flag.Int("orderregex", 1, "Program to attempt to order regexes in file. 0 for no, 1 for yes")
 var verbose = flag.Int("verbose", 1, "Output status and other progress information. 0 for no, 1 for yes")
-var mylogger = logger.Init(os.Stdout, os.Stdout, os.Stderr)
 
 var repoitems *list.List
 var defaultscope string
+
+var errlog *log.Logger
+var infolog *log.Logger
 
 func main() {
 	flag.Parse() //parsing commandline flags
@@ -52,17 +54,19 @@ func main() {
 	srcBuffer, err := ioutil.ReadFile(*source)
 
 	if err != nil {
-		mylogger.Err(fmt.Sprintf("Cannot read file because %v", err))
-		os.Exit(1)
+		errlog.Fatalln(fmt.Sprintf("Cannot read file because %v", err))
 	}
 	scanner.Init(srcBuffer, token.FRONTENDTokens)
 	parser := parser.NewParser(parser.ActionTable, parser.GotoTable, parser.ProductionsTable, token.FRONTENDTokens)
 	grammar, err := parser.Parse(scanner)
 
 	if err != nil {
-		mylogger.Err(fmt.Sprintf("Parse error: %v", err))
-		os.Exit(1)
+		errlog.Fatalln(fmt.Sprintf("Parse error: %v", err))
 	}
+    
+    //initializing logging objects
+    errlog = log.New(os.Stdout,"Error: ",log.Ltime|log.Lshortfile)
+    infolog = log.New(os.Stderr,"Info: ",log.Ltime|log.Lshortfile)
 
 	//loading tokens and scopes
 	defaultscope = fmt.Sprintf("source.%v", *fileTypes) //default scope
@@ -71,8 +75,7 @@ func main() {
 	file, _ := ioutil.ReadFile(*scopesfile)
 	err = json.Unmarshal(file, &data)
 	if err != nil {
-		mylogger.Err(fmt.Sprintf("Cannot parse json file with scopes because %v", err))
-		os.Exit(1)
+		errlog.Fatalln(fmt.Sprintf("Cannot parse json file with scopes because %v", err))
 	}
 
 	//retrieving the tokens and productions from the
@@ -122,7 +125,7 @@ func main() {
 
 		if err != nil {
 			//ignoring token
-			mylogger.Err(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
+			infolog.Println(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
 			break
 		}
 		repository.SetRighthandside(patternobj, prod.LexPattern())
@@ -164,7 +167,7 @@ func main() {
 					//_,err := repository.NewRepoItem(prodid)
 					if err != nil {
 						//ignoring token
-						mylogger.Err(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
+						errlog.Fatalln(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
 						break
 					}
 					repository.SetRighthandside(patternobj, nil)
@@ -189,17 +192,15 @@ func main() {
 	}
 
 	if *verbose == 1 {
-		mylogger.Inform("Generating uuid for syntax highlighting file.")
+		infolog.Println("Generating uuid for syntax highlighting file.")
 	}
 	//generating uuid for syntax highlighting file
 	u, err := uuid.NewV4()
 	if err != nil {
 		//it was not possible to generated uuid, quiting...
-		mylogger.Err("Could not generate uuid.")
-		//fmt.Println("Could not generate uuid.")
-		os.Exit(1)
+		errlog.Fatalln("Could not generate uuid.")
 	} else {
-		mylogger.Inform("Finished generating uuid. Now processing bnf file...")
+		infolog.Println("Finished generating uuid. Now processing bnf file...")
 		//genating patterns since uuid has been successfully generated
 
 		//patternarray := make([]PatternEntry,1)
@@ -225,7 +226,7 @@ func main() {
 			regp, compileerr := pcre.Compile(regex, 0)
 			if compileerr != nil {
 				//regex is not compatile so skip it.
-				mylogger.Err(compileerr.String())
+				infolog.Println(compileerr.String())
 				continue
 			}
 
@@ -384,18 +385,18 @@ func main() {
 		}
 
 		if *verbose == 1 {
-			mylogger.Inform("Finished processing bnf file.")
+			infolog.Println("Finished processing bnf file.")
 		}
 
 		if *doregexorder == 1 {
 			//sorting regexes
-			mylogger.Inform("Sorting regexes...")
+			infolog.Println("Sorting regexes...")
 			sort.Sort(patternarray)
-			mylogger.Inform("Done sorting!")
+			infolog.Println("Done sorting!")
 		}
 
 		if *verbose == 1 {
-			mylogger.Inform("Transforming syntax highlighting data to json...")
+			infolog.Println("Transforming syntax highlighting data to json...")
 		}
 
 		//marshaling output into proper json
@@ -404,38 +405,32 @@ func main() {
 
 		if err != nil {
 			if *verbose == 1 {
-				mylogger.Err(fmt.Sprintf("Could not transform syntax highlighting data to json becase %v", err))
+				errlog.Fatalln(fmt.Sprintf("Could not transform syntax highlighting data to json becase %v", err))
 			}
-			//fmt.Println("we have a problem marshalling output.")
-			os.Exit(1)
 		} else {
 			if *verbose == 1 {
-				mylogger.Inform("done converting syntax highlighting data to json. Now saving json file...")
+				infolog.Println("done converting syntax highlighting data to json. Now saving json file...")
 			}
 			err := ioutil.WriteFile(fmt.Sprintf("%v.tmLanguage.json", *name), jsonsyntaxobj_result, 0644)
 			if err != nil {
-				mylogger.Err(fmt.Sprintf("We a problem writing to file because %v", err))
-				//fmt.Println("(Error): we have a problem writing to file.")
-				//fmt.Println("(Reason):", err)
-				os.Exit(1)
+				errlog.Fatalln(fmt.Sprintf("We a problem writing to file because %v", err))
 			} else {
 				if *verbose == 1 {
-					mylogger.Inform("json file saved.")
+					infolog.Println("json file saved.")
 				}
 			}
 		}
 
 		if *verbose == 1 {
-			mylogger.Inform("Converting json to plist...")
+			infolog.Println("Converting json to plist...")
 		}
 		//convert resulting json to a plist file and save it.
 		err = exec.Command("python", "convertor.py", fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v.tmLanguage", *name)).Run()
 		if err != nil {
-			mylogger.Err(fmt.Sprintf("(Error): Could not convert json to plist.\n(Reason): %v", err))
-			os.Exit(1)
+			errlog.Fatalln(fmt.Sprintf("Could not convert json to plist.\n(Reason): %v", err))
 		} else {
 			if *verbose == 1 {
-				mylogger.Inform("Finished converting json to plist!")
+				infolog.Println("Finished converting json to plist!")
 			}
 		}
 		//moving the files into a folder with the name provided as cmdline arg
@@ -449,15 +444,14 @@ func main() {
 		//removing old directory with the same name
 		if directoryexists {
 			if *verbose == 1 {
-				mylogger.Inform("Found old directory with same name as target directory, deleting...")
+				infolog.Println("Found old directory with same name as target directory, deleting...")
 			}
 			err := os.RemoveAll(*name)
 			if err != nil {
-				mylogger.Err(fmt.Sprintf("Cannot remove old directory because %v", err))
-				os.Exit(1)
+				errlog.Fatalln(fmt.Sprintf("Cannot remove old directory because %v", err))
 			} else {
 				if *verbose == 1 {
-					mylogger.Inform("Old directory with same name as target directory, deleted!")
+					infolog.Println("Old directory with same name as target directory, deleted!")
 				}
 			}
 		}
@@ -465,24 +459,22 @@ func main() {
 		//creating folder for syntax highlighting files
 		err0 := os.Mkdir(*name, 0775)
 		if err0 != nil {
-			mylogger.Err(fmt.Sprintf("Could not create folder for storing generated files because %v", err0))
-			os.Exit(1)
+			errlog.Fatalln(fmt.Sprintf("Could not create folder for storing generated files because %v", err0))
 		}
 
 		if *verbose == 1 {
-			mylogger.Inform("Moving files into new folder!")
+			infolog.Println("Moving files into new folder!")
 		}
 		//moving files into created folder
 		err1 := os.Rename(fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v/%v.tmLanguage.json", *name, *name))
 		err2 := os.Rename(fmt.Sprintf("%v.tmLanguage", *name), fmt.Sprintf("%v/%v.tmLanguage", *name, *name))
 		if err1 != nil || err2 != nil {
-			mylogger.Err(fmt.Sprintf("Could not move files because %v and/or %v", err1, err2))
-			os.Exit(1)
+			errlog.Fatalln(fmt.Sprintf("Could not move files because %v and/or %v", err1, err2))
 		}
 	}
 
 	if *verbose == 1 {
-		mylogger.Inform("Finished!")
+		infolog.Println("Finished!")
 	}
 	os.Exit(0)
 }
