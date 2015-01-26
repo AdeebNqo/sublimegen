@@ -1,13 +1,13 @@
 {
-   "_double":"keyword.walt",
-   "_float":"keyword.walt",
-   "_int64":"keyword.walt",
-   "_uint64":"keyword.walt",
-   "_int32":"keyword.walt",
-   "_uint32":"keyword.walt",
-   "_bytes":"keyword.walt",
-   "_string":"keyword.walt",
-   "_bool":"keyword.walt",
+   "_double":"entity.name.type.walt",
+   "_float":"entity.name.type.walt",
+   "_int64":"entity.name.type.walt",
+   "_uint64":"entity.name.type.walt",
+   "_int32":"entity.name.type.walt",
+   "_uint32":"entity.name.type.walt",
+   "_bytes":"entity.name.type.walt",
+   "_string":"entity.name.type.walt",
+   "_bool":"entity.name.type.walt",
 
 	"_lineComment":"comment.line.walt",
 	"_blockComment":"comment.block.walt",
@@ -17,8 +17,12 @@
    "_singed_int_lit":"constant.numeric.walt",
    "_int_lit":"constant.numeric.walt",
 
-   "if":"keyword.walt",
-   "then":"keyword.walt",
-   "else":"keyword.walt",
-   "root":"keyword.walt"
+   "if":"keyword.control.walt",
+   "then":"keyword.control.walt",
+   "else":"keyword.control.walt",
+   "root":"keyword.walt",
+
+   "_qualid":"variable.parameter.walt",
+   "_char_lit":"constant.character.walt",
+   "_escaped_char":"constant.character.escape.walt"
 }
