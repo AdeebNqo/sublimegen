@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from multiprocessing import Process, Queue, cpu_count
+from multiprocessing import Process, Queue, cpu_count, Lock
 import time
 class fsm:
 	'''
@@ -35,6 +35,10 @@ class fsm:
 			for symbol in self.alphabet:
 				assert symbol in self.map[state]
 				assert self.map[state][symbol] in self.states
+
+		#have to use this nonsense init since fsm is immutable
+		self.__dict__["parrfollowlist"     ] = [] # list that will contain items produced by processes
+		self.__dict__["proclock"     ] = Lock()  #lock to manage access to parrfollowlist
 
 	def accepts(self, input):
 		'''This is actually only used for unit testing purposes'''
@@ -285,14 +289,14 @@ class fsm:
 		).reduce()
 
 
-	def parrfollow(self, start, end, queue, keys, current, symbol):
-		tmplist = []
+	def parrfollow(self, start, end, keys, current, symbol):
 		for i in range(start,end+1):
 			prev = keys[i]
 			for state in current:
 				if self.map[prev][symbol] == state:
-					tmplist.append(prev)
-		#queue.put(tmplist)
+					self.proclock.acquire()
+					self.parrfollowlist.append(prev)
+					self.proclock.release()
 
 	def __reversed__(self):
 		'''
@@ -323,17 +327,18 @@ class fsm:
 					right = size
 					index = 1
 					while right<=maplength-1:
-						processes.append(Process(target=self.parrfollow, args=(left, right, resultq, keys, current, symbol)))
+						processes.append(Process(target=self.parrfollow, args=(left, right, keys, current, symbol)))
 						left = right+1
 						index = index+1
 						right = index*size+(index-1)
 					if right>=maplength:
-						processes.append(Process(target=self.parrfollow, args=(left, maplength-1, resultq, keys, current, symbol)))
-						
+						processes.append(Process(target=self.parrfollow, args=(left, maplength-1, keys, current, symbol)))
+
 					for proc in processes:
 						proc.start()
 					for proc in processes:
 						proc.join()
+					self.parrfollowlist[:] = []
 					return frozenset([]) #resultq.get())
 			else:
 				fset = frozenset([
