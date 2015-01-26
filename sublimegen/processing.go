@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"github.com/AdeebNqo/sublimegen/repository"
 	"strconv"
-	//"reflect"
+	"strings"
 )
 
 //----------------------------------------------------------------------
@@ -333,9 +333,9 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 	var matched bool
 	var scope string
 
-	//if currentregex==originalregex{
-	matched, scope = retrievescopefromcapturegroup(currentregex, false)
-	//}
+	if currentregex!=""{
+		matched, scope = retrievescopefromcapturegroup(currentregex, startandendwithrb(currentregex))
+	}
 	if matched {
 		groupcount += 1
 		scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
@@ -395,7 +395,7 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 							// else process the items within the braces. ||
 							//                                           \/
 							//fmt.Println(biggest, groupcount)
-							matched, scope := retrievescopefromcapturegroup(biggest, true)
+							matched, scope = retrievescopefromcapturegroup(biggest, startandendwithrb(biggest))
 							if matched {
 								groupcount += 1
 								scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
@@ -430,6 +430,7 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 Inefficient method for retrieving scope of regex
 */
 func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string) {
+
 	if capturedregex!=""{
 		if activate {
 			capturedregex = capturedregex[1 : len(capturedregex)-1]
@@ -444,4 +445,11 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
 		}
 	}
 	return false, ""
+}
+
+/*
+Method for determining if strings starts and ends with round braces
+*/
+func startandendwithrb(somestring string) bool{
+	return strings.HasPrefix(somestring,"(") && strings.HasSuffix(somestring,")")
 }
