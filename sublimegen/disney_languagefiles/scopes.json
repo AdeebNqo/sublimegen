@@ -75,5 +75,7 @@
     
     "_byte_elem":"constant.numeric.walt",
     
-    "bytes_lit":"constant.numeric.walt"
+    "bytes_lit":"constant.numeric.walt",
+
+    "space":"comment.block.walt"
 }
