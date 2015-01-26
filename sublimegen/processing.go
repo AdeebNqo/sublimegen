@@ -334,8 +334,10 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 	var scope string
 
 	if currentregex!=""{
+        //fmt.Println("X---X")
+        fmt.Println("curregex:",currentregex)
 		matched, scope = retrievescopefromcapturegroup(currentregex, false)
-        fmt.Println("checking whole regex: ",currentregex,",matched:",matched)
+        //fmt.Println("X---X")
 	}
 	if matched {
 		groupcount += 1
@@ -347,83 +349,100 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 		regexlength := len(currentregex)
 		stack := Stack{}
 
-	STARTBRACE:
-		for pos := 0; pos < regexlength; pos++ {
-			currcharacter := string(currentregex[pos])
-			if currcharacter == "(" {
-				if pos == 0 || string(currentregex[pos-1]) != "\\" {
+        hacked := false
+        pos := strings.Index(currentregex,"(")
+        for ;pos!= -1 && pos!=0 && currentregex[pos-1]=='\\';{
+            hacked = true
+            nextpos := strings.Index(currentregex[pos+1:],"(")
+            if nextpos == -1{
+                break
+            }else{
+                pos += 1+nextpos
+            }
+        }
+        
+        if pos!=-1{
+            count+=1
+            fmt.Println("start at pos: ",pos)
+            for innerindex:=pos+1; innerindex<regexlength; innerindex++{
+                innercurrcharacter := string(currentregex[innerindex])
+                if innercurrcharacter=="("{
+                    //found brace inner group, start by checking if it's not escaped
+                    if innerindex-1<0 || currentregex[innerindex-1]!='\\'{
+                        //it is not escaped
+                        count +=1
+                        stack.Push(innercurrcharacter)
+                        //fmt.Println(innercurrcharacter,count) //debug
+                    }else{
+                        stack.Push(innercurrcharacter)
+                    }
+                }else if innercurrcharacter==")"{
+                    if innerindex+1<regexlength{
+                        //still within bounds of regex, that is, there is a next char
+                        if currentregex[innerindex+1]=='*' || currentregex[innerindex+1]=='+' || currentregex[innerindex+1]=='?'{
+                            //do decrease count, push it in
+                            count -= 1
+                            stack.Push(innercurrcharacter)
+                        }else{
+                            count -= 1
+                            if count!=0{
+                                stack.Push(innercurrcharacter)
+                            }
+                        }
+                    }else{
+                        count-=1;
+                    }
+                }else{
+                    stack.Push(innercurrcharacter)
+                }
+                if count==0{
+                    //the contents of the stack are the group elements
 
-					//found starting brace
-					count += 1
-					stack.Push(currcharacter)
-					//pushing in the rest till we find matching brace
-					for innerindex := pos + 1; innerindex < regexlength; innerindex++ {
+                    biggest := ""
+                    for {
+                        head := stack.Pop()
+                        if head == nil {
+                            break
+                        }
+                        biggest = head.(string) + biggest
+                    }
 
-						currcharacter2 := string(currentregex[innerindex])
-						if currcharacter2 == ")" {
-							if innerindex != 0 || string(currentregex[innerindex-1]) != "\\" {
-								count -= 1
-								stack.Push(currcharacter2)
+                    //fmt.Println("X---X")
+                    fmt.Println("group: ",biggest)
+                    //trying to see if group can be matched
+                    matched, scope = retrievescopefromcapturegroup(biggest, false)
+                    fmt.Println("matched:",matched)
+                    //fmt.Println("X---X")
 
-								//checking if following character is a *, + or ?
-								if innerindex+1 < len(currentregex) {
-									charafterrbrace := string(currentregex[innerindex+1])
-									if charafterrbrace == "*" || charafterrbrace == "+" || charafterrbrace == "?" {
-										innerindex += 1
-										stack.Push(charafterrbrace)
-									}
-								}
-							}
-						} else if currcharacter2 == "(" {
-							if innerindex == 0 || string(currentregex[innerindex-1]) != "\\" {
-								count += 1
-								stack.Push(currcharacter2)
-							}
-						} else {
-							stack.Push(currcharacter2)
-						}
-						if count == 0 {
-							biggest := ""
-							for {
-								head := stack.Pop()
-								if head == nil {
-									break
-								}
-								biggest = head.(string) + biggest
-							}
-							//TODO: Check if this matches any special definitions.
-							// if it doesnt, and there is still other braces after the  the closing one -- process the following ones.
-							// else process the items within the braces. ||
-							//                                           \/
-							//fmt.Println(biggest, groupcount)
-							matched, scope = retrievescopefromcapturegroup(biggest, false)
-                            fmt.Println("biggest:",biggest,",matched:",matched)
-                            
-							if matched {
-								groupcount += 1
-								scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
-							}
-							if !matched {
-								groupcount += 1
-								nextlayer.PushFront(biggest)
-							}
-							if len(biggest) < regexlength {
-								scopecontainer, nextlayer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, scopecontainer, nextlayer)
-							}
-							if nextlayer.Len() != 0 {
-								for it := nextlayer.Back(); it != nil; it = it.Prev() {
-									nextlayer.Remove(it)
-									itvalue := it.Value.(string)
-									scopecontainer, nextlayer = getgroups(itvalue[1:len(itvalue)-1], originalregex, groupcount, scopecontainer, nextlayer)
-								}
-							}
-							break STARTBRACE
-						}
-					}
-					break
-				}
-			}
-		}
+                    if matched {
+                            groupcount += 1
+                            scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
+                    }
+                    if !matched {
+                        groupcount += 1
+                        nextlayer.PushFront(biggest)
+                        fmt.Println("added ff to next layer:",biggest)
+                    }
+                    if hacked{
+                        currentregex = ""
+                        hacked = false
+                    }
+                    if len(biggest) < regexlength {
+                        if len(currentregex)>0{
+                            scopecontainer, nextlayer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, scopecontainer, nextlayer)
+                        }
+                    }
+                    if nextlayer.Len() != 0 {
+                        for it := nextlayer.Back(); it != nil; it = it.Prev() {
+                            nextlayer.Remove(it)
+                            itvalue := it.Value.(string)
+                            scopecontainer, nextlayer = getgroups(itvalue, originalregex, groupcount, scopecontainer, nextlayer)
+                        }
+                    }
+                    break
+                }
+            }
+        }
 	}
 	return scopecontainer, nextlayer
 }
@@ -435,11 +454,9 @@ Inefficient method for retrieving scope of regex
 func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string) {
 
 	if capturedregex!=""{
-        fmt.Println("cut/uncut version1:",capturedregex)
 		if activate==true {
 			capturedregex = capturedregex[1 : len(capturedregex)-1]
 		}
-        fmt.Println("cut/uncut version2:",capturedregex)
 		for ritem := repoitems.Front(); ritem != nil; ritem = ritem.Next() {
             
 			if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex {

@@ -341,6 +341,7 @@ func main() {
 			} else {
 
 				if !strings.HasPrefix(realname, "_") {
+                    fmt.Println("---------------START-------------------") //debug
 					//getting groups
 					groups, _ := getgroups(regex, regex, 0, list.New().Init(), list.New().Init())
 
@@ -364,8 +365,9 @@ func main() {
 						donotskip = !(skippingtruefrontvalue == skippingscope)
 					}
 
-                    fmt.Println(regex)
-                    fmt.Println("num groups: ",groups.Len())
+                    fmt.Println(regex) //debug
+                    fmt.Println("num groups: ",groups.Len()) //debug
+                    fmt.Println("----------------END------------------") //debug
 					//adding items to "captures"
 					if numberofgroups > 0 && regp.Groups() != 0 && donotskip {
 						for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next() {
