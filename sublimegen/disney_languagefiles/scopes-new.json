@@ -22,7 +22,7 @@
    "else":"keyword.control.walt",
    "root":"keyword.walt",
 
-   "_qualid":"variable.parameter.walt",
+   "id":"variable.parameter.walt",
    "_char_lit":"constant.character.walt",
    "_escaped_char":"constant.character.escape.walt"
 }
