@@ -292,7 +292,7 @@ class fsm:
 			for state in current:
 				if self.map[prev][symbol] == state:
 					tmplist.append(prev)
-		queue.put(tmplist)
+		#queue.put(tmplist)
 
 	def __reversed__(self):
 		'''
@@ -311,7 +311,7 @@ class fsm:
 		def follow(current, symbol):
 			maplength = len(self.map)
 			if maplength>10	:
-					resultq = Queue()
+					#resultq = Queue()
 
 					numprocesses = cpu_count()
 					keys = self.map.keys()
@@ -329,17 +329,12 @@ class fsm:
 						right = index*size+(index-1)
 					if right>=maplength:
 						processes.append(Process(target=self.parrfollow, args=(left, maplength-1, resultq, keys, current, symbol)))
-
-					#processes.append(Process(target=self.parrfollow, args=(0, size, resultq, keys, current, symbol)))
-					#processes.append(Process(target=self.parrfollow, args=(size+1, 2*size+1, resultq, keys, current, symbol)))
-					#processes.append(Process(target=self.parrfollow, args=(2*size+2, 3*size+2, resultq, keys, current, symbol)))
-					#processes.append(Process(target=self.parrfollow, args=(3*size+3, maplength-1, resultq, keys, current, symbol)))
-					
+						
 					for proc in processes:
 						proc.start()
 					for proc in processes:
 						proc.join()
-					return frozenset(resultq.get())
+					return frozenset([]) #resultq.get())
 			else:
 				fset = frozenset([
 					prev
