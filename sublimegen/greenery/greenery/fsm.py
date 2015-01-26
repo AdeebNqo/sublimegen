@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, cpu_count
 import time
 class fsm:
 	'''
@@ -313,7 +313,7 @@ class fsm:
 			if maplength>10	:
 					resultq = Queue()
 
-					numprocesses = 8
+					numprocesses = cpu_count()
 					keys = self.map.keys()
 					size = maplength/numprocesses
 
