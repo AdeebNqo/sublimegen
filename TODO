@@ -37,3 +37,5 @@ it is not there.[Done]
 15. Update s-lang scopes file and bnf file.
 
 16. Parrallelize follow in fsm.py:299[DONE]
+
+17. Fix bug in the group identification method, processing (getgroups)

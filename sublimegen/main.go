@@ -122,7 +122,6 @@ func main() {
 
 		//creating an object that will convert the production/token to the appropriate item for the json patterns field
 		patternobj, err := repository.NewRepoItem(prodid)
-
 		if err != nil {
 			//ignoring token
 			infolog.Println(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
@@ -300,6 +299,7 @@ func main() {
 						}
 					}
 				}
+
 				//---------------------------------------------------------------------------------------------
 
 				//adding middle parts
@@ -364,10 +364,13 @@ func main() {
 						donotskip = !(skippingtruefrontvalue == skippingscope)
 					}
 
+                    fmt.Println(regex)
+                    fmt.Println("num groups: ",groups.Len())
 					//adding items to "captures"
 					if numberofgroups > 0 && regp.Groups() != 0 && donotskip {
 						for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next() {
 							val := listitemX.Value.(string)
+                            fmt.Println("val is :",val) //debug
 							lastindex := strings.LastIndex(val, "|")
 							if lastindex > -1 {
 								scopename := val[0:lastindex]
@@ -376,7 +379,8 @@ func main() {
 							}
 						}
 					}
-
+                    fmt.Println() //debug
+                    fmt.Println() //debug
 					//creating pattern entry
 					patternentry := PatternEntry{Match: regex, Name: repository.GetScope(listitemwithtype), Captures: capturesmap, Comment: realname}
 					patternarray = append(patternarray, patternentry)

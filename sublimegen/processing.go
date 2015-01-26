@@ -31,7 +31,7 @@ func constructregexandfillgroups(alternatives []*ast.LexAlt) string {
 	for index, lexitem := range alternatives {
 		tmpregex := getregex(lexitem)
 		if index > 0 {
-			tmpregex = " | " + tmpregex
+			tmpregex = "|" + tmpregex
 		}
 		regex += tmpregex
 	}
@@ -334,7 +334,8 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 	var scope string
 
 	if currentregex!=""{
-		matched, scope = retrievescopefromcapturegroup(currentregex, startandendwithrb(currentregex))
+		matched, scope = retrievescopefromcapturegroup(currentregex, false)
+        fmt.Println("checking whole regex: ",currentregex,",matched:",matched)
 	}
 	if matched {
 		groupcount += 1
@@ -395,7 +396,9 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 							// else process the items within the braces. ||
 							//                                           \/
 							//fmt.Println(biggest, groupcount)
-							matched, scope = retrievescopefromcapturegroup(biggest, startandendwithrb(biggest))
+							matched, scope = retrievescopefromcapturegroup(biggest, false)
+                            fmt.Println("biggest:",biggest,",matched:",matched)
+                            
 							if matched {
 								groupcount += 1
 								scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
@@ -432,10 +435,13 @@ Inefficient method for retrieving scope of regex
 func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string) {
 
 	if capturedregex!=""{
-		if activate {
+        fmt.Println("cut/uncut version1:",capturedregex)
+		if activate==true {
 			capturedregex = capturedregex[1 : len(capturedregex)-1]
 		}
+        fmt.Println("cut/uncut version2:",capturedregex)
 		for ritem := repoitems.Front(); ritem != nil; ritem = ritem.Next() {
+            
 			if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex {
 				tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
 				if tmpscope != defaultscope {
