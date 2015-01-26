@@ -1,0 +1,1 @@
+rm -rf Walter; go clean; go build; ./sublimegen -fileTypes "walt" -name "Walter" -scopeName "source.walt" -source disney_languagefiles/asm.bnf -scopes disney_languagefiles/scopes-new.json -orderregex 0
