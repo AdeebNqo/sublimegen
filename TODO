@@ -40,5 +40,6 @@ it is not there.[Done]
 
 17. Fix bug in the group identification method, processing (getgroups) [FIXED]
 
-17. Fix bug in group numbering. [FIXED]
+18. Fix bug in group numbering. [FIXED]
 
+19. Fix bug: in processing -- regex == currenetregex ignoring some regular expressions
