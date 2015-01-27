@@ -335,122 +335,143 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 
 	if currentregex!=""{
         //fmt.Println("X---X")
-        fmt.Println("curregex:",currentregex)
 		matched, scope = retrievescopefromcapturegroup(currentregex, false)
-        fmt.Println("matched:",matched)
         //fmt.Println("X---X")
 	}
 	if matched {
 		groupcount += 1
 		scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
 		return scopecontainer, nextlayer
-	} else {
+	} else{
+        
+        //identifying first opening brace which is not escaped
+        bracefound := false
+        var tmppos int
+        prevregex := ""
+        notprevregex := ""
+        for braceindex:=0;!bracefound;braceindex++{
+            if braceindex==0{
+            	notprevregex = currentregex
+            }
 
-		count := 0
-		regexlength := len(currentregex)
-		stack := Stack{}
+            tmppos = strings.Index(notprevregex, "(")
 
-        hacked := false
-        pos := strings.Index(currentregex,"(")
-        for ;pos!= -1 && pos!=0 && currentregex[pos-1]=='\\';{
-            hacked = true
-            nextpos := strings.Index(currentregex[pos+1:],"(")
-            if nextpos == -1{
-                break
+            if tmppos==-1{
+            	//no more braces
+            	break
+            }
+            //checking if found brace is not escaped
+            escapechars := ""
+            for braceindex2:=tmppos-1;braceindex2>0;braceindex2--{
+            	if notprevregex[braceindex2]=='\\'{
+            		escapechars += string(notprevregex[braceindex2])
+            	}else{
+            		break
+            	}
+            }
+            //checking if escaped
+            length := len(escapechars)
+            if length%2==0{
+            	//not escaped
+            	bracefound = true
+            	//TODO: set proper value of tmppos
             }else{
-                pos += 1+nextpos
+            	//the brace has been escaped
+            	prevregex = notprevregex[:tmppos+1]
+            	notprevregex = notprevregex[tmppos:]
             }
         }
-        
-        if pos!=-1{
-            count+=1
-            fmt.Println("start at pos: ",pos)
-            for innerindex:=pos+1; innerindex<regexlength; innerindex++{
-                innercurrcharacter := string(currentregex[innerindex])
-                if innercurrcharacter=="("{
-                    //found brace inner group, start by checking if it's not escaped
-                    if innerindex-1<0 || currentregex[innerindex-1]!='\\'{
-                        //it is not escaped
-                        count +=1
-                        stack.Push(innercurrcharacter)
-                        //fmt.Println(innercurrcharacter,count) //debug
-                    }else{
-                        stack.Push(innercurrcharacter)
-                    }
-                }else if innercurrcharacter==")"{
-                    if innerindex+1<regexlength{
-                        //still within bounds of regex, that is, there is a next char
-                        if currentregex[innerindex+1]=='*' || currentregex[innerindex+1]=='+' || currentregex[innerindex+1]=='?'{
-                            //do decrease count, push it in
-                            count -= 1
-                            
-                            //TODO: Neeed to check if the only captured thing is the (*,?,+)'ed thing because if it is then we need to change pos to something further
-                            if count!=0{
-                                stack.Push(innercurrcharacter)
-                            }
-                        }else{
-                            count -= 1
-                            if count!=0{
-                                stack.Push(innercurrcharacter)
+        pos := tmppos+len(prevregex)
+        fmt.Println("pos:",pos)
+        if pos != -1 {
+            regexlength := len(currentregex)
+            count := 1 // count of how many braces we have encountered
+            stack := &Stack{}
+
+            //identififying group
+            stack.Push('(')
+            tmpgroup := "("
+            for charindex:=pos+1; charindex<regexlength; charindex++{
+                    //building group
+                    if currentregex[charindex] == '('{
+                        //checking if opening brace is escaped
+                        escapechars := ""
+                        for escapedcheckindex:=charindex-1;escapedcheckindex>0;escapedcheckindex--{
+                            if currentregex[escapedcheckindex]=='\\'{
+                                escapechars += string('\\')
+                            }else{
+                                break
                             }
                         }
-                    }else{
-                        count-=1;
-                    }
-                }else{
-                    stack.Push(innercurrcharacter)
-                }
-                if count==0{
-                    //the contents of the stack are the group elements
-
-                    biggest := ""
-                    for {
-                        head := stack.Pop()
-                        if head == nil {
-                            break
+                        length := len(escapechars)
+                        if length%2==0{
+                            //not escaped
+                            count += 1
                         }
-                        biggest = head.(string) + biggest
+                    }else if currentregex[charindex]==')'{
+                        //checking if opening brace is escaped
+                        escapechars := ""
+                        for escapedcheckindex:=charindex-1;escapedcheckindex>0;escapedcheckindex--{
+                            if currentregex[escapedcheckindex]=='\\'{
+                                escapechars += string('\\')
+                            }else{
+                                break
+                            }
+                        }
+                        length := len(escapechars)
+                        if length%2==0{
+                            //not escaped
+                            count -= 1
+                        }
+                        
+                        //if charindex+1<regexlength && currentregex[charindex+1]=='*' || currentregex[charindex+1]=='+' || currentregex[charindex+1]=='?'{
+
+                        //}
                     }
-
-                    //fmt.Println("X---X")
-                    fmt.Println("group: ",biggest)
-                    //trying to see if group can be matched
-                    matched, scope = retrievescopefromcapturegroup(biggest, false)
-                    fmt.Println("matched:",matched)
-                    //fmt.Println("X---X")
-
-                    if matched {
+                    stack.Push(currentregex[charindex])
+                    tmpgroup += string(currentregex[charindex])
+                
+                    if count == 0 {
+                        fmt.Println("group:",tmpgroup)
+                        
+                        //seeing if largest group can be matched to a scope selector
+                        matched, scope = retrievescopefromcapturegroup(tmpgroup, true)
+                        if matched {
                             groupcount += 1
                             scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
-                    }
-                    if !matched {
-                        groupcount += 1
-                        nextlayer.PushFront(biggest)
-                        fmt.Println("added ff to next layer:",biggest)
-                    }
-                    if hacked{
-                        currentregex = ""
-                        hacked = false
-                    }
-                    if len(biggest) < regexlength {
-                        if len(currentregex)>0{
-                            scopecontainer, nextlayer = getgroups(currentregex[innerindex+1:], originalregex, groupcount, scopecontainer, nextlayer)
                         }
-                    }
-                    if nextlayer.Len() != 0 {
-                        for it := nextlayer.Back(); it != nil; it = it.Prev() {
-                            nextlayer.Remove(it)
-                            itvalue := it.Value.(string)
-                            scopecontainer, nextlayer = getgroups(itvalue, originalregex, groupcount, scopecontainer, nextlayer)
+                        if !matched {
+                            groupcount += 1
+                            nextlayer.PushFront(tmpgroup)
                         }
+                        
+                        if charindex+1<regexlength{
+                            //processing reset of regex
+                            scopecontainer, nextlayer = getgroups(currentregex[charindex+1:], originalregex, groupcount, scopecontainer, nextlayer)
+                        }
+                        break
                     }
-                    break
-                }
             }
         }
-	}
+    }
 	return scopecontainer, nextlayer
 }
+
+func AllEscaped(somestring string) bool{
+    stack := &Stack{}
+    for _,char :=range somestring{
+        if char=='\\'{
+            stack.Push(char)
+        }else{
+            curchar := stack.Pop()
+            if curchar != '\\'{
+                return false
+            }
+        }
+    }
+    return true
+}
+
 
 /*
 
@@ -458,6 +479,7 @@ Inefficient method for retrieving scope of regex
 */
 func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string) {
 
+    fmt.Println("testing match of regex ===> ",capturedregex) //debug
 	if capturedregex!=""{
 		if activate==true {
 			capturedregex = capturedregex[1 : len(capturedregex)-1]
@@ -467,11 +489,13 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
 			if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex {
 				tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
 				if tmpscope != defaultscope {
+                    fmt.Println("matched: true, scope:",tmpscope) //debug
 					return true, tmpscope
 				}
 			}
 		}
 	}
+    fmt.Println("matched: false") //debug
 	return false, ""
 }
 
