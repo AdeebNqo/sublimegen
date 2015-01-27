@@ -19,7 +19,7 @@ To fix or not fix? [FIXED]
 
 7. Remove alternatives as argument in getgroups function.[DONE]
 
-8. Order regexes properly
+8. Order regexes properly [DONE]
 
 9. Organize code -- make it look cleaner
 
@@ -38,4 +38,4 @@ it is not there.[Done]
 
 16. Parrallelize follow in fsm.py:299[DONE]
 
-17. Fix bug in the group identification method, processing (getgroups)
+17. Fix bug in the group identification method, processing (getgroups) [FIXED]
