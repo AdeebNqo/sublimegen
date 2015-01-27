@@ -102,18 +102,20 @@ func reallygetregex(lexterm interface{}) string {
 
 			alternatives := term.LexPattern.Alternatives
 
-			if len(alternatives)==1{
-			    terms := alternatives[0].Terms
-			    if len(terms)==1{
-			        switch terms[0].(type){
-			            case *ast.LexCharLit:{
-			                return fmt.Sprintf("%v?", getregex(alternatives[0]))
-			            }
-			            case *ast.LexDot:{
-			                return fmt.Sprintf("%v?", getregex(alternatives[0]))
-			            }
-			        }
-			    }
+			if len(alternatives) == 1 {
+				terms := alternatives[0].Terms
+				if len(terms) == 1 {
+					switch terms[0].(type) {
+					case *ast.LexCharLit:
+						{
+							return fmt.Sprintf("%v?", getregex(alternatives[0]))
+						}
+					case *ast.LexDot:
+						{
+							return fmt.Sprintf("%v?", getregex(alternatives[0]))
+						}
+					}
+				}
 			}
 			retval := "("
 			for index, lexalt := range alternatives {
@@ -131,18 +133,20 @@ func reallygetregex(lexterm interface{}) string {
 
 			alternatives := term.LexPattern.Alternatives
 
-			if len(alternatives)==1{
-			   terms := alternatives[0].Terms
-			   if len(terms)==1{
-			       switch terms[0].(type){
-			           case *ast.LexCharLit:{
-			               return fmt.Sprintf("%v*", getregex(alternatives[0]))
-			           }
-			           case *ast.LexDot:{
-			               return fmt.Sprintf("%v*", getregex(alternatives[0]))
-			           }
-			       }
-			   }
+			if len(alternatives) == 1 {
+				terms := alternatives[0].Terms
+				if len(terms) == 1 {
+					switch terms[0].(type) {
+					case *ast.LexCharLit:
+						{
+							return fmt.Sprintf("%v*", getregex(alternatives[0]))
+						}
+					case *ast.LexDot:
+						{
+							return fmt.Sprintf("%v*", getregex(alternatives[0]))
+						}
+					}
+				}
 			}
 			retval := "("
 			for index, lexalt := range alternatives {
@@ -177,11 +181,11 @@ func reallygetregex(lexterm interface{}) string {
 						}
 						repository.Setregex(rval, retval)
 						//return retval
-						return fmt.Sprintf("(%s)",retval) //debug
+						return fmt.Sprintf("(%s)", retval) //debug
 
 					} else {
 						//return repository.Getregex(rval)
-						return "("+repository.Getregex(rval)+")"
+						return "(" + repository.Getregex(rval) + ")"
 					}
 				}
 			}
@@ -297,7 +301,7 @@ func determinebeginandend(someregex string) (bool, string, string, string) {
 				}
 			}
 			break
-		}else if somechar=='|'{
+		} else if somechar == '|' {
 			return false, "", "", ""
 		}
 		//appending to the begin char
@@ -333,145 +337,172 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 	var matched bool
 	var scope string
 
-	if currentregex!=""{
-        //fmt.Println("X---X")
+	if currentregex != "" {
+		//fmt.Println("X---X")
 		matched, scope = retrievescopefromcapturegroup(currentregex, false)
-        //fmt.Println("X---X")
+		//fmt.Println("X---X")
 	}
 	if matched {
 		groupcount += 1
 		scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
 		return scopecontainer, nextlayer
-	} else{
-        
-        //identifying first opening brace which is not escaped
-        bracefound := false
-        var tmppos int
-        prevregex := ""
-        notprevregex := ""
-        for braceindex:=0;!bracefound;braceindex++{
-            if braceindex==0{
-            	notprevregex = currentregex
-            }
+	} else {
 
-            tmppos = strings.Index(notprevregex, "(")
+		//identifying first opening brace which is not escaped
+		bracefound := false
+		var tmppos int
+		prevregex := ""
+		notprevregex := ""
+		for braceindex := 0; !bracefound; braceindex-- {
+			if braceindex == 0 {
+				notprevregex = currentregex
+			}
 
-            if tmppos==-1{
-            	//no more braces
-            	break
-            }
-            //checking if found brace is not escaped
-            escapechars := ""
-            for braceindex2:=tmppos-1;braceindex2>0;braceindex2--{
-            	if notprevregex[braceindex2]=='\\'{
-            		escapechars += string(notprevregex[braceindex2])
-            	}else{
-            		break
-            	}
-            }
-            //checking if escaped
-            length := len(escapechars)
-            if length%2==0{
-            	//not escaped
-            	bracefound = true
-            	//TODO: set proper value of tmppos
-            }else{
-            	//the brace has been escaped
-            	prevregex = notprevregex[:tmppos+1]
-            	notprevregex = notprevregex[tmppos:]
-            }
-        }
-        pos := tmppos+len(prevregex)
-        fmt.Println("pos:",pos)
-        if pos != -1 {
-            regexlength := len(currentregex)
-            count := 1 // count of how many braces we have encountered
-            stack := &Stack{}
+			tmppos = strings.Index(notprevregex, "(")
 
-            //identififying group
-            stack.Push('(')
-            tmpgroup := "("
-            for charindex:=pos+1; charindex<regexlength; charindex++{
-                    //building group
-                    if currentregex[charindex] == '('{
-                        //checking if opening brace is escaped
-                        escapechars := ""
-                        for escapedcheckindex:=charindex-1;escapedcheckindex>0;escapedcheckindex--{
-                            if currentregex[escapedcheckindex]=='\\'{
-                                escapechars += string('\\')
-                            }else{
-                                break
-                            }
-                        }
-                        length := len(escapechars)
-                        if length%2==0{
-                            //not escaped
+			if tmppos == -1 {
+				//no more braces
+				break
+			}
+			//checking if found brace is not escaped
+			escapechars := ""
+
+			for braceindex2 := tmppos + len(prevregex) - 1; braceindex2 >= 0; braceindex2-- {
+				if currentregex[braceindex2] == '\\' {
+					escapechars += string('\\')
+				} else {
+					break
+				}
+			}
+			//checking if escaped
+			length := len(escapechars)
+			if length%2 == 0 {
+				//not escaped
+				bracefound = true
+			} else {
+				//the brace has been escaped
+				bracefound = false
+				prevregex = notprevregex[:tmppos+1]
+				notprevregex = notprevregex[tmppos:]
+			}
+			//fmt.Println("current pos:", tmppos+len(prevregex))
+		}
+		//found brace position
+		pos := tmppos + len(prevregex)
+		//fmt.Println("pos:", pos)
+
+		if pos != -1 {
+			//if a brace exists
+			regexlength := len(currentregex)
+			count := 1 // count of how many braces we have encountered
+			stack := &Stack{}
+
+			//identififying group
+			stack.Push('(')
+			tmpgroup := "("
+			for charindex := pos + 1; charindex < regexlength; charindex++ {
+
+				//building group
+				if currentregex[charindex] == '(' {
+					//checking if opening brace is escaped
+					escapechars := ""
+					for escapedcheckindex := charindex - 1; escapedcheckindex > 0; escapedcheckindex-- {
+						if currentregex[escapedcheckindex] == '\\' {
+							escapechars += string('\\')
+						} else {
+							break
+						}
+					}
+					length := len(escapechars)
+					if length%2 == 0 {
+						//not escaped
+                        if count == -1{
+                            count = 1
+                        }else{
                             count += 1
                         }
-                    }else if currentregex[charindex]==')'{
-                        //checking if opening brace is escaped
-                        escapechars := ""
-                        for escapedcheckindex:=charindex-1;escapedcheckindex>0;escapedcheckindex--{
-                            if currentregex[escapedcheckindex]=='\\'{
-                                escapechars += string('\\')
-                            }else{
-                                break
+					}
+				} else if currentregex[charindex] == ')' {
+					//checking if opening brace is escaped
+					escapechars := ""
+					for escapedcheckindex := charindex - 1; escapedcheckindex > 0; escapedcheckindex-- {
+						if currentregex[escapedcheckindex] == '\\' {
+							escapechars += string('\\')
+						} else {
+							break
+						}
+					}
+					length := len(escapechars)
+					if length%2 == 0 {
+						//not escaped
+						count -= 1
+						if charindex+1 < regexlength && (currentregex[charindex+1] == '*' || currentregex[charindex+1] == '+' || currentregex[charindex+1] == '?') {
+							//do nothing
+                            if count == 0{
+                                count = -1
                             }
-                        }
-                        length := len(escapechars)
-                        if length%2==0{
-                            //not escaped
-                            count -= 1
-                        }
-                        
-                        //if charindex+1<regexlength && currentregex[charindex+1]=='*' || currentregex[charindex+1]=='+' || currentregex[charindex+1]=='?'{
+						}
+					}
+				}
+				stack.Push(currentregex[charindex])
+				tmpgroup += string(currentregex[charindex])
 
-                        //}
-                    }
-                    stack.Push(currentregex[charindex])
-                    tmpgroup += string(currentregex[charindex])
-                
-                    if count == 0 {
-                        fmt.Println("group:",tmpgroup)
-                        
-                        //seeing if largest group can be matched to a scope selector
-                        matched, scope = retrievescopefromcapturegroup(tmpgroup, true)
-                        if matched {
-                            groupcount += 1
-                            scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
-                        }
-                        if !matched {
-                            groupcount += 1
-                            nextlayer.PushFront(tmpgroup)
-                        }
-                        
-                        if charindex+1<regexlength{
-                            //processing reset of regex
-                            scopecontainer, nextlayer = getgroups(currentregex[charindex+1:], originalregex, groupcount, scopecontainer, nextlayer)
-                        }
-                        break
-                    }
-            }
-        }
-    }
+				if count == 0 {
+
+					//fmt.Println("group:", tmpgroup)
+
+					//seeing if largest group can be matched to a scope selector
+					matched, scope = retrievescopefromcapturegroup(tmpgroup, true)
+					if matched {
+						groupcount += 1
+						scopecontainer.PushBack(scope + "|" + strconv.Itoa(groupcount))
+					}
+					if !matched {
+						//fmt.Println("inside not matched!")
+						if strings.HasSuffix(tmpgroup, ")*") {
+							//fmt.Println("slice:", tmpgroup[1:len(tmpgroup)-3])
+						} else {
+							groupcount += 1
+							nextlayer.PushFront(tmpgroup[1:len(tmpgroup)-1])
+						}
+					}
+
+					if charindex+1 < regexlength {
+						//processing reset of regex
+						scopecontainer, nextlayer = getgroups(currentregex[charindex+1:], originalregex, groupcount, scopecontainer, nextlayer)
+					}
+
+					//fmt.Println("----------New Layer---------")
+					//fmt.Println("next layer:")
+					if nextlayer.Len() != 0 {
+						for it := nextlayer.Back(); it != nil; it = it.Prev() {
+							nextlayer.Remove(it)
+							itvalue := it.Value.(string)
+							scopecontainer, nextlayer = getgroups(itvalue, originalregex, groupcount, scopecontainer, nextlayer)
+						}
+					}
+					break
+				}
+			}
+		}
+	}
 	return scopecontainer, nextlayer
 }
 
-func AllEscaped(somestring string) bool{
-    stack := &Stack{}
-    for _,char :=range somestring{
-        if char=='\\'{
-            stack.Push(char)
-        }else{
-            curchar := stack.Pop()
-            if curchar != '\\'{
-                return false
-            }
-        }
-    }
-    return true
+func AllEscaped(somestring string) bool {
+	stack := &Stack{}
+	for _, char := range somestring {
+		if char == '\\' {
+			stack.Push(char)
+		} else {
+			curchar := stack.Pop()
+			if curchar != '\\' {
+				return false
+			}
+		}
+	}
+	return true
 }
-
 
 /*
 
@@ -479,29 +510,29 @@ Inefficient method for retrieving scope of regex
 */
 func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string) {
 
-    fmt.Println("testing match of regex ===> ",capturedregex) //debug
-	if capturedregex!=""{
-		if activate==true {
+	//fmt.Println("testing match of regex ===> ", capturedregex) //debug
+	if capturedregex != "" {
+		if activate == true {
 			capturedregex = capturedregex[1 : len(capturedregex)-1]
 		}
 		for ritem := repoitems.Front(); ritem != nil; ritem = ritem.Next() {
-            
+
 			if repository.Getregex(ritem.Value.(*repository.Repoitem)) == capturedregex {
 				tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
 				if tmpscope != defaultscope {
-                    fmt.Println("matched: true, scope:",tmpscope) //debug
+					//fmt.Println("matched: true, scope:", tmpscope) //debug
 					return true, tmpscope
 				}
 			}
 		}
 	}
-    fmt.Println("matched: false") //debug
+	//fmt.Println("matched: false") //debug
 	return false, ""
 }
 
 /*
 Method for determining if strings starts and ends with round braces
 */
-func startandendwithrb(somestring string) bool{
-	return strings.HasPrefix(somestring,"(") && strings.HasSuffix(somestring,")")
+func startandendwithrb(somestring string) bool {
+	return strings.HasPrefix(somestring, "(") && strings.HasSuffix(somestring, ")")
 }

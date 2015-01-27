@@ -7,8 +7,8 @@ Copyright 2015 Zola Mahlaza <adeebnqo@gmail.com>
 package main
 
 import (
-"os/exec"
-"strings"
+	"os/exec"
+	"strings"
 )
 
 //the following structs are used to produce a json file
@@ -57,28 +57,28 @@ func (p patternarraytype) Less(i, j int) bool {
 
 	pythonexecutable := "python" ///tmp/pypy-2.4.0-linux64/bin/pypy"
 
-	cmd := exec.Command(pythonexecutable,"greenery/compare.py", p[i].Match, p[j].Match)
+	cmd := exec.Command(pythonexecutable, "greenery/compare.py", p[i].Match, p[j].Match)
 	output, err := cmd.CombinedOutput()
-	outputString  := string(output)
+	outputString := string(output)
 
-	if outputString=="subset"{
+	if outputString == "subset" {
 		return true
 	}
 
-	cmd2 := exec.Command(pythonexecutable,"greenery/compare.py",  p[j].Match, p[i].Match)
+	cmd2 := exec.Command(pythonexecutable, "greenery/compare.py", p[j].Match, p[i].Match)
 	output2, err2 := cmd2.CombinedOutput()
 	output2String := string(output2)
 
-	if err==nil && err2==nil{
-	  outputString = strings.TrimSpace(outputString)
-	  output2String = strings.TrimSpace(output2String)
-	  if outputString=="notsubset" && output2String=="notsubset"{
-	          return p[i].Match < p[j].Match
-	  }else if outputString=="subset"{
-	      return true
-	  }else if outputString=="notsubset"{
-	      return false
-	  }
+	if err == nil && err2 == nil {
+		outputString = strings.TrimSpace(outputString)
+		output2String = strings.TrimSpace(output2String)
+		if outputString == "notsubset" && output2String == "notsubset" {
+			return p[i].Match < p[j].Match
+		} else if outputString == "subset" {
+			return true
+		} else if outputString == "notsubset" {
+			return false
+		}
 	}
 	return p[i].Match < p[j].Match
 }

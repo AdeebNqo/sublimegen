@@ -22,10 +22,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
 	"github.com/AdeebNqo/sublimegen/repository"
 	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre" //(documentation: https://godoc.org/github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre)
 	"github.com/nu7hatch/gouuid"
+	"log"
 	"os"
 	"os/exec"
 	"sort"
@@ -36,7 +36,7 @@ var name = flag.String("name", "default", "This is the name of the syntax.")
 var scopeName = flag.String("scopeName", "source.default", "This is the scope of the syntax file.")
 var fileTypes = flag.String("fileTypes", "default", "Comma seperated list of file types.")
 var source = flag.String("source", "defaultinput", "the bnf file for the language you want to highlight.")
-var scopesfile = flag.String("scopes","scopes.json","the json file containing the scope selectors.")
+var scopesfile = flag.String("scopes", "scopes.json", "the json file containing the scope selectors.")
 var doregexorder = flag.Int("orderregex", 1, "Program to attempt to order regexes in file. 0 for no, 1 for yes")
 var verbose = flag.Int("verbose", 1, "Output status and other progress information. 0 for no, 1 for yes")
 
@@ -63,10 +63,10 @@ func main() {
 	if err != nil {
 		errlog.Fatalln(fmt.Sprintf("Parse error: %v", err))
 	}
-    
-    //initializing logging objects
-    errlog = log.New(os.Stdout,"Error: ",log.Ltime|log.Lshortfile)
-    infolog = log.New(os.Stderr,"Info: ",log.Ltime|log.Lshortfile)
+
+	//initializing logging objects
+	errlog = log.New(os.Stdout, "Error: ", log.Ltime|log.Lshortfile)
+	infolog = log.New(os.Stderr, "Info: ", log.Ltime|log.Lshortfile)
 
 	//loading tokens and scopes
 	defaultscope = fmt.Sprintf("source.%v", *fileTypes) //default scope
@@ -159,7 +159,7 @@ func main() {
 					break
 				}
 			}
-			if found==false {
+			if found == false {
 				if strings.HasPrefix(synprodname, "\"") && strings.HasSuffix(synprodname, "\"") {
 					prodid := synprodname[1 : len(synprodname)-1]
 					patternobj, err := repository.NewRepoItem(prodid)
@@ -216,7 +216,7 @@ func main() {
 				alternatives := beforealternatives.Alternatives
 				regex = constructregexandfillgroups(alternatives) //we are extracting the regex for the
 			} else {
-				for _,char := range realname{
+				for _, char := range realname {
 					regex += Escape(string(char))
 				}
 			}
@@ -341,7 +341,7 @@ func main() {
 			} else {
 
 				if !strings.HasPrefix(realname, "_") {
-                    fmt.Println("---------------START-------------------") //debug
+					//fmt.Println("---------------START-------------------") //debug
 					//getting groups
 					groups, _ := getgroups(regex, regex, 0, list.New().Init(), list.New().Init())
 
@@ -365,14 +365,14 @@ func main() {
 						donotskip = !(skippingtruefrontvalue == skippingscope)
 					}
 
-                    fmt.Println(regex) //debug
-                    fmt.Println("num groups: ",groups.Len()) //debug
-                    fmt.Println("----------------END------------------") //debug
+					//fmt.Println(regex)                                   //debug
+					//fmt.Println("num groups: ", groups.Len())            //debug
+					//fmt.Println("----------------END------------------") //debug
 					//adding items to "captures"
 					if numberofgroups > 0 && regp.Groups() != 0 && donotskip {
 						for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next() {
 							val := listitemX.Value.(string)
-                            fmt.Println("val is :",val) //debug
+							//fmt.Println("val is :", val) //debug
 							lastindex := strings.LastIndex(val, "|")
 							if lastindex > -1 {
 								scopename := val[0:lastindex]
@@ -381,8 +381,6 @@ func main() {
 							}
 						}
 					}
-                    fmt.Println() //debug
-                    fmt.Println() //debug
 					//creating pattern entry
 					patternentry := PatternEntry{Match: regex, Name: repository.GetScope(listitemwithtype), Captures: capturesmap, Comment: realname}
 					patternarray = append(patternarray, patternentry)
