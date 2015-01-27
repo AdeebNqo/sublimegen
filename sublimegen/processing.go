@@ -337,6 +337,7 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
         //fmt.Println("X---X")
         fmt.Println("curregex:",currentregex)
 		matched, scope = retrievescopefromcapturegroup(currentregex, false)
+        fmt.Println("matched:",matched)
         //fmt.Println("X---X")
 	}
 	if matched {
@@ -382,7 +383,11 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
                         if currentregex[innerindex+1]=='*' || currentregex[innerindex+1]=='+' || currentregex[innerindex+1]=='?'{
                             //do decrease count, push it in
                             count -= 1
-                            stack.Push(innercurrcharacter)
+                            
+                            //TODO: Neeed to check if the only captured thing is the (*,?,+)'ed thing because if it is then we need to change pos to something further
+                            if count!=0{
+                                stack.Push(innercurrcharacter)
+                            }
                         }else{
                             count -= 1
                             if count!=0{
