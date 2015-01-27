@@ -40,5 +40,5 @@ it is not there.[Done]
 
 17. Fix bug in the group identification method, processing (getgroups) [FIXED]
 
-17. Fix bug in group numbering.
+17. Fix bug in group numbering. [FIXED]
 

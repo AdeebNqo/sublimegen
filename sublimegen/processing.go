@@ -474,6 +474,13 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 					}
 
 					if charindex+1 < regexlength {
+                        if strings.HasPrefix(currentregex[charindex+1:],"|"){
+                            for it := nextlayer.Back(); it != nil; it = it.Prev() {
+                                nextlayer.Remove(it)
+                                itvalue := it.Value.(string)
+                                scopecontainer, nextlayer = getgroups(itvalue, originalregex, groupcount, scopecontainer, nextlayer)
+                            }
+                        }
 						//processing reset of regex
 						scopecontainer, nextlayer = getgroups(currentregex[charindex+1:], originalregex, groupcount, scopecontainer, nextlayer)
 					}
