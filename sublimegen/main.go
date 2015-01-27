@@ -342,7 +342,8 @@ func main() {
 
 				if !strings.HasPrefix(realname, "_") {
 					//fmt.Println("---------------START-------------------") //debug
-					//getting groups
+					//fmt.Println(realname) //debug
+                    //getting groups
 					groups, _ := getgroups(regex, regex, 0, list.New().Init(), list.New().Init())
 
 					//In the following lines, I am creating the "patterns" field for the json string declared above.
