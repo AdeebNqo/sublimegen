@@ -28,7 +28,6 @@ Function for disentangling a pattern to obtain it's regex
 */
 func constructregexandfillgroups(alternatives []*ast.LexAlt) string {
 	regex := ""
-    //fmt.Println("alternatives-->",alternatives,"size:",len(alternatives))
 	for index, lexitem := range alternatives {
         tmpregex := getregex(lexitem)
         if index > 0 {
@@ -37,7 +36,7 @@ func constructregexandfillgroups(alternatives []*ast.LexAlt) string {
         regex += tmpregex
         //fmt.Println("now-->",regex)
 	}
-	//regex += ")"
+    //regex += ")"
 	return regex
 }
 
@@ -49,14 +48,77 @@ return a string, the regex
 */
 func getregex(lexitem *ast.LexAlt) string {
 	regex := ""
+    var tmpoutput string
+    var termstring string
+    
+    bracedregex := ""
+    bracestack := Stack{}
+    var strippedtermstring string
+    
 	for _, term := range lexitem.Terms {
-        if (term.String()=="'\\n'"){
-            regex += "$"
-        }else{
-		  regex += reallygetregex(term)
+        termstring = term.String()
+        
+        if strings.HasPrefix(termstring,"'") && strings.HasSuffix(termstring,"'"){
+            strippedtermstring = stripliteral(termstring)
         }
+        
+        if (termstring=="'\\n'"){
+            regex += "$"
+            bracedregex += "$"
+        }else{
+                tmpoutput = reallygetregex(term)
+
+                //--------------------------
+                //testing if we can close the section
+                if strippedtermstring == ")"{
+                    lastbrace := bracestack.Peek()
+                    if lastbrace!=nil{
+                        if lastbrace=="("{
+                            bracedregex += ")"
+                            bracestack.Pop()
+                        }
+                    }
+                    strippedtermstring = ""
+                }else if strippedtermstring == "}"{
+                    lastbrace := bracestack.Peek()
+                    if lastbrace!=nil{
+                        if lastbrace=="{"{
+                            bracedregex += ")"
+                            bracestack.Pop()
+                        }
+                    }
+                    strippedtermstring = ""
+                }else if strippedtermstring == "]"{
+                    lastbrace := bracestack.Peek()
+                    if lastbrace!=nil{
+                        if lastbrace=="["{
+                            bracedregex += ")"
+                            bracestack.Pop()
+                        }
+                    }
+                    strippedtermstring = ""
+                }
+                //--------------------------
+
+                regex += tmpoutput
+                bracedregex += tmpoutput
+
+                //--------------------------
+                //testing if we can open the secion
+
+                //--------------------------
+                if strippedtermstring == "[" || strippedtermstring == "(" || strippedtermstring == "{"{
+                    bracedregex += "("
+                    bracestack.Push(strippedtermstring)
+                    strippedtermstring = ""
+                }
+            }
 	}
-	return regex
+    if bracestack.Peek()==nil{  
+        return bracedregex
+    }else{
+	   return regex
+    }
 }
 
 /*
@@ -523,33 +585,35 @@ Inefficient method for retrieving scope of regex
 */
 func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string) {
 
-	fmt.Println("testing match of regex ===> ", capturedregex) //debug
+	//fmt.Println("testing match of regex ===> ", capturedregex) //debug
 	if capturedregex != "" {
 		if activate == true {
 			capturedregex = capturedregex[1 : len(capturedregex)-1]
 		}
 		for ritem := repoitems.Front(); ritem != nil; ritem = ritem.Next() {
-
+            
             currreg := repository.Getregex(ritem.Value.(*repository.Repoitem))
            
-			if currreg == capturedregex {
-				tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
-				if tmpscope != defaultscope {
-					fmt.Println("matched: true, scope:", tmpscope) //debug
-					return true, tmpscope
-				}
-			}else if strings.HasPrefix(capturedregex,"(") && strings.HasSuffix(capturedregex,")"){
-                if currreg == capturedregex[1:len(capturedregex)-1]{
+            if currreg != ""{
+                if currreg == capturedregex {
                     tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
                     if tmpscope != defaultscope {
-                        fmt.Println("matched: true, scope:", tmpscope) //debug
+                        //fmt.Println("matched: true, scope:", tmpscope) //debug
                         return true, tmpscope
+                    }
+                }else if strings.HasPrefix(capturedregex,"(") && strings.HasSuffix(capturedregex,")"){
+                    if currreg == capturedregex[1:len(capturedregex)-1]{
+                        tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
+                        if tmpscope != defaultscope {
+                            //fmt.Println("matched: true, scope:", tmpscope) //debug
+                            return true, tmpscope
+                        }
                     }
                 }
             }
 		}
 	}
-	fmt.Println("matched: false") //debug
+	//fmt.Println("matched: false") //debug
 	return false, ""
 }
 
