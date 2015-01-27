@@ -28,12 +28,14 @@ Function for disentangling a pattern to obtain it's regex
 */
 func constructregexandfillgroups(alternatives []*ast.LexAlt) string {
 	regex := ""
+    //fmt.Println("alternatives-->",alternatives,"size:",len(alternatives))
 	for index, lexitem := range alternatives {
-		tmpregex := getregex(lexitem)
-		if index > 0 {
-			tmpregex = "|" + tmpregex
-		}
-		regex += tmpregex
+        tmpregex := getregex(lexitem)
+        if index > 0 {
+            tmpregex = "|" + tmpregex
+        }
+        regex += tmpregex
+        //fmt.Println("now-->",regex)
 	}
 	//regex += ")"
 	return regex
@@ -48,7 +50,11 @@ return a string, the regex
 func getregex(lexitem *ast.LexAlt) string {
 	regex := ""
 	for _, term := range lexitem.Terms {
-		regex += reallygetregex(term)
+        if (term.String()=="'\\n'"){
+            regex += "$"
+        }else{
+		  regex += reallygetregex(term)
+        }
 	}
 	return regex
 }

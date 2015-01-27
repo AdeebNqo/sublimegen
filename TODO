@@ -39,3 +39,6 @@ it is not there.[Done]
 16. Parrallelize follow in fsm.py:299[DONE]
 
 17. Fix bug in the group identification method, processing (getgroups) [FIXED]
+
+17. Fix bug in group numbering.
+
