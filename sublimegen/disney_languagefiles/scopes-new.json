@@ -24,5 +24,6 @@
 
    "id":"variable.parameter.walt",
    "_char_lit":"constant.character.walt",
-   "_escaped_char":"constant.character.escape.walt"
+   "_escaped_char":"constant.character.escape.walt",
+    "_qualid":"variable.language.walt"
 }

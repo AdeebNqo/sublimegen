@@ -28,6 +28,7 @@ Function for disentangling a pattern to obtain it's regex
 */
 func constructregexandfillgroups(alternatives []*ast.LexAlt) string {
 	regex := ""
+    //fmt.Println("A-->",alternatives) //debug
 	for index, lexitem := range alternatives {
         tmpregex := getregex(lexitem)
         if index > 0 {
@@ -37,6 +38,8 @@ func constructregexandfillgroups(alternatives []*ast.LexAlt) string {
         //fmt.Println("now-->",regex)
 	}
     //regex += ")"
+    //fmt.Println("B-->",regex) //debug
+    //fmt.Println() //debug
 	return regex
 }
 
@@ -54,6 +57,7 @@ func getregex(lexitem *ast.LexAlt) string {
     bracedregex := ""
     bracestack := Stack{}
     var strippedtermstring string
+    usenormalregex := false
     
 	for _, term := range lexitem.Terms {
         termstring = term.String()
@@ -70,28 +74,13 @@ func getregex(lexitem *ast.LexAlt) string {
 
                 //--------------------------
                 //testing if we can close the section
-                if strippedtermstring == ")"{
+                if strippedtermstring == ")" || strippedtermstring == "}" || strippedtermstring == "]"{
                     lastbrace := bracestack.Peek()
                     if lastbrace!=nil{
-                        if lastbrace=="("{
-                            bracedregex += ")"
-                            bracestack.Pop()
-                        }
-                    }
-                    strippedtermstring = ""
-                }else if strippedtermstring == "}"{
-                    lastbrace := bracestack.Peek()
-                    if lastbrace!=nil{
-                        if lastbrace=="{"{
-                            bracedregex += ")"
-                            bracestack.Pop()
-                        }
-                    }
-                    strippedtermstring = ""
-                }else if strippedtermstring == "]"{
-                    lastbrace := bracestack.Peek()
-                    if lastbrace!=nil{
-                        if lastbrace=="["{
+                        if lastbrace=="(" || lastbrace=="{" || lastbrace=="["{
+                            if bracedregex[len(bracedregex)-1]=='('{
+                                usenormalregex = true
+                            }
                             bracedregex += ")"
                             bracestack.Pop()
                         }
@@ -114,11 +103,12 @@ func getregex(lexitem *ast.LexAlt) string {
                 }
             }
 	}
-    //if bracestack.Peek()==nil{  
-    //    return bracedregex
-    //}else{
-	   return regex
-    //}
+    if bracestack.Peek()==nil && !usenormalregex{  
+
+        return bracedregex
+    }else{
+        return regex
+    }
 }
 
 /*
@@ -248,12 +238,12 @@ func reallygetregex(lexterm interface{}) string {
 							retval += getregex(lexalt)
 						}
 						repository.Setregex(rval, retval)
-						//return retval
-						return fmt.Sprintf("(%s)", retval) //debug
+						return retval
+						//return fmt.Sprintf("(%s)", retval) //debug
 
 					} else {
-						//return repository.Getregex(rval)
-						return "(" + repository.Getregex(rval) + ")"
+						return repository.Getregex(rval)
+						//return "(" + repository.Getregex(rval) + ")"
 					}
 				}
 			}
@@ -523,7 +513,7 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 				if count == 0 || count == -1{
                     count = 0
                     
-					fmt.Println("group:", tmpgroup)
+					//fmt.Println("group:", tmpgroup)
 
 					//seeing if largest group can be matched to a scope selector
 					matched, scope = retrievescopefromcapturegroup(tmpgroup, true)
@@ -591,7 +581,7 @@ Inefficient method for retrieving scope of regex
 */
 func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string) {
 
-	//fmt.Println("testing match of regex ===> ", capturedregex) //debug
+	fmt.Println("testing match of regex ===> ", capturedregex) //debug
 	if capturedregex != "" {
 		if activate == true {
 			capturedregex = capturedregex[1 : len(capturedregex)-1]
@@ -604,14 +594,14 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
                 if currreg == capturedregex {
                     tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
                     if tmpscope != defaultscope {
-                        //fmt.Println("matched: true, scope:", tmpscope) //debug
+                        fmt.Println("matched: true, scope:", tmpscope) //debug
                         return true, tmpscope
                     }
                 }else if strings.HasPrefix(capturedregex,"(") && strings.HasSuffix(capturedregex,")"){
                     if currreg == capturedregex[1:len(capturedregex)-1]{
                         tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
                         if tmpscope != defaultscope {
-                            //fmt.Println("matched: true, scope:", tmpscope) //debug
+                            fmt.Println("matched: true, scope:", tmpscope) //debug
                             return true, tmpscope
                         }
                     }
@@ -619,7 +609,7 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
             }
 		}
 	}
-	//fmt.Println("matched: false") //debug
+	fmt.Println("matched: false") //debug
 	return false, ""
 }
 

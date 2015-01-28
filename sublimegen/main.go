@@ -215,7 +215,9 @@ func main() {
 			listitemwithtype := listitem.Value.(*repository.Repoitem)
 
 			realname := repository.GetRealname(listitemwithtype)
-
+            
+            fmt.Println(realname) //debug
+            
 			beforealternatives := repository.GetRighthandside(listitemwithtype)
 			var regex string
 			if beforealternatives != nil {
