@@ -238,12 +238,12 @@ func reallygetregex(lexterm interface{}) string {
 							retval += getregex(lexalt)
 						}
 						repository.Setregex(rval, retval)
-						return retval
-						//return fmt.Sprintf("(%s)", retval) //debug
+						//return retval
+						return fmt.Sprintf("(%s)", retval) //debug
 
 					} else {
-						return repository.Getregex(rval)
-						//return "(" + repository.Getregex(rval) + ")"
+						//return repository.Getregex(rval)
+						return "(" + repository.Getregex(rval) + ")"
 					}
 				}
 			}
