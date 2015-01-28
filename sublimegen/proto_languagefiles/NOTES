@@ -4,13 +4,17 @@ lexical
 2. octEscape
 3. hexEscape
 4. quote
+
 5. strLit
 6. boolLit
 7. floatLit
+
 8. octInt
 9. hexInt
 10. decInt
+
 11. intLit
+
 12. camelIdent
 13. ident
 14. constant
@@ -18,8 +22,6 @@ lexical
 16. type
 17. label
 18. extension
-19. extensions
-20. field
 
 syntax
 ------
@@ -37,3 +39,5 @@ syntax
 12. package [nb]
 13. import
 14. proto [nb]
+15. extensions
+26. field
