@@ -116,26 +116,28 @@ func main() {
 	   Processing productions
 
 	*/
-	productions := grammarX.LexPart.ProdList.Productions
-	for _, prod := range productions {
-		prodid := prod.Id()
+	if grammarX.LexPart!=nil && grammarX.LexPart.ProdList!=nil && grammarX.LexPart.ProdList.Productions!=nil{
+		productions := grammarX.LexPart.ProdList.Productions
+		for _, prod := range productions {
+			prodid := prod.Id()
 
-		//creating an object that will convert the production/token to the appropriate item for the json patterns field
-		patternobj, err := repository.NewRepoItem(prodid)
-		if err != nil {
-			//ignoring token
-			infolog.Println(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
-			break
-		}
-		repository.SetRighthandside(patternobj, prod.LexPattern())
-		somescope := data[repository.GetRealname(patternobj)]
-		if somescope != "" {
-			repository.SetScope(patternobj, somescope)
-		} else {
-			repository.SetScope(patternobj, defaultscope)
-		}
+			//creating an object that will convert the production/token to the appropriate item for the json patterns field
+			patternobj, err := repository.NewRepoItem(prodid)
+			if err != nil {
+				//ignoring token
+				infolog.Println(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
+				break
+			}
+			repository.SetRighthandside(patternobj, prod.LexPattern())
+			somescope := data[repository.GetRealname(patternobj)]
+			if somescope != "" {
+				repository.SetScope(patternobj, somescope)
+			} else {
+				repository.SetScope(patternobj, defaultscope)
+			}
 
-		repoitems.PushBack(patternobj)
+			repoitems.PushBack(patternobj)
+		}
 	}
 
 	/*
@@ -143,47 +145,51 @@ func main() {
 	   Processing the syntax part
 
 	*/
-	for _, synprod := range grammarX.SyntaxPart.ProdList {
-		for _, synsymb := range synprod.Body.Symbols {
+	if grammarX.SyntaxPart!=nil{
+		if grammarX.SyntaxPart.ProdList!=nil{
+			for _, synprod := range grammarX.SyntaxPart.ProdList {
+				for _, synsymb := range synprod.Body.Symbols {
 
-			synprodname := synsymb.String()
-			found := false
-			for t := repoitems.Front(); t != nil; t = t.Next() {
-				item := t.Value.(*repository.Repoitem)
-				realname := repository.GetRealname(item)
-				if realname == synprodname {
-					found = true
-					break
-				} else if fmt.Sprintf("\"%v\"", realname) == synprodname {
-					found = true
-					break
-				}
-			}
-			if found == false {
-				if strings.HasPrefix(synprodname, "\"") && strings.HasSuffix(synprodname, "\"") {
-					prodid := synprodname[1 : len(synprodname)-1]
-					patternobj, err := repository.NewRepoItem(prodid)
-					//_,err := repository.NewRepoItem(prodid)
-					if err != nil {
-						//ignoring token
-						errlog.Fatalln(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
-						break
+					synprodname := synsymb.String()
+					found := false
+					for t := repoitems.Front(); t != nil; t = t.Next() {
+						item := t.Value.(*repository.Repoitem)
+						realname := repository.GetRealname(item)
+						if realname == synprodname {
+							found = true
+							break
+						} else if fmt.Sprintf("\"%v\"", realname) == synprodname {
+							found = true
+							break
+						}
 					}
-					repository.SetRighthandside(patternobj, nil)
-					somescope := data[repository.GetRealname(patternobj)]
-					if somescope != "" {
-						repository.SetScope(patternobj, somescope)
-					} else {
-						repository.SetScope(patternobj, defaultscope)
-					}
+					if found == false {
+						if strings.HasPrefix(synprodname, "\"") && strings.HasSuffix(synprodname, "\"") {
+							prodid := synprodname[1 : len(synprodname)-1]
+							patternobj, err := repository.NewRepoItem(prodid)
+							//_,err := repository.NewRepoItem(prodid)
+							if err != nil {
+								//ignoring token
+								errlog.Fatalln(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
+								break
+							}
+							repository.SetRighthandside(patternobj, nil)
+							somescope := data[repository.GetRealname(patternobj)]
+							if somescope != "" {
+								repository.SetScope(patternobj, somescope)
+							} else {
+								repository.SetScope(patternobj, defaultscope)
+							}
 
-					tmpprodid := ""
-					for _, char := range prodid {
-						tmpprodid += string(char)
-					}
-					prodid = tmpprodid
-					if strings.ContainsAny(prodid, "abcdefghijklmnopqrstuvwxyz") && somescope != defaultscope {
-						repoitems.PushBack(patternobj)
+							tmpprodid := ""
+							for _, char := range prodid {
+								tmpprodid += string(char)
+							}
+							prodid = tmpprodid
+							if strings.ContainsAny(prodid, "abcdefghijklmnopqrstuvwxyz") && somescope != defaultscope {
+								repoitems.PushBack(patternobj)
+							}
+						}
 					}
 				}
 			}
