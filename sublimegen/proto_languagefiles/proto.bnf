@@ -1,9 +1,4 @@
-/*
-
-Copyright 2015 Zola Mahlaza <adeebnqo@gmail.com>
-proto gocc bnf file
-
-*/
+//lex part
 
 _import : 'i' 'm' 'p' 'o' 'r' 't';
 _package : 'p' 'a' 'c' 'k' 'a' 'g' 'e';
@@ -54,54 +49,33 @@ _decimal_digit : '0' - '9' ;
 _true : 't' 'r' 'u' 'e';
 _false : 'f' 'a' 'l' 's' 'e';
 
-_ws : ' ' | '\t' | '\n' | '\r' ; //whitespace
-_camel_ident : ['A'-'Z']{ _ws | '_'};
-_ident : ('A'-'Z') ('a'-'z') '_' { (_ws | '_') };
+
 _quote : ('"' | '\'');
 _hexEscape : '\\' ('X' | 'x') ( (('A'-'F') ('a'-'f') ('0'-'9')) | (('A'-'F') ('a'-'f') ('0'-'9')) (('A'-'F') ('a'-'f') ('0'-'9')) );
 _octEscape : '\\' ['0'] ( ('0'-'7') | ('0'-'7') ('0'-'7') | ('0'-'7') ('0'-'7') ('0'-'7') );
 _charEscape :  '\\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\\' | '?' | '\'' | '"') ;
 
-_hexInt: '0' ('x' | 'X') (['A'-'F']['a'-'f']['0'-'9']){(['A'-'F']['a'-'f']['0'-'9'])};
-_octint: '0' '0'-'7' {'0'-'7'};
+_slashzero : '\\' '0';
+_strLit : _quote { _hexEscape | _octEscape | _charEscape | ( '^' | _slashzero | '\n') } _quote;
 _boolLit : _true | _false;
 _floatLit : _decimal_digit {_decimal_digit} ['.' _decimal_digit {_decimal_digit}] [('E' | 'e')['+' | '-'] _decimal_digit {_decimal_digit} ];
 
-
+_hexInt: '0' ('x' | 'X') (['A'-'F']['a'-'f']['0'-'9']){(['A'-'F']['a'-'f']['0'-'9'])};
+_octint: '0' '0'-'7' {'0'-'7'};
 _decInt : ('1'-'9') _decimal_digit { _decimal_digit};
 
-_label: _enumField | _optional | _repeated ;
-
-_slashzero : '\\' '0';
-_strLit : _quote { _hexEscape | _octEscape | _charEscape | ( '^' | _slashzero | '\n') } _quote;
-
 _intLit : _decInt | _hexInt | _octint;
-_constant : _ident | _intLit | _floatLit | _strLit | _boolLit;
+
+_ws : ' ' | '\t' | '\n' | '\r' ; //whitespace
+
+camelIdent : ('A'-'Z'){ _ws |  '_'};
+_ident : ('A'-'Z') ('a'-'z') '_' { (_ws | '_') };
+constant : _ident | _intLit | _floatLit | _strLit | _boolLit;
 _userType : [ _dot ] _ident { _dot _ident };
 
-_optionBody : _ident { _dot _ident} _equal _constant;
+type : _double | _float | _int32 | _int64 | _uint32 | _uint64 | _sint32 | _sint64 | _fixed32 | _fixed64 | _sfixed32 | _sfixed64 | _bool | _string | _bytes | _userType;
 
-_optionLit : _leftqt _optionBody _semicolon;
-_packageLit : _package _ident {( _dot _ident )} _semicolon;
-_extension: _intLit [ _to (_intLit | _max) ];
-_extensionsLit: _extensions _extension { _comma _extension } _semicolon;
-
-_fieldOption : _optionBody | (_default _equal _constant);
-_field : _label _type _ident _equal _intLit [ _leftsb _fieldOption { _comma _fieldOption} _rightsb] _semicolon;
-
-_importLit : _import _strLit _semicolon;
-
-_type : _double | _float | _int32 | _int64 | _uint32 | _uint64 | _sint32 | _sint64 | _fixed32 | _fixed64 | _sfixed32 | _sfixed64 | _bool | _string | _bytes | _userType;
-
-_groupLit: _label _group _camel_ident _equal _intLit _messageBody;
-_messageLit : _message _ident _messageBody;
-
-_enumLit : _enum _ident _leftcb { _optionLit | _enumField | _semicolon } _rightcb;
 _enumField : _ident _equal _intLit _semicolon;
-_extendLit : _extend _userType _lefttcb { _field | _groupLit | _semicolon} _rightcb;
 
-_messageBody: _leftcb { _field | _enumLit | _messageLit | _extendLit | _extensionsLit | _groupLit | _optionLit | _colon  } _rightcb;
-
-proto : { (_messageLit | _extendLit | _enumLit | _importLit | _packageLit | _option | _semicolon) } ;
-
-_serviceLit : _service _ident _lefttcb { _option | _rpc | _semicolon } _rightcb;
+label: _enumField | _optional | _repeated ;
+extension: _intLit [ _to (_intLit | _max) ];
