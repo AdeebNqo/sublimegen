@@ -114,11 +114,11 @@ func getregex(lexitem *ast.LexAlt) string {
                 }
             }
 	}
-    if bracestack.Peek()==nil{  
-        return bracedregex
-    }else{
+    //if bracestack.Peek()==nil{  
+    //    return bracedregex
+    //}else{
 	   return regex
-    }
+    //}
 }
 
 /*
@@ -510,6 +510,9 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 							//do nothing
                             if count == 0{
                                 count = -1
+                                stack.Push(currentregex[charindex])
+				                tmpgroup += string(currentregex[charindex])
+                                continue
                             }
 						}
 					}
@@ -517,9 +520,10 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 				stack.Push(currentregex[charindex])
 				tmpgroup += string(currentregex[charindex])
 
-				if count == 0 {
-
-					//fmt.Println("group:", tmpgroup)
+				if count == 0 || count == -1{
+                    count = 0
+                    
+					fmt.Println("group:", tmpgroup)
 
 					//seeing if largest group can be matched to a scope selector
 					matched, scope = retrievescopefromcapturegroup(tmpgroup, true)
