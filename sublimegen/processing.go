@@ -581,7 +581,7 @@ Inefficient method for retrieving scope of regex
 */
 func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, string) {
 
-	fmt.Println("testing match of regex ===> ", capturedregex) //debug
+	//fmt.Println("testing match of regex ===> ", capturedregex) //debug
 	if capturedregex != "" {
 		if activate == true {
 			capturedregex = capturedregex[1 : len(capturedregex)-1]
@@ -594,14 +594,14 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
                 if currreg == capturedregex {
                     tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
                     if tmpscope != defaultscope {
-                        fmt.Println("matched: true, scope:", tmpscope) //debug
+                        //fmt.Println("matched: true, scope:", tmpscope) //debug
                         return true, tmpscope
                     }
                 }else if strings.HasPrefix(capturedregex,"(") && strings.HasSuffix(capturedregex,")"){
                     if currreg == capturedregex[1:len(capturedregex)-1]{
                         tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
                         if tmpscope != defaultscope {
-                            fmt.Println("matched: true, scope:", tmpscope) //debug
+                            //fmt.Println("matched: true, scope:", tmpscope) //debug
                             return true, tmpscope
                         }
                     }
@@ -609,7 +609,7 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
             }
 		}
 	}
-	fmt.Println("matched: false") //debug
+	//fmt.Println("matched: false") //debug
 	return false, ""
 }
 
