@@ -52,6 +52,10 @@ func main() {
 	//reading in the provided bnf file and parsing it.
 	scanner := &scanner.Scanner{}
 	srcBuffer, err := ioutil.ReadFile(*source)
+    
+    //initializing logging objects
+	errlog = log.New(os.Stdout, "Error: ", log.Ltime|log.Lshortfile)
+	infolog = log.New(os.Stderr, "Info: ", log.Ltime|log.Lshortfile)
 
 	if err != nil {
 		errlog.Fatalln(fmt.Sprintf("Cannot read file because %v", err))
@@ -63,10 +67,6 @@ func main() {
 	if err != nil {
 		errlog.Fatalln(fmt.Sprintf("Parse error: %v", err))
 	}
-
-	//initializing logging objects
-	errlog = log.New(os.Stdout, "Error: ", log.Ltime|log.Lshortfile)
-	infolog = log.New(os.Stderr, "Info: ", log.Ltime|log.Lshortfile)
 
 	//loading tokens and scopes
 	defaultscope = fmt.Sprintf("source.%v", *fileTypes) //default scope
@@ -216,7 +216,7 @@ func main() {
 
 			realname := repository.GetRealname(listitemwithtype)
             
-            fmt.Println(realname) //debug
+            //fmt.Println(realname) //debug
             
 			beforealternatives := repository.GetRighthandside(listitemwithtype)
 			var regex string
