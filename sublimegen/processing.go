@@ -289,7 +289,13 @@ func Escape(termasstring string) string {
 		return "\\}"
 	} else if termasstring == "?"{
 		return "\\?"
-	}
+	} else if termasstring == "`"{
+        return "\\`"
+    } else if termasstring == "."{
+        return "\\."
+    } else if termasstring == "-"{
+        return "-"
+    }
 	return termasstring
 }
 
