@@ -36,5 +36,6 @@
     
     "_boolLit":"constant.numeric.proto",
     "_constant":"constant.numeric.proto",
+    "_intLit":"constant.numeric.proto",
     "_strLit":"string.quoted.double.proto"
 }

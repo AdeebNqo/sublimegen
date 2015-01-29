@@ -1,49 +1,51 @@
 //lex part
 
-_import : 'i' 'm' 'p' 'o' 'r' 't';
-_package : 'p' 'a' 'c' 'k' 'a' 'g' 'e';
-_option : 'o' 'p' 't' 'i' 'o' 'n';
-_message : 'm' 'e' 's' 's' 'a' 'g' 'e';
-_extend : 'e' 'x' 't' 'e' 'n' 'd';
-_enum : 'e' 'n' 'u' 'm';
-_service : 's' 'e' 'r' 'v' 'i' 'c' 'e';
-_rpc : 'r' 'p' 'c';
-_group: 'g' 'r' 'o' 'u' 'p';
-_default : 'd' 'e' 'f' 'a' 'u' 'l' 't';
-_extensions : 'e' 'x' 't' 'e' 'n' 's' 'i' 'o' 'n' 's';
-_to : 't' 'o';
-_max : 'm' 'a' 'x';
-_required : 'r' 'e' 'q' 'u' 'i' 'r' 'e' 'd';
-_optional: 'o' 'p' 't' 'i' 'o' 'n' 'a' 'l';
-_repeated: 'r' 'e' 'p' 'e' 'a' 't' 'e' 'd';
-_double: 'd' 'o' 'u' 'b' 'l' 'e';
-_float : 'f' 'l' 'o' 'a' 't';
-_int32 : 'i' 'n' 't' '3' '2';
-_int64 : 'i' 'n' 't' '6' '4';
-_uint32 : 'u' 'i' 'n' 't' '3' '2';
-_uint64 : 'u' 'i' 'n' 't' '6' '4';
-_sint32 : 's' 'i' 'n' 't' '3' '2';
-_sint64 : 's' 'i' 'n' 't' '6' '4';
-_fixed32 : 'f' 'i' 'x' 'e' 'd' '3' '2';
-_fixed64 : 'f' 'i' 'x' 'e' 'd' '6' '4';
-_sfixed32 : 's' 'f' 'i' 'x' 'e' 'd' '3' '2';
-_sfixed64 : 's' 'f' 'i' 'x' 'e' 'd' '6' '4';
-_bool : 'b' 'o' 'o' 'l';
-_string : 's' 't' 'r' 'i' 'n' 'g';
-_bytes : 'b' 'y' 't' 'e' 's';
+importX : 'i' 'm' 'p' 'o' 'r' 't';
+package : 'p' 'a' 'c' 'k' 'a' 'g' 'e';
+option : 'o' 'p' 't' 'i' 'o' 'n';
+message : 'm' 'e' 's' 's' 'a' 'g' 'e';
+extend : 'e' 'x' 't' 'e' 'n' 'd';
+enum : 'e' 'n' 'u' 'm';
+service : 's' 'e' 'r' 'v' 'i' 'c' 'e';
+rpc : 'r' 'p' 'c';
+group: 'g' 'r' 'o' 'u' 'p';
+default : 'd' 'e' 'f' 'a' 'u' 'l' 't';
+extensions : 'e' 'x' 't' 'e' 'n' 's' 'i' 'o' 'n' 's';
+to : 't' 'o';
+max : 'm' 'a' 'x';
 
-_semicolon : ';';
-_colon : ':';
-_dot : '.';
-_equal : '=';
-_leftqt: '`';
-_leftcb: '{';
-_rightcb : '}';
-_leftrb : '(';
-_rightrb : ')';
-_leftsb : '[';
-_rightsb : ']';
-_comma : ',';
+required : 'r' 'e' 'q' 'u' 'i' 'r' 'e' 'd';
+optional: 'o' 'p' 't' 'i' 'o' 'n' 'a' 'l';
+repeated: 'r' 'e' 'p' 'e' 'a' 't' 'e' 'd';
+
+double: 'd' 'o' 'u' 'b' 'l' 'e';
+float : 'f' 'l' 'o' 'a' 't';
+int32 : 'i' 'n' 't' '3' '2';
+int64 : 'i' 'n' 't' '6' '4';
+uint32 : 'u' 'i' 'n' 't' '3' '2';
+uint64 : 'u' 'i' 'n' 't' '6' '4';
+sint32 : 's' 'i' 'n' 't' '3' '2';
+sint64 : 's' 'i' 'n' 't' '6' '4';
+fixed32 : 'f' 'i' 'x' 'e' 'd' '3' '2';
+fixed64 : 'f' 'i' 'x' 'e' 'd' '6' '4';
+sfixed32 : 's' 'f' 'i' 'x' 'e' 'd' '3' '2';
+sfixed64 : 's' 'f' 'i' 'x' 'e' 'd' '6' '4';
+bool : 'b' 'o' 'o' 'l';
+string : 's' 't' 'r' 'i' 'n' 'g';
+bytes : 'b' 'y' 't' 'e' 's';
+
+semicolon : ';';
+colon : ':';
+dot : '.';
+equal : '=';
+leftqt: '`';
+leftcb: '{';
+rightcb : '}';
+leftrb : '(';
+rightrb : ')';
+leftsb : '[';
+rightsb : ']';
+comma : ',';
 _decimal_digit : '0' - '9' ;
 
 _true : 't' 'r' 'u' 'e';
@@ -56,29 +58,109 @@ _octEscape : '\\' ['0'] ( ('0'-'7') | ('0'-'7') ('0'-'7') | ('0'-'7') ('0'-'7') 
 _charEscape :  '\\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\\' | '?' | '\'' | '"') ;
 
 _slashzero : '\\' '0';
-_strLit : _quote { _hexEscape | _octEscape | _charEscape | ( '^' | _slashzero | '\n') } _quote;
-_boolLit : _true | _false;
-_floatLit : _decimal_digit {_decimal_digit} ['.' _decimal_digit {_decimal_digit}] [('E' | 'e')['+' | '-'] _decimal_digit {_decimal_digit} ];
+strLit : _quote { _hexEscape | _octEscape | _charEscape | ( '^' | _slashzero | '\n') } _quote;
+boolLit : _true | _false;
+floatLit : _decimal_digit {_decimal_digit} ['.' _decimal_digit {_decimal_digit}] [('E' | 'e')['+' | '-'] _decimal_digit {_decimal_digit} ];
 
-_hexInt: '0' ('x' | 'X') (['A'-'F']['a'-'f']['0'-'9']){(['A'-'F']['a'-'f']['0'-'9'])};
-_octint: '0' '0'-'7' {'0'-'7'};
-_decInt : ('1'-'9') _decimal_digit { _decimal_digit};
+hexInt: '0' ('x' | 'X') (['A'-'F']['a'-'f']['0'-'9']){(['A'-'F']['a'-'f']['0'-'9'])};
+octint: '0' '0'-'7' {'0'-'7'};
+decInt : ('1'-'9') _decimal_digit { _decimal_digit};
 
-_intLit : _decInt | _hexInt | _octint;
+intLit : _decInt | _hexInt | _octint;
 
 _ws : ' ' | '\t' | '\n' | '\r' ; //whitespace
 
 camelIdent : ('A'-'Z'){ _ws |  '_'};
-_ident : ('A'-'Z') ('a'-'z') '_' { (_ws | '_') };
-constant : _ident | _intLit | _floatLit | _strLit | _boolLit;
-_userType : [ _dot ] _ident { _dot _ident };
-
-type : _double | _float | _int32 | _int64 | _uint32 | _uint64 | _sint32 | _sint64 | _fixed32 | _fixed64 | _sfixed32 | _sfixed64 | _bool | _string | _bytes | _userType;
-
-_enumField : _ident _equal _intLit _semicolon;
+ident : ('A'-'Z') ('a'-'z') '_' { (_ws | '_') };
+userType : [ _dot ] _ident { _dot _ident };
 
 label: _enumField | _optional | _repeated ;
 extension: _intLit [ _to (_intLit | _max) ];
 
-//second part
-_fieldOption : _optionBody | (_default _equal _constant);
+//syntax part
+
+Proto : ItemsSTAR;
+ItemsSTAR : empty;
+ItemsSTAR: Items ItemsSTAR;
+Items: Message | Extend | Enum | Import | Package | Option | semicolon ;
+
+Message : _message _ident MessageBody;
+Import : importX strLit semicolon;
+
+EnumField : ident equal intLit;
+OptionEnumFieldColonSTAR : empty;
+OptionEnumFieldColonSTAR : OptionEnumFieldColon OptionEnumFieldColonSTAR;
+OptionEnumFieldColon: Option | EnumField | semicolon;
+Enum : enum ident leftcb OptionEnumFieldColonSTAR rightcb;
+
+FiedInnerStuffSTAR: empty;
+FiedInnerStuffSTAR: FiedInnerStuff FiedInnerStuffSTAR;
+FiedInnerStuff : comma FieldOption;
+FieldStuffOpt : empty;
+FieldStuffOpt : leftsb FieldOption  FiedInnerStuffSTAR rightsb;
+
+Field : label Type ident equal intLit FieldStuffOpt semicolon;
+FieldGroupBraceSTAR : empty ;
+FieldGroupBraceSTAR : FieldGroupBrace FieldGroupBraceSTAR;
+FieldGroupBrace : Field | Group | semicolon;
+Extend : extend userType leftcb FieldGroupBraceSTAR rightcb;
+
+
+DotIdent : dot ident;
+DotIdentSTAR: DotIdent DotIdentSTAR;
+DotIdentSTAR: empty;
+OptionBody : ident DotIdentSTAR equal Constant;
+Option : leftqt OptionBody semicolon;
+
+
+FieldOption: OptionBody
+			| default equal Constant;
+
+Constant : ident | intLit | floatLit | strLit | boolLit;
+
+Type : double | float | int32 | int64 | uint32 | uint64
+	 | sint32 | sint64 | fixed32 | fixed64 | sfixed32
+	 | sfixed64 | bool | string | bytes | userType;
+
+
+ItemsWithFieldSTAR : empty;
+ItemsWithFieldSTAR : ItemsWithField ItemsWithFieldSTAR;
+ItemsWithField : Field | Enum | Message | Extend | Extensions
+				| Group | Option | colon;
+MessageBody : leftcb ItemsWithFieldSTAR rightcb;
+
+
+/*
+Import : _importX _strLit _semicolon;
+
+DotIdent : _dot _ident
+DotIdentSTAR: DotIdent DotIdentSTAR
+DotIdentSTAR: empty
+
+Package : _package ident DotIdentSTAR _semicolon;
+
+OptionBody : _ident DotIdentSTAR _equal constant;
+
+Option : _leftqt OptionBody _semicolon;
+
+ItemsWithFieldSTAR : "empty";
+ItemsWithFieldSTAR : ItemsWithField ItemsWithFieldSTAR;
+ItemsWithField : _field | _enum | _message | _extend | _extensions | _group | _option | _colon ;
+
+MessageBody : _leftcb ItemsWithFieldSTAR _rightcb;
+
+Message : _message _ident MessageBody;
+
+//DotOpt : _dot | "empty" ;
+//UserType : Dotopt ident DotIdentSTAR;
+
+FieldOptionOpt : "empty";
+FieldOptionOpt
+
+Field : label type _ident _equal 
+FieldGroupBraceSTAR : "empty";
+FieldGroupBraceSTAR : FieldGroupBrace FieldGroupBraceSTAR;
+FieldGroupBrace : Field | Group 
+Extend : _extend userType _leftcb FieldGroupBraceSTAR _rightcb;
+
+*/

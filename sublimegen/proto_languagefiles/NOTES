@@ -1,43 +1,46 @@
 lexical
 -------
-1. charEscape
-2. octEscape
-3. hexEscape
-4. quote
+1. charEscape - _charEscape (used in strLit)
+2. octEscape  - _octEscape (used in strLit)
+3. hexEscape  - _hexEscape (used in strLit)
+4. quote	  - _quote (used in strLit)
 
-5. strLit
-6. boolLit
-7. floatLit
+5. strLit	  - strLit
+6. boolLit	  - boolLit
+7. floatLit	  - floatLit
 
-8. octInt
-9. hexInt
-10. decInt
+8. octInt	  -_octInt
+9. hexInt	  - hexInt
+10. decInt	  - decInt 
 
-11. intLit
+11. intLit	  - intLit
 
-12. camelIdent
-13. ident
-14. constant
-15. userType
-16. type
-17. label
-18. extension
+12. camelIdent - camelIdent
+13. ident 		- ident
+14. constant   - constant
+15. userType   - userType
+16. type       - type
+17. label      - label
+18. extension  - extension
 
 syntax
 ------
 1. fieldOption
 2. group
-3. messageBody [nb]
+3. messageBody
 4. rpc
-5. service [nb]
+5. service
 6. enumField
-7. enum [nb]
-8. extend [nb]
+7. enum
+8. extend
 9. message
-10. optionBody [nb]
+10. optionBody
 11. option
-12. package [nb]
+12. package
 13. import
-14. proto [nb]
+14. proto 
 15. extensions
 26. field
+27. constant
+28. enumField
+29. type
