@@ -9,9 +9,9 @@ lexical
 6. boolLit	  - boolLit
 7. floatLit	  - floatLit
 
-8. octInt	  -_octInt
-9. hexInt	  - hexInt
-10. decInt	  - decInt 
+8. octInt	  -_octInt (used by IntLit)
+9. hexInt	  - _hexInt (used by IntLit)
+10. decInt	  - _decInt (used by IntLit)
 
 11. intLit	  - intLit
 
@@ -28,8 +28,8 @@ syntax
 1. fieldOption
 2. group
 3. messageBody
-4. rpc
-5. service
+4. rpc [missing]
+5. service [missing]
 6. enumField
 7. enum
 8. extend

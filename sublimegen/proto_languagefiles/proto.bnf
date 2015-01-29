@@ -2,7 +2,6 @@
 
 importX : 'i' 'm' 'p' 'o' 'r' 't';
 package : 'p' 'a' 'c' 'k' 'a' 'g' 'e';
-option : 'o' 'p' 't' 'i' 'o' 'n';
 message : 'm' 'e' 's' 's' 'a' 'g' 'e';
 extend : 'e' 'x' 't' 'e' 'n' 'd';
 enum : 'e' 'n' 'u' 'm';
@@ -11,12 +10,13 @@ rpc : 'r' 'p' 'c';
 group: 'g' 'r' 'o' 'u' 'p';
 default : 'd' 'e' 'f' 'a' 'u' 'l' 't';
 extensions : 'e' 'x' 't' 'e' 'n' 's' 'i' 'o' 'n' 's';
-to : 't' 'o';
+_to : 't' 'o';
 max : 'm' 'a' 'x';
+returns: 'r' 'e' 't' 'u' 'r' 'n' 's';
 
-required : 'r' 'e' 'q' 'u' 'i' 'r' 'e' 'd';
-optional: 'o' 'p' 't' 'i' 'o' 'n' 'a' 'l';
-repeated: 'r' 'e' 'p' 'e' 'a' 't' 'e' 'd';
+_required : 'r' 'e' 'q' 'u' 'i' 'r' 'e' 'd';
+_optional: 'o' 'p' 't' 'i' 'o' 'n' 'a' 'l';
+_repeated: 'r' 'e' 'p' 'e' 'a' 't' 'e' 'd';
 
 double: 'd' 'o' 'u' 'b' 'l' 'e';
 float : 'f' 'l' 'o' 'a' 't';
@@ -62,9 +62,9 @@ strLit : _quote { _hexEscape | _octEscape | _charEscape | ( '^' | _slashzero | '
 boolLit : _true | _false;
 floatLit : _decimal_digit {_decimal_digit} ['.' _decimal_digit {_decimal_digit}] [('E' | 'e')['+' | '-'] _decimal_digit {_decimal_digit} ];
 
-hexInt: '0' ('x' | 'X') (['A'-'F']['a'-'f']['0'-'9']){(['A'-'F']['a'-'f']['0'-'9'])};
-octint: '0' '0'-'7' {'0'-'7'};
-decInt : ('1'-'9') _decimal_digit { _decimal_digit};
+_hexInt: '0' ('x' | 'X') (['A'-'F']['a'-'f']['0'-'9']){(['A'-'F']['a'-'f']['0'-'9'])};
+_octint: '0' '0'-'7' {'0'-'7'};
+_decInt : ('1'-'9') _decimal_digit { _decimal_digit};
 
 intLit : _decInt | _hexInt | _octint;
 
@@ -74,7 +74,7 @@ camelIdent : ('A'-'Z'){ _ws |  '_'};
 ident : ('A'-'Z') ('a'-'z') '_' { (_ws | '_') };
 userType : [ _dot ] _ident { _dot _ident };
 
-label: _enumField | _optional | _repeated ;
+label: _required | _optional | _repeated ;
 extension: _intLit [ _to (_intLit | _max) ];
 
 //syntax part
@@ -84,7 +84,7 @@ ItemsSTAR : empty;
 ItemsSTAR: Items ItemsSTAR;
 Items: Message | Extend | Enum | Import | Package | Option | semicolon ;
 
-Message : _message _ident MessageBody;
+Message : message ident MessageBody;
 Import : importX strLit semicolon;
 
 EnumField : ident equal intLit;
@@ -129,38 +129,22 @@ ItemsWithField : Field | Enum | Message | Extend | Extensions
 				| Group | Option | colon;
 MessageBody : leftcb ItemsWithFieldSTAR rightcb;
 
+Package : package ident DotIdentSTAR semicolon;
 
-/*
-Import : _importX _strLit _semicolon;
+ExtensionThingSTAR: empty;
+ExtensionThingSTAR: ExtensionThing ExtensionThingSTAR;
+ExtensionThing: comma Extension;
+Extensions : extensions Extension ExtensionThingSTAR semicolon;
 
-DotIdent : _dot _ident
-DotIdentSTAR: DotIdent DotIdentSTAR
-DotIdentSTAR: empty
+IntLitMaxOpt: empty;
+IntLitMaxOpt: intLit | max;
+Extension : intLit IntLitMaxOpt;
 
-Package : _package ident DotIdentSTAR _semicolon;
+Group : label group camelIdent equal intLit MessageBody;
 
-OptionBody : _ident DotIdentSTAR _equal constant;
+OptionEnumThingSTAR: empty;
+OptionEnumThingSTAR: OptionEnumThing OptionEnumThingSTAR;
+OptionEnumThing: Option | RPC | semicolon;
+Service : service ident leftcb OptionEnumThingSTAR rightcb;
 
-Option : _leftqt OptionBody _semicolon;
-
-ItemsWithFieldSTAR : "empty";
-ItemsWithFieldSTAR : ItemsWithField ItemsWithFieldSTAR;
-ItemsWithField : _field | _enum | _message | _extend | _extensions | _group | _option | _colon ;
-
-MessageBody : _leftcb ItemsWithFieldSTAR _rightcb;
-
-Message : _message _ident MessageBody;
-
-//DotOpt : _dot | "empty" ;
-//UserType : Dotopt ident DotIdentSTAR;
-
-FieldOptionOpt : "empty";
-FieldOptionOpt
-
-Field : label type _ident _equal 
-FieldGroupBraceSTAR : "empty";
-FieldGroupBraceSTAR : FieldGroupBrace FieldGroupBraceSTAR;
-FieldGroupBrace : Field | Group 
-Extend : _extend userType _leftcb FieldGroupBraceSTAR _rightcb;
-
-*/
+RPC : rpc ident leftrb userType rightrb returns leftcb userType rightrb semicolon;
