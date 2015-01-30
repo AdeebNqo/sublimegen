@@ -15,16 +15,27 @@
     "string":"storage.type.proto",
     "bytes":"storage.type.proto",
     
-    "_required":"storage.modifier.proto",
-    "_optional":"storage.modifier.proto",
-    "_repeated":"storage.modifier.proto",
+    "label":"storage.modifier.proto",
     
     "intLit":"constant.numeric.proto",
-    "_decInt":"constant.numeric.proto",
-    "_hexInt":"constant.numeric.proto",
-    "_octint":"constant.numeric.proto",
     "floatLit":"constant.numeric.proto",
     
     "strLit":"string.double.proto",
-    "boolLit":"constant.language.proto"
+    "boolLit":"constant.language.proto",
+    
+    "importX":"keyword.proto",
+    "package":"keyword.proto",
+    "message":"keyword.proto",
+    "extend":"keyword.proto",
+    "enum":"keyword.proto",
+    "service":"keyword.proto",
+    "rpc":"keyword.proto",
+    "group":"keyword.proto",
+    "default":"keyword.proto",
+    "extensions":"keyword.proto",
+    "to":"keyword.proto",
+    "max":"keyword.proto",
+    "returns":"keyword.proto",
+
+    "lineComment":"comment.line.proto"
 }

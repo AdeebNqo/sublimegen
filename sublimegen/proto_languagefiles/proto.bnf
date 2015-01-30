@@ -58,7 +58,8 @@ _octEscape : '\\' ['0'] ( ('0'-'7') | ('0'-'7') ('0'-'7') | ('0'-'7') ('0'-'7') 
 _charEscape :  '\\' ('a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\\' | '?' | '\'' | '"') ;
 
 _slashzero : '\\' '0';
-strLit : _quote { _hexEscape | _octEscape | _charEscape | ( '^' | _slashzero | '\n') } _quote;
+//strLit : _quote { _hexEscape | _octEscape | _charEscape | ( '^' | _slashzero | '\n') } _quote;
+strLit : _quote {.} _quote;
 boolLit : _true | _false;
 floatLit : _decimal_digit {_decimal_digit} ['.' _decimal_digit {_decimal_digit}] [('E' | 'e')['+' | '-'] _decimal_digit {_decimal_digit} ];
 
@@ -74,6 +75,8 @@ camelIdent : ('A'-'Z'){ _ws |  '_'};
 ident : ('A'-'Z') ('a'-'z') '_' { (_ws | '_') };
 
 label: _required | _optional | _repeated ;
+
+lineComment : '/' '/' {.} '\n' ;
 
 //syntax part
 

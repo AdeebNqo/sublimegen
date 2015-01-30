@@ -391,6 +391,9 @@ func main() {
 						}
 					}
 					//creating pattern entry
+                    if realname==regex{
+                        regex = fmt.Sprintf("(\\A|\\s)%v(\\s)",regex)
+                    }
 					patternentry := PatternEntry{Match: regex, Name: repository.GetScope(listitemwithtype), Captures: capturesmap, Comment: realname}
 					patternarray = append(patternarray, patternentry)
 				}
