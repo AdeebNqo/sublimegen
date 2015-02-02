@@ -338,8 +338,7 @@ class fsm:
 						proc.start()
 					for proc in processes:
 						proc.join()
-					self.parrfollowlist[:] = []
-					return frozenset([]) #resultq.get())
+					return frozenset(self.parrfollowlist)
 			else:
 				fset = frozenset([
 					prev
