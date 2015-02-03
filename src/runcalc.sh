@@ -1,1 +1,1 @@
-rm -rf Calc; go clean; go build; ./sublimegen -fileTypes "calc" -name "Calc" -scopeName "source.calc" -source calc_languagefiles/calc.bnf -scopes calc_languagefiles/scopes.json -orderregex 1
+rm -rf Calc; go clean; go build; ./src -fileTypes "calc" -name "Calc" -scopeName "source.calc" -source languagefiles/calc_languagefiles/calc.bnf -scopes languagefiles/calc_languagefiles/scopes.json -orderregex 1

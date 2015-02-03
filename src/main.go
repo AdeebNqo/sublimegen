@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/AdeebNqo/sublimegen/repository"
+	"github.com/AdeebNqo/sublimegen/src/repository"
 	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre" //(documentation: https://godoc.org/github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre)
 	"github.com/nu7hatch/gouuid"
 	"log"
@@ -52,7 +52,7 @@ func main() {
 	//reading in the provided bnf file and parsing it.
 	scanner := &scanner.Scanner{}
 	srcBuffer, err := ioutil.ReadFile(*source)
-    
+
     //initializing logging objects
 	errlog = log.New(os.Stdout, "Error: ", log.Ltime|log.Lshortfile)
 	infolog = log.New(os.Stderr, "Info: ", log.Ltime|log.Lshortfile)
@@ -215,9 +215,9 @@ func main() {
 			listitemwithtype := listitem.Value.(*repository.Repoitem)
 
 			realname := repository.GetRealname(listitemwithtype)
-            
+
             //fmt.Println(realname) //debug
-            
+
 			beforealternatives := repository.GetRighthandside(listitemwithtype)
 			var regex string
 			if beforealternatives != nil {

@@ -10,7 +10,7 @@ import (
 	"code.google.com/p/gocc/ast"
 	"container/list"
 	"fmt"
-	"github.com/AdeebNqo/sublimegen/repository"
+	"github.com/AdeebNqo/sublimegen/src/repository"
 	"strconv"
 	"strings"
 )
@@ -53,19 +53,19 @@ func getregex(lexitem *ast.LexAlt) string {
 	regex := ""
     var tmpoutput string
     var termstring string
-    
+
     bracedregex := ""
     bracestack := Stack{}
     var strippedtermstring string
     usenormalregex := false
-    
+
 	for _, term := range lexitem.Terms {
         termstring = term.String()
-        
+
         if strings.HasPrefix(termstring,"'") && strings.HasSuffix(termstring,"'"){
             strippedtermstring = stripliteral(termstring)
         }
-        
+
         if (termstring=="'\\n'"){
             regex += "$"
             bracedregex += "$"
@@ -103,7 +103,7 @@ func getregex(lexitem *ast.LexAlt) string {
                 }
             }
 	}
-    if bracestack.Peek()==nil && !usenormalregex{  
+    if bracestack.Peek()==nil && !usenormalregex{
 
         return bracedregex
     }else{
@@ -518,7 +518,7 @@ func getgroups(currentregex string, originalregex string, groupcount int, scopec
 
 				if count == 0 || count == -1{
                     count = 0
-                    
+
 					//fmt.Println("group:", tmpgroup)
 
 					//seeing if largest group can be matched to a scope selector
@@ -593,9 +593,9 @@ func retrievescopefromcapturegroup(capturedregex string, activate bool) (bool, s
 			capturedregex = capturedregex[1 : len(capturedregex)-1]
 		}
 		for ritem := repoitems.Front(); ritem != nil; ritem = ritem.Next() {
-            
+
             currreg := repository.Getregex(ritem.Value.(*repository.Repoitem))
-           
+
             if currreg != ""{
                 if currreg == capturedregex {
                     tmpscope := repository.GetScope(ritem.Value.(*repository.Repoitem))
