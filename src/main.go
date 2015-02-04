@@ -52,7 +52,7 @@ func main() {
 	//reading in the provided bnf file and parsing it.
 	scanner := &scanner.Scanner{}
 	srcBuffer, err := ioutil.ReadFile(*source)
-    
+
     //initializing logging objects
 	errlog = log.New(os.Stdout, "Error: ", log.Ltime|log.Lshortfile)
 	infolog = log.New(os.Stderr, "Info: ", log.Ltime|log.Lshortfile)
@@ -215,9 +215,9 @@ func main() {
 			listitemwithtype := listitem.Value.(*repository.Repoitem)
 
 			realname := repository.GetRealname(listitemwithtype)
-            
+
             //fmt.Println(realname) //debug
-            
+
 			beforealternatives := repository.GetRighthandside(listitemwithtype)
 			var regex string
 			if beforealternatives != nil {
@@ -229,6 +229,11 @@ func main() {
 				}
 			}
 
+			// making sure that we do not match words that
+			// are subwords
+			if realname==regex || realname[1:]=regex{
+				regex = fmt.Sprintf("(\\A|\\s)(%v)(\\z|\\s)",regex)
+			}
 			//testing if regex is okay
 			regp, compileerr := pcre.Compile(regex, 0)
 			if compileerr != nil {
