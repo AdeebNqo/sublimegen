@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/AdeebNqo/sublimegen/repository"
+	"github.com/AdeebNqo/sublimegen/src/repository"
 	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre" //(documentation: https://godoc.org/github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre)
 	"github.com/nu7hatch/gouuid"
 	"log"
@@ -242,6 +242,11 @@ func main() {
 				continue
 			}
 
+            //making regex match whole word
+            //if realname==regex || realname[1:]==regex{
+            //    regex = fmt.Sprintf("((\\A|\\s)+)%v(\\s|\\z)",regex)
+            //}
+            
 			//setting regex
 			if repository.Isregexempty(listitemwithtype) {
 				repository.Setregex(listitemwithtype, regex)
@@ -396,9 +401,6 @@ func main() {
 						}
 					}
 					//creating pattern entry
-                    if realname==regex{
-                        regex = fmt.Sprintf("(\\A|\\s)%v(\\s)",regex)
-                    }
 					patternentry := PatternEntry{Match: regex, Name: repository.GetScope(listitemwithtype), Captures: capturesmap, Comment: realname}
 					patternarray = append(patternarray, patternentry)
 				}

@@ -1,29 +1,10 @@
 {
-   "_double":"entity.name.type.walt",
-   "_float":"entity.name.type.walt",
-   "_int64":"entity.name.type.walt",
-   "_uint64":"entity.name.type.walt",
-   "_int32":"entity.name.type.walt",
-   "_uint32":"entity.name.type.walt",
-   "_bytes":"entity.name.type.walt",
-   "_string":"entity.name.type.walt",
-   "_bool":"entity.name.type.walt",
-
-	"_lineComment":"comment.line.walt",
-	"_blockComment":"comment.block.walt",
-
-	"_raw_string":"string.interpolated.walt",
-	"_interpreted_string":"string.quoted.double.walt",
-   "_singed_int_lit":"constant.numeric.walt",
-   "_int_lit":"constant.numeric.walt",
-
+    
    "if":"keyword.control.walt",
    "then":"keyword.control.walt",
    "else":"keyword.control.walt",
    "root":"keyword.walt",
 
-   "id":"variable.parameter.walt",
-   "_char_lit":"constant.character.walt",
-   "_escaped_char":"constant.character.escape.walt",
-    "_qualid":"variable.language.walt"
+    "string_lit":"string.interpolated.walt",
+    "space":"comment.block.walt"
 }

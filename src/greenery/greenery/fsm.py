@@ -315,8 +315,8 @@ class fsm:
 		def follow(current, symbol):
 			maplength = len(self.map)
 			if maplength>10	:
-					#resultq = Queue()
-
+                    self.parrfollowlis[:] = [] #clearing list
+                    
 					numprocesses = cpu_count()
 					keys = self.map.keys()
 					size = maplength/numprocesses
