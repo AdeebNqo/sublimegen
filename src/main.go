@@ -232,7 +232,7 @@ func main() {
 			// making sure that we do not match words that
 			// are subwords
 			if realname==regex || realname[1:]=regex{
-				regex = fmt.Sprintf("(\\A|\\s)(%v)(\\z|\\s)",regex)
+				regex = fmt.Sprintf("(\\A|\\s)(%v)(\\z|\\s)?",regex)
 			}
 			//testing if regex is okay
 			regp, compileerr := pcre.Compile(regex, 0)
