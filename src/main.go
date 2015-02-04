@@ -231,7 +231,7 @@ func main() {
 
 			// making sure that we do not match words that
 			// are subwords
-			if realname==regex || realname[1:]=regex{
+			if (realname==regex || realname[1:]==regex){
 				regex = fmt.Sprintf("(\\b)%v(\\b)",regex)
 			}
 			//testing if regex is okay
@@ -246,7 +246,7 @@ func main() {
             //if realname==regex || realname[1:]==regex{
             //    regex = fmt.Sprintf("((\\A|\\s)+)%v(\\s|\\z)",regex)
             //}
-            
+
 			//setting regex
 			if repository.Isregexempty(listitemwithtype) {
 				repository.Setregex(listitemwithtype, regex)
