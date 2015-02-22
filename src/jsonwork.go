@@ -52,10 +52,10 @@ func (p patternarraytype) Swap(i, j int) {
 func (p patternarraytype) Less(i, j int) bool {
 
 	if p[i].Match == "" || p[j].Match == "" {
-        
-        if len(p[i].Match)!=len(p[j].Match){
-            return len(p[i].Match) < len(p[j].Match)
-        }
+
+		if len(p[i].Match) != len(p[j].Match) {
+			return len(p[i].Match) < len(p[j].Match)
+		}
 		return p[i].Match < p[j].Match
 	}
 
@@ -84,8 +84,8 @@ func (p patternarraytype) Less(i, j int) bool {
 			return false
 		}
 	}
-    if len(p[i].Match)!=len(p[j].Match){
-            return len(p[i].Match) < len(p[j].Match)
-    }
+	if len(p[i].Match) != len(p[j].Match) {
+		return len(p[i].Match) < len(p[j].Match)
+	}
 	return p[i].Match < p[j].Match
 }

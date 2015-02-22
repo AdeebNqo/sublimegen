@@ -12,10 +12,6 @@ file.
 package main
 
 import (
-	"code.google.com/p/gocc/ast"
-	"code.google.com/p/gocc/frontend/parser"
-	"code.google.com/p/gocc/frontend/scanner"
-	"code.google.com/p/gocc/frontend/token"
 	"io/ioutil"
 
 	"container/list"
@@ -27,7 +23,6 @@ import (
 	"github.com/nu7hatch/gouuid"
 	"log"
 	"os"
-	"os/exec"
 	"sort"
 	"strings"
 )
@@ -46,81 +41,45 @@ var defaultscope string
 var errlog *log.Logger
 var infolog *log.Logger
 
+var scopeReferences map[string]string //used to map token to scopes
+
 func main() {
 	flag.Parse() //parsing commandline flags
-
-	//reading in the provided bnf file and parsing it.
-	scanner := &scanner.Scanner{}
-	srcBuffer, err := ioutil.ReadFile(*source)
-
-    //initializing logging objects
+	//initializing logging objects
 	errlog = log.New(os.Stdout, "Error: ", log.Ltime|log.Lshortfile)
 	infolog = log.New(os.Stderr, "Info: ", log.Ltime|log.Lshortfile)
-
+	//initializing value of the default scope
+	defaultscope = fmt.Sprintf("source.%v", *fileTypes) //TODO: fileTypes is a comma seperated list
+	// thefore this is wrong. split fileTypes using
+	// a command and probably only use the first value
+	// in the resulting array.
+	//reading source file
+	srcBuffer, err := getFileAsBuffer(*source)
 	if err != nil {
 		errlog.Fatalln(fmt.Sprintf("Cannot read file because %v", err))
 	}
-	scanner.Init(srcBuffer, token.FRONTENDTokens)
-	parser := parser.NewParser(parser.ActionTable, parser.GotoTable, parser.ProductionsTable, token.FRONTENDTokens)
-	grammar, err := parser.Parse(scanner)
-
+	//parsing input and obtaining the grammar
+	grammar, err := getGrammar(srcBuffer)
 	if err != nil {
 		errlog.Fatalln(fmt.Sprintf("Parse error: %v", err))
 	}
-
 	//loading tokens and scopes
-	defaultscope = fmt.Sprintf("source.%v", *fileTypes) //default scope
-	type config map[string]string
-	var data config
-	file, _ := ioutil.ReadFile(*scopesfile)
-	err = json.Unmarshal(file, &data)
+	scopeReferences, err = getScopeValues(*scopesfile)
 	if err != nil {
 		errlog.Fatalln(fmt.Sprintf("Cannot parse json file with scopes because %v", err))
 	}
-
-	//retrieving the tokens and productions from the
-	//the grammar
-	grammarX := grammar.(*ast.Grammar)
-
 	//instantiating the list that will contain all the repoitems, that is, pattern field entries.
 	repoitems = list.New()
 	repoitems.Init()
 	/*
 
-	   Processing token definitions
-
-	*/
-	/*tokendefs := grammarX.LexPart.TokDefs //list of token definitions
-	  for key,value := range tokendefs{ //the key is the name that appears on the left hand side, value is the right hand side
-
-	      //creating an object that will convert the token to the appropriate item for the json patterns field
-	      patternobj,err := repository.NewRepoItem(key)
-
-	      if err != nil{
-	          //ignoring token
-	          fmt.Println(fmt.Sprintf("could not process %v. reason: %v",key, err))
-	          break
-	      }
-	      repository.SetRighthandside(patternobj,value.LexPattern())
-	      somescope := data[repository.GetRealname(patternobj)]
-	      if somescope!=""{
-	          repository.SetScope(patternobj,somescope)
-	      }else{
-	          repository.SetScope(patternobj, defaultscope)
-	      }
-	      repoitems.PushBack(patternobj)
-	  }*/
-
-	/*
-
 	   Processing productions
 
 	*/
-	if grammarX.LexPart!=nil && grammarX.LexPart.ProdList!=nil && grammarX.LexPart.ProdList.Productions!=nil{
-		productions := grammarX.LexPart.ProdList.Productions
+	if isValueNotEmpty(grammar.LexPart) && isValueNotEmpty(grammar.LexPart.ProdList) && isValueNotEmpty(grammar.LexPart.ProdList.Productions) {
+		productions := grammar.LexPart.ProdList.Productions
 		for _, prod := range productions {
 			prodid := prod.Id()
-
 			//creating an object that will convert the production/token to the appropriate item for the json patterns field
 			patternobj, err := repository.NewRepoItem(prodid)
 			if err != nil {
@@ -129,73 +88,54 @@ func main() {
 				break
 			}
 			repository.SetRighthandside(patternobj, prod.LexPattern())
-			somescope := data[repository.GetRealname(patternobj)]
+			somescope := scopeReferences[repository.GetRealname(patternobj)]
 			if somescope != "" {
 				repository.SetScope(patternobj, somescope)
 			} else {
 				repository.SetScope(patternobj, defaultscope)
 			}
-
 			repoitems.PushBack(patternobj)
 		}
 	}
-
 	/*
 
 	   Processing the syntax part
 
 	*/
-	if grammarX.SyntaxPart!=nil{
-		if grammarX.SyntaxPart.ProdList!=nil{
-			for _, synprod := range grammarX.SyntaxPart.ProdList {
-				for _, synsymb := range synprod.Body.Symbols {
-
-					synprodname := synsymb.String()
-					found := false
-					for t := repoitems.Front(); t != nil; t = t.Next() {
-						item := t.Value.(*repository.Repoitem)
-						realname := repository.GetRealname(item)
-						if realname == synprodname {
-							found = true
-							break
-						} else if fmt.Sprintf("\"%v\"", realname) == synprodname {
-							found = true
+	if isSyntaxPartAvailable(grammar) && isValueNotEmpty(grammar.SyntaxPart.ProdList) {
+		for _, synprod := range grammar.SyntaxPart.ProdList {
+			for _, synsymb := range synprod.Body.Symbols {
+				synprodname := synsymb.String()
+				found := repository.DoesRepoItemExist(synprodname, repoitems)
+				if !found {
+					if startsAndEndWithQuotation(synprodname) {
+						//creating new repoitem
+						productionId := removeStartAndEndChars(synprodname)
+						patternobj, err := repository.NewRepoItem(productionId)
+						if err != nil {
+							//ignoring token -- since there was a problem creating it.
+							errlog.Fatalln(fmt.Sprintf("could not process %v. reason: %v", productionId, err))
 							break
 						}
-					}
-					if found == false {
-						if strings.HasPrefix(synprodname, "\"") && strings.HasSuffix(synprodname, "\"") {
-							prodid := synprodname[1 : len(synprodname)-1]
-							patternobj, err := repository.NewRepoItem(prodid)
-							//_,err := repository.NewRepoItem(prodid)
-							if err != nil {
-								//ignoring token
-								errlog.Fatalln(fmt.Sprintf("could not process %v. reason: %v", prodid, err))
-								break
-							}
-							repository.SetRighthandside(patternobj, nil)
-							somescope := data[repository.GetRealname(patternobj)]
-							if somescope != "" {
-								repository.SetScope(patternobj, somescope)
-							} else {
-								repository.SetScope(patternobj, defaultscope)
-							}
-
-							tmpprodid := ""
-							for _, char := range prodid {
-								tmpprodid += string(char)
-							}
-							prodid = tmpprodid
-							if strings.ContainsAny(prodid, "abcdefghijklmnopqrstuvwxyz") && somescope != defaultscope {
-								repoitems.PushBack(patternobj)
-							}
+						repository.SetRighthandside(patternobj, nil)
+						//getting and setting the scope.
+						somescope := scopeReferences[repository.GetRealname(patternobj)]
+						if somescope != "" {
+							repository.SetScope(patternobj, somescope)
+						} else {
+							repository.SetScope(patternobj, defaultscope)
+						}
+						//ignoring repoitems whose id does not contain letters
+						//and those which have the default scope.
+						if strings.ContainsAny(productionId, "abcdefghijklmnopqrstuvwxyz") && somescope != defaultscope {
+							repoitems.PushBack(patternobj)
 						}
 					}
 				}
 			}
 		}
-	}
 
+	}
 	if *verbose == 1 {
 		infolog.Println("Generating uuid for syntax highlighting file.")
 	}
@@ -207,17 +147,11 @@ func main() {
 	} else {
 		infolog.Println("Finished generating uuid. Now processing bnf file...")
 		//genating patterns since uuid has been successfully generated
-
-		//patternarray := make([]PatternEntry,1)
 		patternarray := make(patternarraytype, 0)
 		//0. Generate repository field from bnf file
 		for listitem := repoitems.Front(); listitem != nil; listitem = listitem.Next() {
 			listitemwithtype := listitem.Value.(*repository.Repoitem)
-
 			realname := repository.GetRealname(listitemwithtype)
-
-            //fmt.Println(realname) //debug
-
 			beforealternatives := repository.GetRighthandside(listitemwithtype)
 			var regex string
 			if beforealternatives != nil {
@@ -228,11 +162,10 @@ func main() {
 					regex += Escape(string(char))
 				}
 			}
-
 			// making sure that we do not match words that
 			// are subwords
-			if (realname==regex || realname[1:]==regex){
-				regex = fmt.Sprintf("(\\b)%v(\\b)",regex)
+			if realname == regex || realname[1:] == regex {
+				regex = fmt.Sprintf("(\\b)%v(\\b)", regex)
 			}
 			//testing if regex is okay
 			regp, compileerr := pcre.Compile(regex, 0)
@@ -241,12 +174,6 @@ func main() {
 				infolog.Println(compileerr.String())
 				continue
 			}
-
-            //making regex match whole word
-            //if realname==regex || realname[1:]==regex{
-            //    regex = fmt.Sprintf("((\\A|\\s)+)%v(\\s|\\z)",regex)
-            //}
-
 			//setting regex
 			if repository.Isregexempty(listitemwithtype) {
 				repository.Setregex(listitemwithtype, regex)
@@ -254,9 +181,7 @@ func main() {
 
 			//determining if one should use begin and end
 			usebeginandend, begin, middle, end := determinebeginandend(regex)
-
 			if usebeginandend {
-
 				//sorting out captures for begin regex
 				groups, _ := getgroups(begin, begin, 0, list.New().Init(), list.New().Init())
 				numberofgroups := groups.Len()
@@ -359,9 +284,7 @@ func main() {
 			} else {
 
 				if !strings.HasPrefix(realname, "_") {
-					//fmt.Println("---------------START-------------------") //debug
-					//fmt.Println(realname) //debug
-                    //getting groups
+					//getting groups
 					groups, _ := getgroups(regex, regex, 0, list.New().Init(), list.New().Init())
 
 					//In the following lines, I am creating the "patterns" field for the json string declared above.
@@ -383,15 +306,10 @@ func main() {
 						skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
 						donotskip = !(skippingtruefrontvalue == skippingscope)
 					}
-
-					//fmt.Println(regex)                                   //debug
-					//fmt.Println("num groups: ", groups.Len())            //debug
-					//fmt.Println("----------------END------------------") //debug
 					//adding items to "captures"
 					if numberofgroups > 0 && regp.Groups() != 0 && donotskip {
 						for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next() {
 							val := listitemX.Value.(string)
-							//fmt.Println("val is :", val) //debug
 							lastindex := strings.LastIndex(val, "|")
 							if lastindex > -1 {
 								scopename := val[0:lastindex]
@@ -406,26 +324,25 @@ func main() {
 				}
 			}
 		}
-
 		if *verbose == 1 {
 			infolog.Println("Finished processing bnf file.")
 		}
-
 		if *doregexorder == 1 {
 			//sorting regexes
-			infolog.Println("Sorting regexes...")
+			if *verbose == 1 {
+				infolog.Println("Sorting regexes...")
+			}
 			sort.Sort(patternarray)
-			infolog.Println("Done sorting!")
+			if *verbose == 1 {
+				infolog.Println("Done sorting!")
+			}
 		}
-
 		if *verbose == 1 {
 			infolog.Println("Transforming syntax highlighting data to json...")
 		}
-
 		//marshaling output into proper json
 		jsonsyntaxobj := JSONSyntax{Name: *name, ScopeName: *scopeName, FileTypes: strings.Split(*fileTypes, ","), Patterns: patternarray, Uuid: u.String()}
 		jsonsyntaxobj_result, err := json.MarshalIndent(jsonsyntaxobj, "", "  ")
-
 		if err != nil {
 			if *verbose == 1 {
 				errlog.Fatalln(fmt.Sprintf("Could not transform syntax highlighting data to json becase %v", err))
@@ -443,12 +360,11 @@ func main() {
 				}
 			}
 		}
-
 		if *verbose == 1 {
 			infolog.Println("Converting json to plist...")
 		}
 		//convert resulting json to a plist file and save it.
-		err = exec.Command("python", "convertor.py", fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v.tmLanguage", *name)).Run()
+		err = convertJSONtoPlist(name)
 		if err != nil {
 			errlog.Fatalln(fmt.Sprintf("Could not convert json to plist.\n(Reason): %v", err))
 		} else {
@@ -456,20 +372,12 @@ func main() {
 				infolog.Println("Finished converting json to plist!")
 			}
 		}
-		//moving the files into a folder with the name provided as cmdline arg
-		directoryexists := true
-		if _, err := os.Stat(*name); err != nil {
-			if os.IsNotExist(err) {
-				directoryexists = false
-			}
-		}
-
 		//removing old directory with the same name
-		if directoryexists {
+		if doesDirExist(name) {
 			if *verbose == 1 {
 				infolog.Println("Found old directory with same name as target directory, deleting...")
 			}
-			err := os.RemoveAll(*name)
+			err := deleteDir(name)
 			if err != nil {
 				errlog.Fatalln(fmt.Sprintf("Cannot remove old directory because %v", err))
 			} else {
@@ -480,22 +388,19 @@ func main() {
 		}
 
 		//creating folder for syntax highlighting files
-		err0 := os.Mkdir(*name, 0775)
+		err0 := createDir(name)
 		if err0 != nil {
 			errlog.Fatalln(fmt.Sprintf("Could not create folder for storing generated files because %v", err0))
 		}
-
 		if *verbose == 1 {
 			infolog.Println("Moving files into new folder!")
 		}
 		//moving files into created folder
-		err1 := os.Rename(fmt.Sprintf("%v.tmLanguage.json", *name), fmt.Sprintf("%v/%v.tmLanguage.json", *name, *name))
-		err2 := os.Rename(fmt.Sprintf("%v.tmLanguage", *name), fmt.Sprintf("%v/%v.tmLanguage", *name, *name))
+		err1, err2 := moveFiles(name)
 		if err1 != nil || err2 != nil {
 			errlog.Fatalln(fmt.Sprintf("Could not move files because %v and/or %v", err1, err2))
 		}
 	}
-
 	if *verbose == 1 {
 		infolog.Println("Finished!")
 	}
