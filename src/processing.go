@@ -180,7 +180,7 @@ func addRepoItemToCollection(repoitem *repository.Repoitem, collection *patterna
 		regex = fmt.Sprintf("(\\b)%v(\\b)", regex)
 	}
 	//testing if regex is okay
-	if verifyRegexIsCorrect(regex) {
+	if !verifyRegexIsCorrect(regex) {
 		//do not add it if it is not.
 		return *collection
 	}

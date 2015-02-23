@@ -150,7 +150,6 @@ func main() {
 		for listitem := repoitems.Front(); listitem != nil; listitem = listitem.Next() {
 			listitemwithtype := listitem.Value.(*repository.Repoitem)
 			patternarray = addRepoItemToCollection(listitemwithtype, &patternarray)
-			fmt.Println(patternarray)
 		}
 		if *verbose == 1 {
 			infolog.Println("Finished processing bnf file.")
