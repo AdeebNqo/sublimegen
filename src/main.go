@@ -12,15 +12,13 @@ file.
 package main
 
 import (
-	"io/ioutil"
-
 	"container/list"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/AdeebNqo/sublimegen/src/repository"
-	"github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre" //(documentation: https://godoc.org/github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre)
 	"github.com/nu7hatch/gouuid"
+	"io/ioutil"
 	"log"
 	"os"
 	"sort"
@@ -151,178 +149,8 @@ func main() {
 		//0. Generate repository field from bnf file
 		for listitem := repoitems.Front(); listitem != nil; listitem = listitem.Next() {
 			listitemwithtype := listitem.Value.(*repository.Repoitem)
-			realname := repository.GetRealname(listitemwithtype)
-			beforealternatives := repository.GetRighthandside(listitemwithtype)
-			var regex string
-			if beforealternatives != nil {
-				alternatives := beforealternatives.Alternatives
-				regex = constructregexandfillgroups(alternatives) //we are extracting the regex for the
-			} else {
-				for _, char := range realname {
-					regex += Escape(string(char))
-				}
-			}
-			// making sure that we do not match words that
-			// are subwords
-			if realname == regex || realname[1:] == regex {
-				regex = fmt.Sprintf("(\\b)%v(\\b)", regex)
-			}
-			//testing if regex is okay
-			regp, compileerr := pcre.Compile(regex, 0)
-			if compileerr != nil {
-				//regex is not compatile so skip it.
-				infolog.Println(compileerr.String())
-				continue
-			}
-			//setting regex
-			if repository.Isregexempty(listitemwithtype) {
-				repository.Setregex(listitemwithtype, regex)
-			}
-
-			//determining if one should use begin and end
-			usebeginandend, begin, middle, end := determinebeginandend(regex)
-			if usebeginandend {
-				//sorting out captures for begin regex
-				groups, _ := getgroups(begin, begin, 0, list.New().Init(), list.New().Init())
-				numberofgroups := groups.Len()
-				begincapturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
-
-				donotskip := true //variable to be used to skip the groups --- kinda a "hack"
-				skippingscope := repository.GetScope(listitemwithtype)
-				skippingfront := groups.Front()
-
-				if numberofgroups == 1 {
-					if skippingfront == nil || skippingscope == defaultscope {
-						donotskip = false
-					}
-					skippingfrontvalue := skippingfront.Value.(string)
-					skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
-					donotskip = !(skippingtruefrontvalue == skippingscope)
-				}
-				//adding items to "begincaptures"
-				if numberofgroups > 0 && regp.Groups() != 0 && donotskip {
-					for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next() {
-						val := listitemX.Value.(string)
-						lastindex := strings.LastIndex(val, "|")
-						if lastindex > -1 {
-							scopename := val[0:lastindex]
-							scopenumber := val[lastindex+1:]
-							begincapturesmap[scopenumber] = CaptureEntryName{Name: scopename}
-						}
-					}
-				}
-				//----------------------------------------------------------------------------------------------
-
-				//sorting out captures for end regex
-				groups, _ = getgroups(end, end, 0, list.New().Init(), list.New().Init())
-				numberofgroups = groups.Len()
-				endcapturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
-
-				donotskip = true //variable to be used to skip the groups --- kinda a "hack"
-				skippingscope = repository.GetScope(listitemwithtype)
-				skippingfront = groups.Front()
-
-				if numberofgroups == 1 {
-					if skippingfront == nil || skippingscope == defaultscope {
-						donotskip = false
-					}
-					skippingfrontvalue := skippingfront.Value.(string)
-					skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
-					donotskip = !(skippingtruefrontvalue == skippingscope)
-				}
-				//adding items to "begincaptures"
-				if numberofgroups > 0 && regp.Groups() != 0 && donotskip {
-					for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next() {
-						val := listitemX.Value.(string)
-						lastindex := strings.LastIndex(val, "|")
-						if lastindex > -1 {
-							scopename := val[0:lastindex]
-							scopenumber := val[lastindex+1:]
-							endcapturesmap[scopenumber] = CaptureEntryName{Name: scopename}
-						}
-					}
-				}
-
-				//---------------------------------------------------------------------------------------------
-
-				//adding middle parts
-				groups, _ = getgroups(middle, middle, 0, list.New().Init(), list.New().Init())
-				numberofgroups = groups.Len()
-				middlecapturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
-
-				donotskip = true //variable to be used to skip the groups --- kinda a "hack"
-				skippingscope = repository.GetScope(listitemwithtype)
-				skippingfront = groups.Front()
-
-				if numberofgroups == 1 {
-					if skippingfront == nil || skippingscope == defaultscope {
-						donotskip = false
-					}
-					skippingfrontvalue := skippingfront.Value.(string)
-					skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
-					donotskip = !(skippingtruefrontvalue == skippingscope)
-				}
-				//adding items to "begincaptures"
-				if numberofgroups > 0 && regp.Groups() != 0 && donotskip {
-					for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next() {
-						val := listitemX.Value.(string)
-						lastindex := strings.LastIndex(val, "|")
-						if lastindex > -1 {
-							scopename := val[0:lastindex]
-							scopenumber := val[lastindex+1:]
-							middlecapturesmap[scopenumber] = CaptureEntryName{Name: scopename}
-						}
-					}
-				}
-				middlearray := make(patternarraytype, 0)
-				middlearray = append(middlearray, PatternEntry{Match: middle, Captures: middlecapturesmap})
-				//--------------------------------------------------------------------------------------------
-
-				//creating pattern entry
-				patternentry := PatternEntry{Begin: begin, End: end, Name: repository.GetScope(listitemwithtype), EndCaptures: endcapturesmap, MorePatterns: middlearray, Comment: realname}
-				patternarray = append(patternarray, patternentry)
-			} else {
-
-				if !strings.HasPrefix(realname, "_") {
-					//getting groups
-					groups, _ := getgroups(regex, regex, 0, list.New().Init(), list.New().Init())
-
-					//In the following lines, I am creating the "patterns" field for the json string declared above.
-					//the final string will create the json file which will further be converted to plist. In particular,
-					// I am creating the items (match and name, alongside the neccessary groups) which will be contained in "patterns" array.
-
-					numberofgroups := groups.Len()
-					capturesmap := make(map[string]CaptureEntryName) //creating map that holds the items of the "captures" fields
-
-					donotskip := true //variable to be used to skip the groups --- kinda a "hack"
-					skippingscope := repository.GetScope(listitemwithtype)
-					skippingfront := groups.Front()
-
-					if numberofgroups == 1 {
-						if skippingfront == nil || skippingscope == defaultscope {
-							donotskip = false
-						}
-						skippingfrontvalue := skippingfront.Value.(string)
-						skippingtruefrontvalue := skippingfrontvalue[:strings.LastIndex(skippingfrontvalue, "|")]
-						donotskip = !(skippingtruefrontvalue == skippingscope)
-					}
-					//adding items to "captures"
-					if numberofgroups > 0 && regp.Groups() != 0 && donotskip {
-						for listitemX := groups.Front(); listitemX != nil; listitemX = listitemX.Next() {
-							val := listitemX.Value.(string)
-							lastindex := strings.LastIndex(val, "|")
-							if lastindex > -1 {
-								scopename := val[0:lastindex]
-								scopenumber := val[lastindex+1:]
-								capturesmap[scopenumber] = CaptureEntryName{Name: scopename}
-							}
-						}
-					}
-					//creating pattern entry
-					patternentry := PatternEntry{Match: regex, Name: repository.GetScope(listitemwithtype), Captures: capturesmap, Comment: realname}
-					patternarray = append(patternarray, patternentry)
-				}
-			}
+			patternarray = addRepoItemToCollection(listitemwithtype, &patternarray)
+			fmt.Println(patternarray)
 		}
 		if *verbose == 1 {
 			infolog.Println("Finished processing bnf file.")
@@ -386,7 +214,6 @@ func main() {
 				}
 			}
 		}
-
 		//creating folder for syntax highlighting files
 		err0 := createDir(name)
 		if err0 != nil {
