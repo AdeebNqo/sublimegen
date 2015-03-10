@@ -2,7 +2,7 @@ sublimegen
 ---------------
 
 [![Build Status](https://drone.io/github.com/AdeebNqo/sublimegen/status.png)](https://drone.io/github.com/AdeebNqo/sublimegen/latest)
-
+[![Coverage Status](https://coveralls.io/repos/AdeebNqo/sublimegen/badge.svg)](https://coveralls.io/r/AdeebNqo/sublimegen)
 
 This is a tool that will convert a BNF (conforming to the GOCC syntax) for a language to a
 SublimeText Syntax Highlighting Plugin. It uses [gocc](https://code.google.com/p/gocc/), a parser generator written in Go.
