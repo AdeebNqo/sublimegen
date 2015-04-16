@@ -1,1 +1,0 @@
-rm -rf Walter; go clean; go build; ./src -fileTypes "walt" -name "Walter" -scopeName "source.walt" -source languagefiles/disney_languagefiles/asm.bnf -scopes languagefiles/disney_languagefiles/scopes-new.json -orderregex 1

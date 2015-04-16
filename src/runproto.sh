@@ -1,1 +1,0 @@
-rm -rf ProtoBuff; go clean; go build; ./src -fileTypes "proto" -name "ProtoBuff" -scopeName "source.walt" -source languagefiles/proto_languagefiles/proto.bnf -scopes languagefiles/proto_languagefiles/scopes.json -orderregex 1

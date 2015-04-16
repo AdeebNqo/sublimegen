@@ -1,0 +1,20 @@
+{
+  "name": "Calc",
+  "scopeName": "source.calc",
+  "fileTypes": [
+    "calc"
+  ],
+  "patterns": [
+    {
+      "match": "[ ]|\\t|$|\\r",
+      "name": "source.calc",
+      "_comment": "!whitespace"
+    },
+    {
+      "match": "[1-9](([0-9]))*",
+      "name": "constant.numeric.lang",
+      "_comment": "int64"
+    }
+  ],
+  "uuid": "a9b7038e-bca0-4a5e-7a5d-dc01b5242682"
+}
