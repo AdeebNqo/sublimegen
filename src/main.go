@@ -30,6 +30,8 @@ import (
 	"os/exec"
 	"sort"
 	"strings"
+
+	"github.com/AdeebNqo/sublimegen/src/loaders"
 )
 
 var name = flag.String("name", "default", "This is the name of the syntax.")
@@ -53,13 +55,16 @@ func main() {
 	scanner := &scanner.Scanner{}
 	srcBuffer, err := ioutil.ReadFile(*source)
 
-    //initializing logging objects
+    	//initializing logging objects
 	errlog = log.New(os.Stdout, "Error: ", log.Ltime|log.Lshortfile)
 	infolog = log.New(os.Stderr, "Info: ", log.Ltime|log.Lshortfile)
 
 	if err != nil {
 		errlog.Fatalln(fmt.Sprintf("Cannot read file because %v", err))
 	}
+
+	g, myerr := loaders.GetGrammar(srcBuffer)
+
 	scanner.Init(srcBuffer, token.FRONTENDTokens)
 	parser := parser.NewParser(parser.ActionTable, parser.GotoTable, parser.ProductionsTable, token.FRONTENDTokens)
 	grammar, err := parser.Parse(scanner)

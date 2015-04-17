@@ -1,3 +1,5 @@
+package model
+
 type Production struct{
-        a
+        V string
 }
