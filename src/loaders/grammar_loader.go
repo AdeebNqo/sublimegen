@@ -4,6 +4,6 @@ import (
         "github.com/AdeebNqo/sublimegen/src/grammar"
         )
 
-func GetGrammar(srcBuffer []byte) (grammar.Grammar, error){
+func GetGrammar(srcBuffer []byte) (grammar.IGrammar, error){
         return grammar.NewGoccGrammar(srcBuffer);
 }

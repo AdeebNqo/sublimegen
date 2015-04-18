@@ -63,13 +63,45 @@ func main() {
 		errlog.Fatalln(fmt.Sprintf("Cannot read file because %v", err))
 	}
 
+	//START OF NEW CODE
 	g, myerr := loaders.GetGrammar(srcBuffer)
+
+
+	if !g.IsLexPartEmpty() && g.DoesLexPartHaveProductions(){
+		productions := g.ReadLexPartProductions()
+
+		for _, production := range productions {
+
+			if (production!=nil){
+				name := production.ReadLeftHand()
+				rightItems := production.ReadRightHand()
+
+				fmt.Println("name: ", name, "righthandside: ", rightItems)
+			}
+		}
+	}
+	if (!g.IsSyntaxPartEmpty()){
+		if g.DoesSyntaxPartHaveProductions(){
+			productions := g.ReadSyntaxPartProductions()
+
+			for _, production := range productions {
+
+				if production!=nil{
+					name := production.ReadLeftHand()
+					rightItems := production.ReadRightHand()
+
+					fmt.Println("name: ", name, "righthandside: ", rightItems)
+				}
+			}
+		}
+	}
+	//END OF NEW CODE
 
 	scanner.Init(srcBuffer, token.FRONTENDTokens)
 	parser := parser.NewParser(parser.ActionTable, parser.GotoTable, parser.ProductionsTable, token.FRONTENDTokens)
-	grammar, err := parser.Parse(scanner)
+	grammar, _ := parser.Parse(scanner)
 
-	if err != nil {
+	if myerr != nil {
 		errlog.Fatalln(fmt.Sprintf("Parse error: %v", err))
 	}
 

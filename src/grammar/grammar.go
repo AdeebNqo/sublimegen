@@ -1,11 +1,11 @@
 package grammar
 
 import (
-        "github.com/AdeebNqo/sublimegen/src/model"
+        "github.com/AdeebNqo/sublimegen/src/production"
         )
-type Grammar interface{
-        ReadTokens() []model.Token
-        ReadProductions() []model.Production
+type IGrammar interface{
+        ReadLexPartProductions() []production.IProduction
+        ReadSyntaxPartProductions() []production.IProduction
 
         IsLexPartEmpty() bool
         IsSyntaxPartEmpty() bool

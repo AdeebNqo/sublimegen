@@ -5,7 +5,7 @@ import (
         "code.google.com/p/gocc/frontend/token"
         "code.google.com/p/gocc/ast"
         "code.google.com/p/gocc/frontend/parser"
-        "github.com/AdeebNqo/sublimegen/src/model"
+        "github.com/AdeebNqo/sublimegen/src/production"
         )
 
 type GoccGrammar struct{
@@ -26,11 +26,25 @@ func NewGoccGrammar(srcBuffer []byte) (*GoccGrammar, error){
 
         return g, err
 }
-func (grammar GoccGrammar) ReadTokens() []model.Token{
-        return nil
+func (grammar GoccGrammar) ReadLexPartProductions() []production.IProduction{
+        goccProductions := make([]production.IProduction,1)
+        for _, prod := range grammar.grammar.LexPart.ProdList.Productions{
+                newGoccProduction ,_ := production.NewGoCCProduction(&prod)
+                if newGoccProduction!=nil{
+                        goccProductions = append(goccProductions, newGoccProduction)
+                }
+        }
+        return goccProductions
 }
-func (grammar GoccGrammar) ReadProductions() []model.Production{
-        return nil
+func (grammar GoccGrammar) ReadSyntaxPartProductions() []production.IProduction{
+        goccProductions := make([]production.IProduction,1)
+        for _, prod := range grammar.grammar.SyntaxPart.ProdList{
+                newGoccProduction ,_ := production.NewGoCCProduction(prod)
+                if newGoccProduction!=nil{
+                        goccProductions = append(goccProductions, newGoccProduction)
+                }
+        }
+        return goccProductions
 }
 func (grammar GoccGrammar) IsLexPartEmpty() bool{
         return grammar.grammar.LexPart==nil
