@@ -6,6 +6,8 @@ import (
         "code.google.com/p/gocc/ast"
         "code.google.com/p/gocc/frontend/parser"
         "github.com/AdeebNqo/sublimegen/src/production"
+
+        "errors"
         )
 
 type GoccGrammar struct{
@@ -21,6 +23,10 @@ func NewGoccGrammar(srcBuffer []byte) (*GoccGrammar, error){
         scanner.Init(srcBuffer, token.FRONTENDTokens)
         parser := parser.NewParser(parser.ActionTable, parser.GotoTable, parser.ProductionsTable, token.FRONTENDTokens)
         grammar, err := parser.Parse(scanner)
+
+        if g.grammar==nil{
+                return nil, errors.New("Cannot create grammar")
+        }
 
         g.grammar = grammar.(*ast.Grammar);
 
@@ -47,10 +53,10 @@ func (grammar GoccGrammar) ReadSyntaxPartProductions() []production.IProduction{
         return goccProductions
 }
 func (grammar GoccGrammar) IsLexPartEmpty() bool{
-        return grammar.grammar.LexPart==nil
+        return grammar.grammar == nil || grammar.grammar.LexPart==nil
 }
 func (grammar GoccGrammar) IsSyntaxPartEmpty() bool{
-        return grammar.grammar.SyntaxPart==nil
+        return grammar.grammar == nil || grammar.grammar.SyntaxPart==nil
 }
 
 func (grammar GoccGrammar) DoesLexPartHaveProductions() bool{
